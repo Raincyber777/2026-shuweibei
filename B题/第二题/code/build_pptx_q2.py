@@ -15,7 +15,7 @@ from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.opc.package import Part
 from pptx.opc.packuri import PackURI
 
-BASE = r"e:\2026数维杯\2026-shuweibei\B题\第二题"
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo-relative
 FIG_DIR = os.path.join(BASE, "figures")
 OUT = os.path.join(BASE, "第二题_图集.pptx")
 

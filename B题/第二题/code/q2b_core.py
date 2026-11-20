@@ -34,7 +34,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from q2_lib import (BUILDINGS, FIELD, OMEGA, R_VEH, H_CAM, SPEED,
                     TARGETS, TARGET_H, R_MIN_GEO, ALERTS, VEHICLES,
                     dist_to_rect, los_blocked_h, region_masks, make_grid,
-                    wrap180, slew_time, pointing_angles, nelder_mead)
+                    wrap180, slew_time, pointing_angles, nelder_mead,
+                    travel_time)
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES_DIR = os.path.join(BASE, "results")
@@ -91,27 +92,44 @@ for a in ALERT_KEYS:
     sl = np.maximum(np.abs(az), el) / OMEGA
     FEAS[a] = {"pts": pts, "sub": sub, "az": az, "el": el, "slew": sl,
                "area": float(m.sum()) * 0.01}
+# official (midpoint) areas, reported alongside the node-count values
+for a in ALERT_KEYS:
+    Xm2, Ym2 = make_grid(0.1, center=True)
+    c1m2, c2m2, c3m2, _ = region_masks(Xm2, Ym2, TARGETS[a], TARGET_H[a],
+                                       R_MIN_GEO[a])
+    FEAS[a]["area_mid"] = float((c1m2 & c2m2 & c3m2).sum()) * 0.01
+    print(f"  {a}: area_mid={FEAS[a]['area_mid']:.1f} m^2 "
+          f"(node {FEAS[a]['area']:.1f})")
     print(f"  {a}: area={FEAS[a]['area']:.1f} m^2  full={n}  sub={len(sub)}")
 
 # -------------------------------------- 2) earliest-ready values r(v, a)
-print("per-vehicle earliest-ready ...")
+print("per-vehicle earliest-ready (obstacle-aware travel) ...")
 R_VA = {}          # (v,a) -> earliest ready (full feasible set)
 ARG_VA = {}        # (v,a) -> argmin station
 for v in range(5):
     for a in ALERT_KEYS:
         pts = FEAS[a]["pts"]
         d = np.hypot(pts[:, 0] - VEHICLES[v, 0], pts[:, 1] - VEHICLES[v, 1])
-        # slew of the same station set: recompute on full points
         dxa = TARGETS[a][0] - pts[:, 0]
         dya = TARGETS[a][1] - pts[:, 1]
         rr = np.hypot(dxa, dya)
         azf = wrap180(np.degrees(np.arctan2(dya, dxa)))
         elf = np.degrees(np.arctan((TARGET_H[a] - H_CAM) / np.maximum(rr, 1e-12)))
         slf = np.maximum(np.abs(azf), elf) / OMEGA
-        ready = d / SPEED + slf
-        k = int(np.argmin(ready))
-        R_VA[(v, a)] = float(ready[k])
-        ARG_VA[(v, a)] = (float(pts[k, 0]), float(pts[k, 1]))
+        ready_lb = d / SPEED + slf          # straight-line LOWER bound
+        # exact minimum with obstacle-aware travel: walk candidates in
+        # straight-LB order until the LB exceeds the best path-based value
+        order = np.argsort(ready_lb)[:20000]
+        best_v, best_p = np.inf, None
+        for k in order:
+            if ready_lb[k] >= best_v:
+                break
+            tp = travel_time(VEHICLES[v], pts[k])
+            rv = tp + slf[k]
+            if rv < best_v:
+                best_v, best_p = rv, pts[k]
+        R_VA[(v, a)] = float(best_v)
+        ARG_VA[(v, a)] = (float(best_p[0]), float(best_p[1]))
 rmat = np.array([[R_VA[(v, a)] for a in ALERT_KEYS] for v in range(5)])
 LB_alert = [float(np.sort(rmat[:, j])[1]) for j in range(3)]
 LB_global = float(max(LB_alert))
@@ -151,7 +169,7 @@ def simulate(assignment, orders, stations):
                 if st is None:
                     return (np.inf, None, None, False)
                 az, el, sl = station_times(st, a)
-                travel = np.hypot(st[0] - pos[0], st[1] - pos[1]) / SPEED
+                travel = travel_time(pos, st)
                 rd = t_free + travel + sl
                 ready[(v, a)] = rd              # own ready is final already
                 v2 = assignment[a][0] if assignment[a][1] == v else assignment[a][1]
@@ -485,7 +503,7 @@ def gantt_segments(assignment, orders, stations, starts):
         for a in orders.get(v, []):
             st = stations[(v, a)]
             az, el, sl = station_times(st, a)
-            travel = np.hypot(st[0] - pos[0], st[1] - pos[1]) / SPEED
+            travel = travel_time(pos, st)
             arrive = t_free + travel
             rd = arrive + sl
             v2 = assignment[a][0] if assignment[a][1] == v else assignment[a][1]
@@ -526,7 +544,8 @@ results = {
     "r_va_argmin": {f"V{v+1}": {a: list(ARG_VA[(v, a)]) for a in ALERT_KEYS}
                     for v in range(5)},
     "LB": {"per_alert": dict(zip(ALERT_KEYS, LB_alert)), "global": LB_global},
-    "region_areas": {a: FEAS[a]["area"] for a in ALERT_KEYS},
+    "region_areas": {a: FEAS[a]["area_mid"] for a in ALERT_KEYS},
+    "region_areas_node": {a: FEAS[a]["area"] for a in ALERT_KEYS},
     "optimized": detail,
     "top5_structures": top5,
     "heuristic": {

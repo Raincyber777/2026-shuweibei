@@ -25,7 +25,7 @@ from q2_lib import (BUILDINGS, FIELD, OMEGA, R_VEH, H_CAM, SPEED, ELEV_MAX,
                     TARGETS, TARGET_H, R_MIN_GEO, ALERTS, VEHICLES,
                     dist_to_rect, los_blocked_h, region_masks, make_grid,
                     circle_samples, bool_runs, wrap180, slew_time,
-                    pointing_angles, nelder_mead)
+                    pointing_angles, nelder_mead, travel_time, path_length)
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIG_DIR = os.path.join(BASE, "figures")
@@ -81,8 +81,12 @@ STEP = 0.1
 X, Y = make_grid(STEP)
 c1, c2, c3, rgrid = region_masks(X, Y, T2P, H2, RMIN)
 mask = c1 & c2 & c3
-area = float(mask.sum()) * STEP * STEP
-print("Omega_2 area = %.1f m^2" % area)
+# official area: cell-center (midpoint) estimator; node count kept for reference
+Xm, Ym = make_grid(STEP, center=True)
+c1m, c2m, c3m, _ = region_masks(Xm, Ym, T2P, H2, RMIN)
+area = float((c1m & c2m & c3m).sum()) * STEP * STEP
+area_node = float(mask.sum()) * STEP * STEP
+print("Omega_2 area (midpoint) = %.1f m^2 (node count %.1f)" % (area, area_node))
 
 # ---------------------------------------------------------------- 2) r_min circle
 NC = 72000
@@ -253,8 +257,10 @@ for iv in range(5):
         d1, ph1 = polar_of(np.array([x1]), np.array([y1]))
         d2, ph2 = polar_of(np.array([x2]), np.array([y2]))
         gamma = abs(((ph2[0] - ph1[0] + 180.0) % 360.0) - 180.0)
-        t1 = np.hypot(x1 - VEHICLES[iv, 0], y1 - VEHICLES[iv, 1]) / SPEED
-        t2 = np.hypot(x2 - VEHICLES[jv, 0], y2 - VEHICLES[jv, 1]) / SPEED
+        t1 = travel_time(VEHICLES[iv], (x1, y1))
+        t2 = travel_time(VEHICLES[jv], (x2, y2))
+        p1_ok = path_length(VEHICLES[iv], (x1, y1))[1]
+        p2_ok = path_length(VEHICLES[jv], (x2, y2))[1]
         robust = (seg_roof_clearance(x1, y1, T2P, H2) >= CLR_LOS and
                   seg_roof_clearance(x2, y2, T2P, H2) >= CLR_LOS and
                   c1_margin(np.array([x1]), np.array([y1]))[0] >= MAR_C1 and
@@ -265,6 +271,11 @@ for iv in range(5):
             "stations": [[x1, y1], [x2, y2]], "d": [d1[0], d2[0]],
             "phi": [ph1[0], ph2[0]], "gamma_deg": gamma,
             "travel_s": [t1, t2], "travel_sum_s": t1 + t2,
+            "travel_straight_lb_s":
+                [float(np.hypot(x1 - VEHICLES[iv, 0], y1 - VEHICLES[iv, 1]) / SPEED),
+                 float(np.hypot(x2 - VEHICLES[jv, 0], y2 - VEHICLES[jv, 1]) / SPEED)],
+            "path_straight_clear": [bool(p1_ok), bool(p2_ok)],
+            "reach_ok_path": bool(t1 <= TRAVEL_LIMIT_S and t2 <= TRAVEL_LIMIT_S),
             "robust": bool(robust)})
         print(f"V{iv+1}+V{jv+1}: G={g:.4f} m  d=({d1[0]:.3f},{d2[0]:.3f}) "
               f"gamma={gamma:.2f}  travel=({t1:.2f},{t2:.2f})")
@@ -335,6 +346,14 @@ for r in pair_rows:
             r["stations"] = [[fx1, fy1], [fx2, fy2]]
             r["travel_s"] = [ft1, ft2]
             r["travel_sum_s"] = ft1 + ft2
+            # family stations have verified-clear straight paths, so path
+            # time equals the straight time; refresh the stale row flags
+            r["path_straight_clear"] = [
+                bool(path_length(VEHICLES[iv], (fx1, fy1))[1]),
+                bool(path_length(VEHICLES[jv], (fx2, fy2))[1])]
+            r["travel_straight_lb_s"] = [ft1, ft2]
+            r["reach_ok_path"] = bool(ft1 <= TRAVEL_LIMIT_S and
+                                      ft2 <= TRAVEL_LIMIT_S)
             r["d"] = [RMIN, RMIN]
             r["phi"] = [float(np.degrees(np.arctan2(fy1 - TY, fx1 - TX)) % 360.0),
                         float(np.degrees(np.arctan2(fy2 - TY, fx2 - TX)) % 360.0)]
@@ -348,7 +367,7 @@ def _key(r):
     return (round(r["travel_sum_s"], 3), round(max(r["travel_s"]), 3),
             r["stations"][0], r["stations"][1])
 
-feas_rows = [r for r in pair_rows if r.get("feasible")]
+feas_rows = [r for r in pair_rows if r.get("feasible") and r.get("reach_ok_path")]
 opt_pairs = [r for r in feas_rows if r["G_m"] <= G_STAR * 1.0005 and r.get("robust")]
 if not opt_pairs:
     opt_pairs = [r for r in feas_rows if r["G_m"] <= G_STAR * 1.0005]
@@ -426,13 +445,15 @@ cond = 1.0 / np.abs(np.sin(np.radians(gam)))
 # boundary back-off design: elevation <= 78 deg  ->  r >= (H2-Hcam)/tan78
 r_back = (H2 - H_CAM) / np.tan(np.radians(78.0))
 el_margin_back = 2.0
-# sensitivity of DRMS to the azimuth sigma (linear) and to H (region recompute)
+Xm, Ym = make_grid(STEP, center=True)
+rm_mid = np.hypot(Xm - T2P[0], Ym - T2P[1])
+# sensitivity of G* to H (region recompute on the midpoint grid)
 sens_H = []
 for h_try in (25, 30, 35, 40, 45, 50):
     rmin_h = (h_try - H_CAM) / np.tan(np.radians(ELEV_MAX))
-    c2h = rgrid >= rmin_h - 1e-9
-    c3h = ~los_blocked_h(X, Y, T2P, h_try)
-    mh = c1 & c2h & c3h
+    c2h = rm_mid >= rmin_h - 1e-9
+    c3h = ~los_blocked_h(Xm, Ym, T2P, h_try)
+    mh = c1m & c2h & c3h
     # optimum still on the rmin circle if a robust 90-deg pair exists
     phc, cxc, cyc = circle_samples(T2P, rmin_h, 7200)
     cc1h, _, cc3h, _ = region_masks(cxc, cyc, T2P, h_try, rmin_h)
@@ -454,7 +475,9 @@ results = {
                   "travel_limit_m": REACH, "speed": SPEED,
                   "robust_margins": {"los_clearance_m": CLR_LOS, "c1_margin_m": MAR_C1}},
     "r_min_geo_m": float(RMIN),
-    "region": {"step": STEP, "area_m2": area},
+    "region": {"step": STEP, "area_m2": area,
+               "area_estimator": "cell-center (midpoint), h = 0.1 m",
+               "area_node_count_m2": area_node},
     "circle": {"n_samples": NC, "feasible_runs_deg": feas_runs,
                "blocked_runs_deg": blocked_runs,
                "robust_runs_deg": rob_runs},
@@ -489,7 +512,7 @@ np.savez_compressed(os.path.join(RES_DIR, "q2a_data.npz"),
 lines = [
     "==== Problem 2(1) numeric summary ====",
     f"T2' = ({T2P[0]:.4f}, {T2P[1]:.4f})  H = {H2} m  r_min_geo = {RMIN:.4f} m",
-    f"Omega_2 area (0.1 m grid) = {area:.1f} m^2",
+    f"Omega_2 area (0.1 m midpoint) = {area:.1f} m^2 (node count {area_node:.1f})",
     "r_min circle feasible runs: " + str([(round(a, 2), round(b, 2)) for a, b in feas_runs]),
     "r_min circle robust  runs: " + str([(round(a, 2), round(b, 2)) for a, b in rob_runs]),
     f"certificate: G_lower = r_min = {RMIN:.4f} m ; 90-deg family: {certified} "

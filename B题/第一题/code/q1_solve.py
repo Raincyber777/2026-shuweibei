@@ -32,7 +32,7 @@ matplotlib.rcParams["font.family"] = "Times New Roman"
 matplotlib.rcParams["mathtext.fontset"] = "stix"
 matplotlib.rcParams["axes.linewidth"] = 0.8
 
-BASE = r"C:\Users\ASUS\Desktop\shuwei材料包\shuwei材料包\B题\第一题"
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo-relative
 FIG_DIR = os.path.join(BASE, "figures")
 RES_DIR = os.path.join(BASE, "results")
 os.makedirs(FIG_DIR, exist_ok=True)
@@ -64,7 +64,7 @@ VEHICLES = np.array([[15.0, 14.0], [88.0, 10.0], [14.0, 86.0],
                      [88.0, 68.0], [50.0, 93.0]])         # V1..V5
 
 # closed-form lower bound from C2
-R_MIN = (H1 - H_CAM) / np.tan(np.radians(ELEV_MAX))       # ~7.5823 m
+R_MIN = (H1 - H_CAM) / np.tan(np.radians(ELEV_MAX))       # 7.5821 m
 
 
 # ----------------------------- core model -----------------------------------
@@ -124,8 +124,10 @@ def constraint_masks(X, Y, veh_radius=R_VEH, buildings=None):
     return c1, c2, c3, r
 
 
-def make_grid(step):
-    g = np.arange(0.0, FIELD + 1e-9, step)
+def make_grid(step, center=False):
+    """Node grid (center=False, includes 0 and 100) or cell-center grid."""
+    off = step / 2.0 if center else 0.0
+    g = np.arange(off, FIELD + (1e-9 if not center else -1e-9), step)
     return np.meshgrid(g, g)
 
 
@@ -134,7 +136,13 @@ STEP = 0.1
 X, Y = make_grid(STEP)
 c1, c2, c3, rgrid = constraint_masks(X, Y)
 mask = c1 & c2 & c3
-area_base = float(mask.sum()) * STEP * STEP
+# official area: midpoint (cell-center) estimator -- each node represents one
+# full h x h cell; node counting on the [0,100] lattice overestimates by the
+# half-cell boundary band (review issue #4). Both values are reported.
+Xm, Ym = make_grid(STEP, center=True)
+c1m, c2m, c3m, _ = constraint_masks(Xm, Ym)
+area_base = float((c1m & c2m & c3m).sum()) * STEP * STEP      # midpoint
+area_node = float(mask.sum()) * STEP * STEP                    # node count
 
 # numerical cross-check of the optimum on the grid
 r_feas = np.where(mask, rgrid, np.inf)
@@ -152,7 +160,10 @@ a1, a2, a3, ar = constraint_masks(ax_, ay_)
 arc_feasible = a1 & a3            # a2 holds by construction
 
 def bool_runs(flag):
-    """Contiguous True runs (deg intervals) of a periodic boolean sequence."""
+    """Contiguous True runs (deg intervals) of a periodic boolean sequence.
+
+    Runs are kept within [0, 360]: a run crossing 0 deg is split there.
+    """
     n = NPHI
     if flag.all():
         return [(0.0, 360.0)]
@@ -165,7 +176,9 @@ def bool_runs(flag):
     for s, e in zip(starts, ends):
         a, b = phi_deg[s], phi_deg[e]
         if s >= e:                               # run wraps around 0 deg
-            runs.append((a, b + 360.0))
+            runs.append((a, 360.0))
+            if b > 1e-9:
+                runs.append((0.0, b))
         else:
             runs.append((a, b))
     return runs
@@ -184,7 +197,10 @@ for lim in (R_VEH, FIELD - R_VEH):
     margins = np.minimum(margins, ay_ - lim if lim == R_VEH else lim - ay_)
 # note: the two lines above implement min(x-1.5, 98.5-x, y-1.5, 98.5-y)
 margins = np.where(arc_feasible, margins, -np.inf)
-m_star = float(margins.max())
+m_star = float(margins.max())            # TRUE maximum margin on the arc
+k_star = int(np.argmax(margins))
+m_star_phi = float(phi_deg[k_star])
+m_star_point = (float(ax_[k_star]), float(ay_[k_star]))
 band = margins >= m_star - 0.05          # tolerance band for tie-break step 1
 
 # tie-break step 2: shortest travel time from the nearest standby vehicle
@@ -204,6 +220,60 @@ opt_ttime = float(travel_t[best])
 near_v = int(np.argmin(dist_v[best])) + 1
 
 
+# ----------------------------- 3b) obstacle-aware travel times --------------
+# Vehicles cannot cross buildings; the straight line is only a LOWER bound.
+# Shortest feasible path = visibility graph over the 1.5 m inflated building
+# rectangles (corners as nodes, mutual visibility as edges) + Dijkstra.
+
+
+def _seg_hits_rect(p, q, rect):
+    """True if segment p-q passes through the OPEN rectangle (interior).
+
+    Slab logic: an axis parallel to the segment either rules out the hit
+    (segment outside the slab) or imposes no bound (segment spans the slab).
+    """
+    (px, py), (qx, qy) = p, q
+    dx, dy = qx - px, qy - py
+    t_enter, t_exit = 0.0, 1.0
+    for p0, d, lo, hi in ((px, dx, rect[0], rect[1]), (py, dy, rect[2], rect[3])):
+        if abs(d) < 1e-12:
+            if not (lo < p0 < hi):
+                return False
+            continue
+        t1, t2 = (lo - p0) / d, (hi - p0) / d
+        t_enter = max(t_enter, min(t1, t2))
+        t_exit = min(t_exit, max(t1, t2))
+    return t_enter < t_exit - 1e-12 and t_enter < 1.0 and t_exit > 0.0
+
+
+def path_length(p, q):
+    """Straight distance if the path is clear, else shortest detour length."""
+    infl = [(b[0] - R_VEH, b[1] + R_VEH, b[2] - R_VEH, b[3] + R_VEH)
+            for b in BUILDINGS]
+    if not any(_seg_hits_rect(p, q, r) for r in infl):
+        return float(np.hypot(q[0] - p[0], q[1] - p[1])), True
+    nodes = [tuple(p), tuple(q)]
+    for r in infl:
+        nodes += [(r[0], r[2]), (r[1], r[2]), (r[0], r[3]), (r[1], r[3])]
+    n = len(nodes)
+    adj = [[np.inf] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(i + 1, n):
+            if not any(_seg_hits_rect(nodes[i], nodes[j], r) for r in infl):
+                d = float(np.hypot(nodes[i][0] - nodes[j][0],
+                                   nodes[i][1] - nodes[j][1]))
+                adj[i][j] = adj[j][i] = d
+    dist = [np.inf] * n
+    dist[0] = 0.0
+    seen = [False] * n
+    for _ in range(n):
+        k = min((d, i) for i, d in enumerate(dist) if not seen[i])[1]
+        seen[k] = True
+        for j in range(n):
+            dist[j] = min(dist[j], dist[k] + adj[k][j])
+    return float(dist[1]), False
+
+
 def seg_box_dist(x0, y0, building, n=4000):
     """Min distance from the LOS segment of station (x0,y0) to one prism."""
     t = np.linspace(0.0, 1.0, n)
@@ -221,7 +291,13 @@ los_clear_opt = min(seg_box_dist(opt_x, opt_y, b) for b in BUILDINGS)
 
 # travel time from every vehicle to the chosen station (for the report)
 ttime_all = {f"V{i+1}": float(np.hypot(opt_x - vx, opt_y - vy) / SPEED)
-             for i, (vx, vy) in enumerate(VEHICLES)}
+             for i, (vx, vy) in enumerate(VEHICLES)}          # straight (LB)
+ttime_all_path = {}
+path_clear = {}
+for i, (vx, vy) in enumerate(VEHICLES):
+    L, clear = path_length((vx, vy), (opt_x, opt_y))
+    ttime_all_path[f"V{i+1}"] = L / SPEED
+    path_clear[f"V{i+1}"] = clear
 
 # ----------------------------- 4) sensitivity studies -----------------------
 # (a) closed-form sensitivity of r* to target altitude H
@@ -232,12 +308,11 @@ dH = 1.0 / np.tan(np.radians(ELEV_MAX))            # dr*/dH  ~ 0.1763 m/m
 # (b) closed-form sensitivity of r* to the gimbal elevation bound
 sens_eps = [(e, float((H1 - H_CAM) / np.tan(np.radians(e))))
             for e in (70, 75, 78, 80, 82, 85)]
-de = 1.0
 deps = float(-(H1 - H_CAM) / np.sin(np.radians(ELEV_MAX)) ** 2 * np.pi / 180.0)
 
 # (c) observable-region area vs building B2 height / vehicle radius
 STEP_S = 0.25
-Xs, Ys = make_grid(STEP_S)
+Xs, Ys = make_grid(STEP_S, center=True)     # midpoint estimator (see above)
 r_s = np.hypot(Xs - T1[0], Ys - T1[1])
 c2_s = r_s >= R_MIN - 1e-9
 
@@ -261,6 +336,9 @@ sens_vr = [(vr, area_scan(BUILDINGS, vr)) for vr in (1.0, 1.5, 2.0, 2.5)]
 area_base_scan = area_scan(BUILDINGS, R_VEH)
 
 # (d) alternative metric check: Q2 = (1/r) * cos^2(eps - 45 deg)
+# NOTE: Q2 is still strictly decreasing in r on this instance (both factors
+# decrease as r grows), so it verifies that r* -- not the full station
+# selection -- is invariant within this metric family.
 eps_grid = np.degrees(np.arctan((H1 - H_CAM) / np.maximum(rgrid, 1e-9)))
 q2 = np.where(mask, (1.0 / np.maximum(rgrid, 1e-9)) *
               np.cos(np.radians(eps_grid - 45.0)) ** 2, -np.inf)
@@ -298,7 +376,7 @@ def draw_field(ax, buildings=None, alpha=1.0):
 
 def save(fig, name):
     fig.savefig(os.path.join(FIG_DIR, name + ".svg"), bbox_inches="tight")
-    fig.savefig(os.path.join(FIG_DIR, name + ".png"), dpi=200, bbox_inches="tight")
+    fig.savefig(os.path.join(FIG_DIR, name + ".png"), dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("saved", name)
 
@@ -351,10 +429,13 @@ th = np.linspace(0, 2 * np.pi, 720)
 cx = T1[0] + R_MIN * np.cos(th)
 cy = T1[1] + R_MIN * np.sin(th)
 okc = arc_feasible[np.clip((np.degrees(th) % 360 * NPHI // 360).astype(int), 0, NPHI - 1)]
-axm.plot(cx[okc], cy[okc], color=COL_ARC_OK, lw=3.0,
-         solid_capstyle="round", zorder=6)
-axm.plot(cx[~okc], cy[~okc], color=COL_ARC_NO, lw=3.0,
-         solid_capstyle="round", zorder=6)
+# NaN at gaps so the polyline never connects across a blocked arc
+cxg = np.where(okc, cx, np.nan)
+cyg = np.where(okc, cy, np.nan)
+cxr = np.where(~okc, cx, np.nan)
+cyr = np.where(~okc, cy, np.nan)
+axm.plot(cxg, cyg, color=COL_ARC_OK, lw=3.0, solid_capstyle="round", zorder=6)
+axm.plot(cxr, cyr, color=COL_ARC_NO, lw=3.0, solid_capstyle="round", zorder=6)
 axm.plot([T1[0], opt_x], [T1[1], opt_y], linestyle=":", color="k", lw=1.0, zorder=5)
 axm.plot(opt_x, opt_y, marker="p", ms=12, mfc=COL_OPT, mec="w", mew=1.0, zorder=7)
 axm.plot(T1[0], T1[1], marker="*", ms=15, color=COL_TGT, zorder=7)
@@ -368,7 +449,11 @@ _clean_axes(axm)
 
 mplot = np.where(arc_feasible, margins, np.nan)
 axp.plot(phi_deg, mplot, color=COL_ARC_OK, lw=1.6)
-axp.plot([opt_phi], [opt_margin], marker="p", ms=10, mfc=COL_OPT, mec="w", mew=1.0)
+axp.axhspan(m_star - 0.05, m_star, color="#d6e8fa", alpha=0.6, zorder=0)
+axp.plot([m_star_phi], [m_star], marker="o", ms=11, mfc="none",
+         mec=COL_TGT, mew=1.6, zorder=6)
+axp.plot([opt_phi], [opt_margin], marker="p", ms=9, mfc=COL_OPT, mec="w",
+         mew=1.0, zorder=7)
 for a, b in blocked_runs:
     axp.axvspan(a, b, color=COL_INFEAS, zorder=0)
 axp.set_xlim(0, 360)
@@ -441,21 +526,31 @@ results = {
     "r_min_closed_form": float(R_MIN),
     "q_star": float(1.0 / R_MIN),
     "grid": {"step": STEP, "area_m2": area_base,
+             "area_estimator": "cell-center (midpoint), h = 0.1 m",
+             "area_node_count_m2": area_node,
              "best_r": grid_best_r, "best_point": grid_best_pt,
              "r_diff_vs_analytic": float(grid_best_r - R_MIN)},
     "arc": {"n_samples": NPHI,
             "feasible_fraction": feas_frac,
             "feasible_runs_deg": feas_runs,
             "blocked_runs_deg": blocked_runs,
-            "blocked_total_deg": float(sum(b - a for a, b in blocked_runs))},
+            "blocked_total_deg": float(sum(b - a for a, b in blocked_runs)),
+            "m_star_margin_m": m_star,
+            "m_star_phi_deg": m_star_phi,
+            "m_star_point": list(m_star_point),
+            "band_lower_m": float(m_star - 0.05)},
     "optimal_station": {"phi_deg": opt_phi, "x": opt_x, "y": opt_y,
                         "r": opt_r, "elevation_deg": opt_elev,
                         "Q": float(1.0 / opt_r),
                         "margin_m": opt_margin,
+                        "margin_note": "margin of the SELECTED station "
+                            "(band m >= m* - 0.05), not the arc maximum",
                         "los_clearance_m": los_clear_opt,
                         "nearest_vehicle": f"V{near_v}",
                         "travel_time_s": opt_ttime,
-                        "travel_time_all": ttime_all},
+                        "travel_time_all": ttime_all,
+                        "travel_time_all_path": ttime_all_path,
+                        "path_straight_clear": path_clear},
     "sensitivity": {
         "dr_dH": float(dH),
         "dr_deps_deg": deps,
@@ -475,22 +570,28 @@ lines = [
     "==== Problem 1 numeric summary ====",
     f"T1 horizontal projection : ({T1[0]:.4f}, {T1[1]:.4f})  H = {H1} m",
     f"closed-form r* = (H-Hcam)/tan(80deg) = {R_MIN:.4f} m   Q* = {1/R_MIN:.4f} /m",
-    f"grid({STEP} m): area = {area_base:.1f} m^2 ; best feasible r = "
+    f"grid({STEP} m): area (midpoint) = {area_base:.1f} m^2 "
+    f"(node-count {area_node:.1f} m^2) ; best feasible r = "
     f"{grid_best_r:.4f} m at {grid_best_pt} (diff {grid_best_r - R_MIN:+.4f} m)",
     f"optimal arc: feasible {feas_frac * 100:.1f}% of the circle",
-    f"  blocked runs (deg): {[(round(a, 2), round(b, 2)) for a, b in blocked_runs]}",
-    f"  feasible runs (deg): {[(round(a, 2), round(b, 2)) for a, b in feas_runs]}",
+    f"  blocked runs (deg): {[(round(float(a), 2), round(float(b), 2)) for a, b in blocked_runs]}",
+    f"  feasible runs (deg): {[(round(float(a), 2), round(float(b), 2)) for a, b in feas_runs]}",
+    f"  TRUE max margin m* = {m_star:.4f} m at phi = {m_star_phi:.3f} deg "
+    f"(point {m_star_point}, B2-buffer and east-boundary balanced there)",
     f"chosen station: phi = {opt_phi:.3f} deg  p* = ({opt_x:.4f}, {opt_y:.4f})",
     f"  r = {opt_r:.4f} m   elevation = {opt_elev:.3f} deg   Q = {1/opt_r:.4f} /m",
-    f"  margin = {opt_margin:.3f} m   LOS clearance = {los_clear_opt:.2f} m",
-    f"  nearest vehicle V{near_v}  travel time = {opt_ttime:.2f} s",
-    f"  travel times from all vehicles: "
-    + ", ".join(f"{k}: {v:.2f}s" for k, v in ttime_all.items()),
+    f"  selected margin = {opt_margin:.4f} m (in band [m*-0.05, m*] = "
+    f"[{m_star-0.05:.4f}, {m_star:.4f}])   LOS clearance = {los_clear_opt:.2f} m",
+    f"  nearest vehicle V{near_v}  travel time = {opt_ttime:.2f} s "
+    f"(straight path clear: {path_clear[f'V{near_v}']})",
+    f"  straight-line travel (LB) / feasible-path travel from all vehicles:",
+    "    " + ", ".join(f"{k}: {v:.2f}/{ttime_all_path[k]:.2f}s" for k, v in ttime_all.items()),
     f"sensitivity: dr*/dH = {dH:.4f} m/m ; dr*/d(eps_max) = {deps:.4f} m/deg",
-    f"area scan base = {area_base_scan:.1f} m^2",
+    f"area scan base (midpoint 0.25 m) = {area_base_scan:.1f} m^2",
     f"area vs B2 height: {[(h, round(a, 1)) for h, a in sens_b2]}",
     f"area vs vehicle radius: {[(v, round(a, 1)) for v, a in sens_vr]}",
-    f"alt metric Q2: station {alt_pt}, r = {alt_r:.3f} m, elev = {alt_elev:.2f} deg",
+    f"alt metric Q2: station {alt_pt}, r = {alt_r:.3f} m, elev = {alt_elev:.2f} deg "
+    f"(only verifies r* invariance: Q2 is still decreasing in r)",
 ]
 summary = "\n".join(lines)
 with open(os.path.join(RES_DIR, "q1_summary.txt"), "w", encoding="utf-8") as f:

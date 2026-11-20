@@ -115,9 +115,15 @@ def region_masks(X, Y, tgt, h_tgt, r_min_geo, veh_radius=R_VEH, buildings=None):
     return c1, c2, c3, r
 
 
-def make_grid(step, x0=0.0, x1=FIELD, y0=0.0, y1=FIELD):
-    gx = np.arange(x0, x1 + 1e-9, step)
-    gy = np.arange(y0, y1 + 1e-9, step)
+def make_grid(step, x0=0.0, x1=FIELD, y0=0.0, y1=FIELD, center=False):
+    """Node grid (center=False) or cell-center grid (center=True).
+
+    With center=True the offset/upper bounds are adjusted so that each node
+    represents one full step x step cell (midpoint area estimator).
+    """
+    off = step / 2.0 if center else 0.0
+    gx = np.arange(x0 + off, x1 + (1e-9 if not center else -1e-9), step)
+    gy = np.arange(y0 + off, y1 + (1e-9 if not center else -1e-9), step)
     return np.meshgrid(gx, gy)
 
 
@@ -141,7 +147,10 @@ def circle_samples(tgt, radius, n=200000):
 
 
 def bool_runs(flag, phi_deg):
-    """Contiguous True runs (deg) of a periodic boolean sequence."""
+    """Contiguous True runs (deg) of a periodic boolean sequence.
+
+    Runs are kept within [0, 360]: a run crossing 0 deg is split there.
+    """
     n = len(flag)
     if flag.all():
         return [(0.0, 360.0)]
@@ -153,7 +162,12 @@ def bool_runs(flag, phi_deg):
     runs = []
     for s, e in zip(starts, ends):
         a, b = phi_deg[s], phi_deg[e]
-        runs.append((a, b + 360.0) if s >= e else (a, b))
+        if s >= e:                      # run wraps around 0 deg -> split
+            runs.append((a, 360.0))
+            if b > 1e-9:
+                runs.append((0.0, b))
+        else:
+            runs.append((a, b))
     return runs
 
 
@@ -183,6 +197,72 @@ def obs_window(start, az_deg, el_deg, obs_len=5.0):
     """Return (start, end, reset_done) of one observation task."""
     end = start + obs_len
     return start, end, end + slew_time(az_deg, el_deg)
+
+
+# ----------------------------- obstacle-aware travel ------------------------
+def _seg_hits_rect(p, q, rect):
+    """True if segment p-q passes through the OPEN rectangle (interior).
+
+    Slab logic: an axis parallel to the segment either rules out the hit
+    (segment outside the slab) or imposes no bound (segment spans the slab).
+    """
+    (px, py), (qx, qy) = p, q
+    dx, dy = qx - px, qy - py
+    t_enter, t_exit = 0.0, 1.0
+    for p0, d, lo, hi in ((px, dx, rect[0], rect[1]), (py, dy, rect[2], rect[3])):
+        if abs(d) < 1e-12:
+            if not (lo < p0 < hi):
+                return False
+            continue
+        t1, t2 = (lo - p0) / d, (hi - p0) / d
+        t_enter = max(t_enter, min(t1, t2))
+        t_exit = min(t_exit, max(t1, t2))
+    return t_enter < t_exit - 1e-12 and t_enter < 1.0 and t_exit > 0.0
+
+
+def path_length(p, q, buildings=None, clearance=R_VEH):
+    """Straight distance if the path is clear, else shortest detour length.
+
+    Shortest feasible path = visibility graph over the clearance-inflated
+    building rectangles (corners as nodes, mutual visibility as edges) +
+    Dijkstra.  The field is convex, so polyline nodes inside keep the path
+    inside the field.  Returns (length_m, straight_is_clear).
+    """
+    if buildings is None:
+        buildings = BUILDINGS
+    infl = [(b[0] - clearance, b[1] + clearance, b[2] - clearance,
+             b[3] + clearance) for b in buildings]
+    p, q = (float(p[0]), float(p[1])), (float(q[0]), float(q[1]))
+    if not any(_seg_hits_rect(p, q, r) for r in infl):
+        return float(np.hypot(q[0] - p[0], q[1] - p[1])), True
+    nodes = [p, q]
+    for r in infl:
+        nodes += [(r[0], r[2]), (r[1], r[2]), (r[0], r[3]), (r[1], r[3])]
+    n = len(nodes)
+    adj = [[np.inf] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(i + 1, n):
+            if not any(_seg_hits_rect(nodes[i], nodes[j], r) for r in infl):
+                d = float(np.hypot(nodes[i][0] - nodes[j][0],
+                                   nodes[i][1] - nodes[j][1]))
+                adj[i][j] = adj[j][i] = d
+    dist = [np.inf] * n
+    dist[0] = 0.0
+    seen = [False] * n
+    for _ in range(n):
+        k = min((d, i) for i, d in enumerate(dist) if not seen[i])[1]
+        seen[k] = True
+        if k == 1:
+            break
+        for j in range(n):
+            dist[j] = min(dist[j], dist[k] + adj[k][j])
+    return float(dist[1]), False
+
+
+def travel_time(p, q, buildings=None, speed=SPEED):
+    """Travel time between two points with obstacle avoidance (s)."""
+    L, _ = path_length(p, q, buildings)
+    return L / speed
 
 
 # ----------------------------- tiny optimizer -------------------------------

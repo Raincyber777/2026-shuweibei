@@ -1,8 +1,11 @@
 building regions ...
-  T1: area=5628.7 m^2  full=562868  sub=14813
-  T2: area=6432.4 m^2  full=643243  sub=14960
+  T1: area_mid=5610.4 m^2 (node 5628.7)
+  T1: area=5628.7 m^2  full=548464  sub=14824
+  T2: area_mid=6413.1 m^2 (node 6432.4)
+  T2: area=6432.4 m^2  full=548464  sub=14824
+  T3: area_mid=5459.8 m^2 (node 5484.6)
   T3: area=5484.6 m^2  full=548464  sub=14824
-per-vehicle earliest-ready ...
+per-vehicle earliest-ready (obstacle-aware travel) ...
 r(v,a) table (rows V1..V5, cols T1,T2,T3):
 [[ 5.734  3.129  1.659]
  [ 3.107 10.2    5.778]

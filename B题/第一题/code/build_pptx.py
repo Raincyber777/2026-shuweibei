@@ -16,7 +16,7 @@ from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.opc.package import Part
 from pptx.opc.packuri import PackURI
 
-BASE = r"C:\Users\ASUS\Desktop\shuwei材料包\shuwei材料包\B题\第一题"
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo-relative
 FIG_DIR = os.path.join(BASE, "figures")
 OUT = os.path.join(BASE, "第一题_图集.pptx")
 
@@ -42,8 +42,11 @@ FIGS = [
      "feasible portion (~284 deg), red arc = blocked by B2 and its 1.5 m clearance "
      "buffer (~76 deg); black pentagon = chosen optimal station (88.88, 76.29); "
      "blue square = nearest vehicle V4. Right: geometric safety-margin profile along "
-     "the circle vs. polar angle; shaded band = blocked arc; the pentagon marks the "
-     "maximum-margin point."),
+     "the circle vs. polar angle; shaded band = blocked arc; the red open circle marks "
+     "the true maximum margin m* = 9.675 m at phi = 56.5 deg (where the B2-buffer "
+     "distance equals the east-boundary distance); the black pentagon is the finally "
+     "selected station -- the shortest-to-reach point inside the tie-breaking band "
+     "m >= m* - 0.05 m (its own margin is 9.625 m, limited by the east boundary)."),
     ("fig4_sensitivity_rstar",
      "Fig. 4  Closed-form sensitivity of the optimal distance r* = (H-2)/tan(80 deg). "
      "Left: r* vs. target altitude H (nominal H = 45 m marked; slope 0.176 m per m). "

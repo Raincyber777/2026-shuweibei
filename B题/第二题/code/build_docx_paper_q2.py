@@ -3,6 +3,8 @@
 import os
 import sys
 
+import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _docx_common import (new_doc, title, h1, h2, para, bullet, table,
                           code_block, load_results)
@@ -12,6 +14,9 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 RA = load_results("q2a_results.json")
 RB = load_results("q2b_results.json")
 ch = RA["chosen"]
+DRMS_S = RA["certificate"]["DRMS_star_m"]
+RSTAR = RA["r_min_geo_m"]
+area2 = RA["region"]["area_m2"]
 
 doc = new_doc()
 title(doc, "第二题论文素材（英文可粘贴段落 + 数字总表 + 图注映射）",
@@ -29,13 +34,21 @@ para(doc, "Let the two stations be p1 and p2 with station-target ranges d1, d2 a
           "G = sqrt((d1^2 + d2^2)/2)/|sin(gamma)|, which is frame-invariant, monotone in the 1-sigma "
           "ellipse area, and minimal at gamma = 90 deg; the 95% radius follows as DRMS * sqrt(5.991).", indent=False)
 para(doc, "A provable global lower bound follows from the QM-AM inequality: G >= (d1 + d2)/2 >= r_min, "
-          "where r_min = (H2 - h_cam)/tan(80 deg) = 33/tan(80 deg) = 5.8188 m is the elevation-imposed "
-          "exclusion radius of T2 (11.0289, 72.5, 35 m). Equality holds iff d1 = d2 = r_min and "
-          "gamma = 90 deg. Sampling the r_min circle (72,000 points) yields a feasible arc [59.66 deg, "
-          "244.24 deg] (occlusion by B3 near the target's own footprint blocks the remainder) and a "
-          "robust-feasible arc [70.95 deg, 238.63 deg]; 90 deg-separated pairs exist for phi in "
-          "(70.96 deg, 238.62 deg), so the bound is attained and the optimum set is a continuous "
-          "one-parameter family - tie-breaking rules are required, exactly as in Problem 1.", indent=False)
+          f"where r_min = (H2 - h_cam)/tan(80 deg) = 33/tan(80 deg) = {RSTAR:.4f} m is the "
+          "elevation-imposed exclusion radius of T2 (11.0289, 72.5, 35 m). Equality holds iff "
+          "d1 = d2 = r_min and gamma = 90 deg. Sampling the r_min circle (72,000 points) yields a "
+          "feasible arc "
+          f"[{RA['circle']['feasible_runs_deg'][0][0]:.2f} deg, "
+          f"{RA['circle']['feasible_runs_deg'][-1][1]:.2f} deg] "
+          "(occlusion by B3 near the target's own footprint blocks the remainder) and a robust-feasible "
+          "arc "
+          f"[{RA['circle']['robust_runs_deg'][0][0]:.2f} deg, "
+          f"{RA['circle']['robust_runs_deg'][-1][1]:.2f} deg]; "
+          "90 deg-separated pairs exist for phi in "
+          f"({RA['certificate']['phi_span_deg'][0]:.2f} deg, "
+          f"{RA['certificate']['phi_span_deg'][1]:.2f} deg), "
+          "so the bound is attained and the optimum set is a continuous one-parameter family - "
+          "tie-breaking rules are required, exactly as in Problem 1.", indent=False)
 
 h1(doc, "II. 2(1) 结果段（Results）")
 para(doc, f"Selecting the vehicle pair by C(5,2)=10 enumeration with two-stage LB-pruned polar search "
@@ -48,9 +61,11 @@ para(doc, f"Selecting the vehicle pair by C(5,2)=10 enumeration with two-stage L
           f"p2 = ({ch['stations'][1][0]:.4f}, {ch['stations'][1][1]:.4f}) m, ranges d1 = d2 = 5.8188 m, "
           f"intersection angle gamma = 90.000 deg, baseline B = {ch['baseline_m']:.4f} m, travel times "
           f"({ch['travel_s'][0]:.2f}, {ch['travel_s'][1]:.2f}) s, and DRMS = {ch['DRMS_m']:.4f} m "
-          f"(95% circle radius 0.2486 m, area 0.1941 m^2). A 200,000-sample Monte-Carlo experiment "
-          f"gives RMSE 0.1436 m and a 95th percentile of 0.2486 m, matching the closed form "
-          f"(sigma*sqrt(2) = 0.1437 m and sigma*2.4477 = 0.2486 m).", indent=False)
+          f"(95% circle radius {ch['ellipse95_radius_m']:.4f} m, area "
+          f"{ch['ellipse95_area_m2']:.4f} m^2). A 200,000-sample Monte-Carlo experiment "
+          f"gives RMSE {ch['MC']['rmse_m']:.4f} m and a 95th percentile of {ch['MC']['p95_m']:.4f} m, "
+          f"matching the closed form (sigma*sqrt(2) = {DRMS_S*np.sqrt(2):.4f} m and "
+          f"sigma*2.4477 = {ch['ellipse95_radius_m']:.4f} m).", indent=False)
 para(doc, "Degeneracy. As gamma -> 0 or 180 deg, G ~ 1/|sin gamma| -> infinity and the design matrix A "
           "becomes singular (kappa = 1/|sin gamma|); we therefore impose the operating window "
           "gamma in [30 deg, 150 deg] (G <= 2 G* for symmetric ranges), use a ridge-regularized "
@@ -81,42 +96,74 @@ para(doc, "A lower bound: r(v, a) = min_p [dist(V_v, p)/3 + max(|alpha|, eps)/30
 
 h1(doc, "IV. 2(2) 结果段（Results & Comparison）")
 op = RB["optimized"]
+hp2 = RB["heuristic"]
 starts = op["alert_starts"]
-para(doc, f"The optimized scheme assigns T1 <- (V3, V5), T2 <- (V1, V4), T3 <- (V2, V5); vehicle V5 is "
-          f"reused for T1 then T3 from the same station (zero travel leg, 1.53 s reset + 2.77 s slew "
-          f"in place). Observation starts are T1 = {starts['T1']:.2f} s, T2 = {starts['T2']:.2f} s, "
+oa = op["assignment"]
+para(doc, f"The optimized scheme assigns T1 <- (V{oa['T1'][0]+1}, V{oa['T1'][1]+1}), "
+          f"T2 <- (V{oa['T2'][0]+1}, V{oa['T2'][1]+1}), T3 <- (V{oa['T3'][0]+1}, V{oa['T3'][1]+1}); "
+          "vehicle V5 is reused for T1 then T3 from the same station (zero travel leg, 1.53 s reset "
+          "+ 2.77 s slew in place). Observation starts are "
+          f"T1 = {starts['T1']:.2f} s, T2 = {starts['T2']:.2f} s, "
           f"T3 = {starts['T3']:.2f} s, so the maximum is {op['objective_s']:.2f} s. The independently "
-          f"defined nearest-assignment heuristic - alerts processed in index order, each slot taken by "
-          f"the vehicle with the smallest marginal travel time to its ready-minimizing feasible "
-          f"station, reuse appended after the committed chain - yields 20.67 / 30.21 / 30.04 s and a "
-          f"maximum of 30.21 s, i.e. 19.38 s (+179%) worse. Three sources explain the gap: (i) "
-          f"pairing loss - the heuristic pairs the two nearest vehicles with one alert while the "
-          f"alert start is governed by the slower partner; (ii) chain-order effects - it stacks a slow "
-          f"task after a fast one on the same vehicle and blocks the early window of T3, whereas the "
-          f"optimized plan concentrates all reuse in a single zero-travel chain of V5; (iii) "
-          f"azimuth-blind station choice - ready times are pan-angle dominated (30 deg/s), so "
-          f"distance-nearest stations are not time-nearest.", indent=False)
-para(doc, "Sensitivity: re-simulating the optimized structure at speeds 2.5/3/3.5 m/s and slew rates "
-          "24/30/36 deg/s shows the objective is almost speed-insensitive (10.83 -> 10.95-11.00 s "
-          "across +/-17% speed) but slew-rate sensitive (10.83 -> 12.43 s at 24 deg/s, 10.00 s at "
+          "defined nearest-assignment heuristic - alerts processed in index order, each slot taken by "
+          "the vehicle with the smallest marginal travel time to its ready-minimizing feasible "
+          "station, reuse appended after the committed chain - yields "
+          f"{hp2['alert_starts']['T1']:.2f} / {hp2['alert_starts']['T2']:.2f} / "
+          f"{hp2['alert_starts']['T3']:.2f} s and a "
+          f"maximum of {hp2['objective_s']:.2f} s, i.e. {RB['comparison']['gap_s']:.2f} s "
+          f"(+{(hp2['objective_s']/op['objective_s']-1)*100:.0f}%) worse. Three sources explain the "
+          "gap: (i) "
+          "pairing loss - the heuristic pairs the two nearest vehicles with one alert while the "
+          "alert start is governed by the slower partner; (ii) chain-order effects - it stacks a slow "
+          "task after a fast one on the same vehicle and blocks the early window of T3, whereas the "
+          "optimized plan concentrates all reuse in a single zero-travel chain of V5; (iii) "
+          "azimuth-blind station choice - ready times are pan-angle dominated (30 deg/s), so "
+          "distance-nearest stations are not time-nearest.", indent=False)
+senB = {(s["speed"], s["omega_deg_s"]): s["obj_s"] for s in RB["sensitivity_speed_omega"]}
+o0 = op["objective_s"]
+para(doc, f"Sensitivity: re-simulating the optimized structure at speeds 2.5/3/3.5 m/s and slew rates "
+          f"24/30/36 deg/s shows the objective is almost speed-insensitive "
+          f"({o0:.2f} -> {senB[(2.5, 30.0)]:.2f}-{senB[(3.5, 30.0)]:.2f} s "
+          f"across +/-17% speed) but slew-rate sensitive ({o0:.2f} -> {senB[(3.0, 24.0)]:.2f} s at "
+          f"24 deg/s, {senB[(3.0, 36.0)]:.2f} s at "
           "36 deg/s). Deployment insight: prefer stations with small pan rotation over shorter "
           "travel; upgrading gimbal slew rate buys more than upgrading vehicles.", indent=False)
 
-h1(doc, "V. 英文数字总表（直接引用）")
+h1(doc, "V. 英文数字总表（直接引用，全部取自 JSON）")
 rows = [
     ["T2 projection / altitude", "(11.0289, 72.5000), 35 m"],
-    ["r_min (elevation bound)", "33/tan80 = 5.8188 m"],
-    ["Omega_2 area (0.1 m grid)", "6432.4 m^2"],
-    ["Feasible / robust arc on r_min circle", "[59.66, 244.24] / [70.95, 238.63] deg"],
-    ["Certificate family (90 deg pairs)", "phi in (70.96, 238.62) deg"],
-    ["Chosen pair / stations", "V3+V5; (5.2787, 73.3912), (11.9201, 78.2501)"],
-    ["d1, d2 / gamma / B", "5.8188, 5.8188 m / 90.000 deg / 8.2290 m"],
-    ["Travel times (sum)", "5.11, 13.61 s (18.72 s)"],
-    ["DRMS / 95% radius / area", "0.1016 m / 0.2486 m / 0.1941 m^2"],
-    ["MC check (200k)", "RMSE 0.1436 m, P95 0.2486 m"],
-    ["gamma window (G <= 2G*)", "[30.05, 149.95] deg"],
-    ["Backoff design (elev <= 78)", "r = 7.0144 m, DRMS 0.1224 m"],
-    ["dG*/dH, dDRMS/dH", "0.1763 m/m, 0.00308 m per m"],
+    ["r_min (elevation bound)", f"33/tan80 = {RSTAR:.4f} m"],
+    ["Omega_2 area (0.1 m cell-center grid)",
+     f"{area2:.1f} m^2 (node count {RA['region']['area_node_count_m2']:.1f} m^2)"],
+    ["Feasible / robust arc on r_min circle",
+     f"[{RA['circle']['feasible_runs_deg'][0][0]:.2f}, "
+     f"{RA['circle']['feasible_runs_deg'][-1][1]:.2f}] / "
+     f"[{RA['circle']['robust_runs_deg'][0][0]:.2f}, "
+     f"{RA['circle']['robust_runs_deg'][-1][1]:.2f}] deg"],
+    ["Certificate family (90 deg pairs)",
+     f"phi in ({RA['certificate']['phi_span_deg'][0]:.2f}, "
+     f"{RA['certificate']['phi_span_deg'][1]:.2f}) deg"],
+    ["Chosen pair / stations",
+     f"{ch['vehicles']}; ({ch['stations'][0][0]:.4f}, {ch['stations'][0][1]:.4f}), "
+     f"({ch['stations'][1][0]:.4f}, {ch['stations'][1][1]:.4f})"],
+    ["d1, d2 / gamma / B",
+     f"{ch['d_m'][0]:.4f}, {ch['d_m'][1]:.4f} m / {ch['gamma_deg']:.3f} deg / "
+     f"{ch['baseline_m']:.4f} m"],
+    ["Travel times (sum)",
+     f"{ch['travel_s'][0]:.2f}, {ch['travel_s'][1]:.2f} s ({ch['travel_sum_s']:.2f} s)"],
+    ["DRMS / 95% radius / area",
+     f"{DRMS_S:.4f} m / {ch['ellipse95_radius_m']:.4f} m / {ch['ellipse95_area_m2']:.4f} m^2"],
+    ["MC check (200k)",
+     f"RMSE {ch['MC']['rmse_m']:.4f} m, P95 {ch['MC']['p95_m']:.4f} m"],
+    ["gamma window (G <= 2G*)",
+     f"[{RA['degeneracy']['gamma_window_G_le_2Gstar_deg'][0]:.2f}, "
+     f"{RA['degeneracy']['gamma_window_G_le_2Gstar_deg'][1]:.2f}] deg"],
+    ["Backoff design (elev <= 78)",
+     f"r = {RA['degeneracy']['backoff_r_m']:.4f} m, "
+     f"DRMS {RA['degeneracy']['backoff_DRMS_m']:.4f} m"],
+    ["dG*/dH, dDRMS/dH",
+     f"{RA['sensitivity']['dG_dH_per_m']:.4f} m/m, "
+     f"{RA['sensitivity']['dDRMS_dH_m_per_m']:.5f} m per m"],
 ]
 table(doc, ["Item", "Value"], rows)
 

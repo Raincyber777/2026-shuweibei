@@ -8,7 +8,7 @@ from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 
-BASE = r"e:\2026数维杯\2026-shuweibei\B题\第二题"
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo-relative
 
 
 def load_results(name="q2a_results.json"):

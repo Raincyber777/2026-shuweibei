@@ -25,7 +25,7 @@ bullet(doc, "英文段落按论文模板的章节顺序给出（Problem Analysis
             "Solution → Validation → Sensitivity），可整段粘贴后微调；")
 bullet(doc, "公式以线性格式给出，粘贴后请用 Word 公式编辑器（或 MathType）重新录入并统一编号；")
 bullet(doc, "图在 第一题_图集.pptx（每图一页，SVG 矢量——右键“转换为形状”即可移动/改色/加标注）。"
-            "图内刻意无任何文字（赛事规定图内不得出现中文），需要你在 PPT 中补英文标注，见第 V 节清单；")
+            "图内刻意无任何文字（赛事规定图内不得出现中文），需要你在 PPT 中补英文标注，见第 IV 节清单；")
 bullet(doc, "页眉模板：Team <队伍号>  Page x of y；论文命名 <题号><队伍号>.pdf，例如 BSWBMCM26xxxx.pdf。")
 
 # ============ II ============
@@ -40,33 +40,47 @@ table(doc, ["Item", "Value"], [
     ["Line-of-sight elevation at optimum", f"ε* = {opt['elevation_deg']:.3f}° (active constraint)"],
     ["Optimal station (after tie-breaking)",
      f"p* = ({opt['x']:.4f}, {opt['y']:.4f}) m  (polar angle {opt['phi_deg']:.2f}° on the r* circle)"],
-    ["Safety margin / LOS clearance",
-     f"{opt['margin_m']:.3f} m / {opt['los_clearance_m']:.2f} m"],
-    ["Nearest vehicle & travel time", f"V4 from (88, 68), {opt['travel_time_s']:.2f} s at 3 m/s"],
-    ["Travel times from all vehicles",
-     "；".join(f"{k}: {v:.2f} s" for k, v in opt["travel_time_all"].items()).replace("；", ";  ")],
+    ["Arc maximum margin m* (true)",
+     f"{arc['m_star_margin_m']:.4f} m at phi = {arc['m_star_phi_deg']:.2f} deg "
+     f"(point ({arc['m_star_point'][0]:.4f}, {arc['m_star_point'][1]:.4f}); B2-buffer "
+     "distance = east-boundary distance there)"],
+    ["Safety margin of the SELECTED station / LOS clearance",
+     f"{opt['margin_m']:.3f} m (east field boundary; inside the band "
+     f"[m* − 0.05, m*] = [{arc['band_lower_m']:.4f}, {arc['m_star_margin_m']:.4f}]) / "
+     f"{opt['los_clearance_m']:.2f} m"],
+    ["Nearest vehicle & travel time",
+     f"V4 from (88, 68), {opt['travel_time_s']:.2f} s at 3 m/s (straight path clear)"],
+    ["Travel times from all vehicles (straight-line LB / feasible path)",
+     "；".join(f"{k}: {v:.2f}/{opt['travel_time_all_path'][k]:.2f} s"
+               for k, v in opt["travel_time_all"].items()).replace("；", ";  ")],
     ["Optimal arc blocked by B2 + buffer",
      f"[{arc['blocked_runs_deg'][0][0]:.2f}°, {arc['blocked_runs_deg'][0][1]:.2f}°] "
      f"(total {arc['blocked_total_deg']:.2f}°, i.e. {100-arc['feasible_fraction']*100:.1f}% of the circle)"],
     ["Optimal set", "the feasible arc of the r*-circle (~284°) — a continuum of optima"],
     ["Grid cross-check (0.1 m)",
      f"min feasible r = {gr['best_r']:.4f} m at (92.2, 69.4), +{gr['r_diff_vs_analytic']:.4f} m vs. analytic"],
-    ["Observable-region area", f"{gr['area_m2']:.1f} m² (56.3% of the field)"],
+    ["Observable-region area",
+     f"{gr['area_m2']:.1f} m² ({gr['area_m2']/100:.1f}% of the field; cell-center "
+     f"estimator, node count {gr['area_node_count_m2']:.1f} m²)"],
     ["∂r*/∂H ; ∂r*/∂ε_max",
      f"{sen['dr_dH']:.4f} m per m ; {sen['dr_deps_deg']:.4f} m per degree"],
     ["Area vs. B2 height (20→45 m)",
-     "6354.8 → 3481.5 m², monotone decreasing, saturating above 45 m"],
-    ["Area vs. vehicle radius (1.0→2.5 m)", "5858.5 → 5217.9 m², near-linear decrease"],
-    ["Alternative metric check",
-     "Q₂ = (1/r)·cos²(ε − 45°) yields the same optimal circle (r = 7.583 m) — metric choice is robust"],
+     f"{sen['area_vs_B2_height'][0][1]:.1f} → {sen['area_vs_B2_height'][-1][1]:.1f} m², "
+     "monotone decreasing, saturating above 45 m"],
+    ["Area vs. vehicle radius (1.0→2.5 m)",
+     f"{sen['area_vs_vehicle_radius'][0][1]:.1f} → {sen['area_vs_vehicle_radius'][-1][1]:.1f} m², "
+     "near-linear decrease"],
+    ["Alternative metric check (limited claim)",
+     "Q₂ = (1/r)·cos²(ε − 45°) still decreases in r on this instance, so it only "
+     "verifies that r* (7.583 m) is invariant within this metric family, not the "
+     "full station selection"],
 ])
 spacer(doc)
 
 # ============ III ============
-h1(doc, "III. 可直接粘贴的段落（中文先行，最终统一英译）")
-para(doc, "【中文先行说明】3.3、3.4、3.6、3.7 暂以中文稿给出，便于先定稿内容与数字；"
-          "3.1、3.2、3.5 暂保留英文。全部内容将在最终阶段统一翻译为英文。", indent=False)
-# 各节 en 变量保留，作为最终英译参考；本轮先输出中文稿。
+h1(doc, "III. 可直接粘贴的段落（英文先行，中文稿为对照）")
+para(doc, "【使用说明】3.1–3.7 每节先给可整段粘贴的英文（en 段落），随后附中文稿供核对内容与数字；"
+          "粘贴后请统一用 Word 公式编辑器重录公式并编号。", indent=False)
 
 h2(doc, "3.1 Problem analysis（可放在 Problem Analysis 节）")
 en = ("Problem 1 asks for the vehicle-observable region of target T1 and the station that maximizes the "
@@ -141,6 +155,7 @@ en = ("The optimal value admits a proof of global optimality rather than a mere 
       "the analytic result. Since the entire feasible arc of the r*-circle attains the same optimal "
       "value, the optimal set is a continuum — a structural multiplicity, not an artifact — which is "
       "precisely why tie-breaking rules are required.")
+para(doc, en, indent=False)
 # 中文先行稿（最终英译时按此中文稿翻译）
 para(doc, "首先给出与建筑布局无关的闭式下界。由 C2，对任意 p ∈ Ω 有 "
           "r(p) ≥ r_min = (H1 − h_cam) / tan ε_max = 43 / tan 80° = 7.5821 m。"
@@ -162,31 +177,48 @@ para(doc, "【中文备注】“解析下界 + 可行弧验证 + 网格交叉验
 h2(doc, "3.5 Tie-breaking rules（紧跟 3.4）")
 code_block(doc, """Because every point of the feasible arc attains the same optimal value, we break
 ties by a three-level lexicographic rule:
-  T1 (safety margin)  maximize m(p) = min{ d(p, Bi) - 1.5,  distance to the
-      four field edges }.  On the optimal arc the elevation slack is zero by
-      construction (eps* = 80 deg is the active constraint), so the margin is
-      computed over the geometric and occlusion boundaries only.
-  T2 (responsiveness)  among points whose margin is within 0.05 m of the
-      maximum, choose the one with the shortest travel time from the nearest
-      standby vehicle.
+  T1 (safety-margin band)  with the geometric margin m(p) = min{ d(p, Bi) - 1.5,
+      distance to the four field edges } (on the optimal arc the elevation slack
+      is zero by construction, so m covers geometric boundaries only; the LOS
+      roof clearance is reported separately), keep the band
+      m(p) >= m* - 0.05 m, where m* = 9.6746 m is the true arc maximum, attained
+      at phi = 56.50 deg where the B2-buffer distance equals the east-boundary
+      distance.
+  T2 (responsiveness)  within that band, choose the point with the shortest
+      travel time from the nearest standby vehicle.
   T3 (determinism)  if still tied, take the lexicographically smallest (x, y).
-The rule yields the unique station p* = (88.8753, 76.2895) m with a safety
-margin of 9.625 m, an LOS clearance of 7.41 m, and a travel time of 2.78 s
-from V4 (the nearest vehicle, initially at (88, 68)).""")
-para(doc, "【中文备注】报告值三个都齐了：坐标、距离 7.5821 m、仰角 80°——题面点名的三件套。")
+The rule yields the unique station p* = (88.8753, 76.2895) m, whose own margin
+is 9.625 m (set by the east field boundary; 0.0001 m inside the band), with an
+LOS clearance of 7.41 m and a travel time of 2.78 s from V4 (the nearest
+vehicle, initially at (88, 68); its straight path is clear of all buildings).
+Note: straight-line distances are lower bounds on travel time when the direct
+segment crosses a building (e.g. V1, 32.21 s straight vs 34.36 s via the
+shortest obstacle-avoiding detour).""")
+para(doc, "【中文备注】报告值三个都齐了：坐标、距离 7.5821 m、仰角 80°——题面点名的三件套；"
+          "务必区分 m*（弧上最大裕度 9.6746）与所选站裕度（9.625，带内最短可达）。")
 
 h2(doc, "3.6 Sensitivity（放 Sensitivity Analysis 节）")
 en = ("Two closed-form sensitivities follow immediately from r* = (H − h_cam)/tan 80°: "
       "∂r*/∂H = 1/tan 80° = 0.176 m per m of target altitude, and ∂r*/∂ε_max = −43·csc²(80°)·π/180 = "
       "−0.774 m per degree of the gimbal bound. More importantly, since the bound contains no "
-      "environmental parameters, the optimal VALUE is intrinsically robust to the building layout: "
-      "perturbing building heights or positions changes only WHERE on the r*-circle the feasible arc "
-      "lies, never the optimal distance itself. At the regional level, the observable area decreases "
-      "monotonically with the height of B2 (6354.8 → 3481.5 m² as h_B2 grows from 20 m to 45 m, "
-      "saturating once h_B2 reaches the target altitude) and decreases near-linearly with the vehicle "
-      "radius (5858.5 → 5217.9 m² as R_veh grows from 1.0 m to 2.5 m). Finally, replacing the metric "
-      "by Q₂ = (1/r)·cos²(ε − 45°), which additionally prefers mid-range elevation angles, leaves the "
-      "optimum on the same r*-circle, so the choice Q = 1/r is robust within a reasonable metric family.")
+      "environmental parameters and the feasible arc on the r_min-circle is non-empty, the optimal "
+      "VALUE is robust to the building layout: perturbing building heights or positions changes only "
+      "WHERE on the r*-circle the feasible arc lies, never the optimal distance itself (if some layout "
+      "blocked the entire circle, the optimum would move outward to r > r_min — the conditional nature "
+      "of this statement is stated explicitly). At the regional level, the observable area decreases "
+      "monotonically with the height of B2 "
+      f"({sen['area_vs_B2_height'][0][1]:.0f} → {sen['area_vs_B2_height'][-1][1]:.0f} m² as h_B2 grows "
+      "from 20 m to 45 m, saturating once h_B2 reaches the target altitude) and decreases near-linearly "
+      f"with the vehicle radius ({sen['area_vs_vehicle_radius'][0][1]:.0f} → "
+      f"{sen['area_vs_vehicle_radius'][-1][1]:.0f} m² as R_veh grows from 1.0 m to 2.5 m); over the "
+      "sampled ranges the B2 height moves the area about 4.5 times more in total, yet per unit of "
+      "parameter change the vehicle radius is the stronger lever (≈427 vs ≈115 m² per m). Areas are "
+      "cell-center (midpoint) grid estimates with ~0.4% estimator uncertainty at h = 0.1 m; the trends "
+      "are robust. Finally, replacing the metric by Q₂ = (1/r)·cos²(ε − 45°), which additionally prefers "
+      "mid-range elevation angles, leaves the optimum on the same r*-circle; since Q₂ is still "
+      "decreasing in r on this instance, this checks only the invariance of r* within that metric "
+      "family, not the full station selection.")
+para(doc, en, indent=False)
 # 中文先行稿（最终英译时按此中文稿翻译，注意“可行弧非空”的限定）
 para(doc, "由 r* = (H1 − h_cam) / tan ε_max 可直接求偏导："
           "∂r*/∂H1 = 1 / tan 80° = +0.1763 m/m；"
@@ -208,11 +240,15 @@ para(doc, "【中文备注】“值稳健—位置敏感”分解 + 面积扫描
           "模板自带的 Sensitivity Analysis 章节正好用这段。")
 
 h2(doc, "3.7 结果陈述句（可直接放进摘要或 Conclusion）")
-en = ("For Problem 1, the observable region of T1 covers about 5.63 × 10³ m² (56.3% of the field). "
+en = ("For Problem 1, the observable region of T1 covers about 5.61 × 10³ m² "
+      f"({gr['area_m2']/100:.1f}% of the field). "
       "The optimal station is located at (88.88, 76.29) m with a horizontal distance of 7.5821 m and a "
       "line-of-sight elevation of exactly 80°, where Q attains its maximum 0.1319 m⁻¹; the optimality "
-      "is proven analytically and verified numerically, and a three-level tie-breaking rule selects "
+      "is proven analytically and verified numerically, and a three-level tie-breaking rule (margin "
+      "band around the arc maximum m* = 9.675 m, then shortest travel within the band, then "
+      "lexicographic order) selects "
       "the unique station on the 284°-feasible optimal arc.")
+para(doc, en, indent=False)
 # 中文先行稿（最终英译时按此中文稿翻译）
 para(doc, "第一问中，T1 的可观测区域约为 5.6×10³ m²（约占场地的 56%）。"
           "最优站点位于 (88.8753, 76.2895) m，水平距离 r* = 7.5821 m，视线仰角恰为 80°，"
@@ -235,8 +271,10 @@ table(doc, ["图", "文件", "建议英文 caption（PPT 备注页里也有）",
      "三个子图下标 (a)(b)(c)；坐标轴；标 T1′"],
     ["Fig. 3", "fig3_optimal_arc_zoom",
      "Left: the optimal circle r* = 7.58 m near T1 — green arc feasible (≈284°), red arc blocked by B2 and "
-     "its 1.5 m buffer; right: safety-margin profile along the circle.",
-     "坐标轴 φ (deg) / margin (m)；标 “p* (chosen station)” “T1′” “V4” “B2”"],
+     "its 1.5 m buffer; right: safety-margin profile along the circle — red open circle = arc maximum "
+     "m* = 9.675 m at φ = 56.5°, black pentagon = selected station (margin 9.625 m, band member with "
+     "shortest travel).",
+     "坐标轴 φ (deg) / margin (m)；标 “p* (chosen station)” “m*” “T1′” “V4” “B2”"],
     ["Fig. 4", "fig4_sensitivity_rstar",
      "Closed-form sensitivity of r*: versus target altitude H (left) and versus the gimbal elevation bound "
      "(right); nominal parameters marked.",
