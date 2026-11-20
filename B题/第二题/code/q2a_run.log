@@ -1,0 +1,88 @@
+Omega_2 area = 6432.4 m^2
+feasible runs: [(np.float64(59.66), np.float64(244.24))]
+robust  runs: [(np.float64(70.95), np.float64(238.63))]
+certificate 90-deg family exists: True phi span: (70.96000000000001, 238.62)
+V1+V2: G=9.0063 m  d=(5.825,11.314) gamma=92.41  travel=(19.27,29.98)
+V1+V3: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(18.29,3.97)
+V1+V4: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(18.29,27.21)
+V1+V5: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(18.29,15.41)
+V2+V3: G=9.0063 m  d=(11.314,5.825) gamma=92.41  travel=(29.98,5.76)
+V2+V4: G=9.0063 m  d=(11.314,5.825) gamma=92.41  travel=(29.98,27.55)
+V2+V5: G=9.0063 m  d=(11.314,5.825) gamma=92.41  travel=(29.98,16.58)
+V3+V4: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(6.35,27.21)
+V3+V5: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(6.35,15.41)
+V4+V5: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(26.99,15.41)
+chosen: V3+V5
+chosen detail: {
+ "vehicles": "V3+V5",
+ "stations": [
+  [
+   5.2787185024050265,
+   73.39119611193425
+  ],
+  [
+   11.920052941634513,
+   78.25013832729523
+  ]
+ ],
+ "d_m": [
+  5.818790363379346,
+  5.818790363379346
+ ],
+ "elevation_deg": [
+  80.0,
+  80.0
+ ],
+ "azimuth_deg": [
+  -8.809999999999974,
+  -98.81
+ ],
+ "baseline_m": 8.229012248496945,
+ "gamma_deg": 90.0,
+ "travel_s": [
+  5.110367310651667,
+  13.612252598840845
+ ],
+ "travel_sum_s": 18.72261990949251,
+ "DRMS_m": 0.10155705032428688,
+ "sigma_used_deg": 1.0,
+ "ellipse95_radius_m": 0.24858624788973083,
+ "ellipse95_area_m2": 0.1941351033131735,
+ "sigma1_isotropic": true,
+ "MC": {
+  "n": 200000,
+  "rmse_m": 0.14363732146649222,
+  "p95_m": 0.24858017788272815
+ },
+ "path_straight_ok": [
+  true,
+  true
+ ],
+ "los_clearance_m": [
+  17.10125,
+  2.9195000000000
+==== Problem 2(1) numeric summary ====
+T2' = (11.0289, 72.5000)  H = 35.0 m  r_min_geo = 5.8188 m
+Omega_2 area (0.1 m grid) = 6432.4 m^2
+r_min circle feasible runs: [(np.float64(59.66), np.float64(244.24))]
+r_min circle robust  runs: [(np.float64(70.95), np.float64(238.63))]
+certificate: G_lower = r_min = 5.8188 m ; 90-deg family: True (phi in (70.96000000000001, 238.62))
+per-pair optima:
+  V1+V2: G=9.0063 m DRMS=0.1572 m d=(5.825,11.314) gamma=92.41 travel=(19.27,29.98) s
+  V1+V3: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(18.71,3.49) s
+  V1+V4: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(18.29,27.21) s
+  V1+V5: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(19.47,14.17) s
+  V2+V3: G=9.0063 m DRMS=0.1572 m d=(11.314,5.825) gamma=92.41 travel=(29.98,5.76) s
+  V2+V4: G=9.0063 m DRMS=0.1572 m d=(11.314,5.825) gamma=92.41 travel=(29.98,27.55) s
+  V2+V5: G=9.0063 m DRMS=0.1572 m d=(11.314,5.825) gamma=92.41 travel=(29.98,16.58) s
+  V3+V4: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(6.35,27.21) s
+  V3+V5: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(5.11,13.61) s
+  V4+V5: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(26.99,15.41) s
+CHOSEN: V3+V5  stations [[5.2787185024050265, 73.39119611193425], [11.920052941634513, 78.25013832729523]]
+  d=(5.8188,5.8188) m  gamma=90.000 deg  B=8.2290 m
+  DRMS = 0.1016 m ; 95% radius = 0.2486 m ; area95 = 0.1941 m^2
+  MC check (n=200k): RMSE=0.1436 m  P95=0.2486 m
+  travel times [5.110367310651667, 13.612252598840845] s (sum 18.72 s), straight paths ok: True, True
+gamma operating window (G<=2G*): (30.05, 149.95000000000002)
+back-off design: r = 7.0144 m (elev <= 78 deg), DRMS = 0.1224 m
+sensitivity: dG*/dH = 0.1763 m/m ; dDRMS/dH = 0.00308 m per m of H
