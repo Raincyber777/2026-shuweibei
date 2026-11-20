@@ -1,0 +1,17 @@
+==== Problem 1 numeric summary ====
+T1 horizontal projection : (84.6410, 70.0000)  H = 45.0 m
+closed-form r* = (H-Hcam)/tan(80deg) = 7.5821 m   Q* = 0.1319 /m
+grid(0.1 m): area = 5628.7 m^2 ; best feasible r = 7.5828 m at (92.2, 69.4) (diff +0.0007 m)
+optimal arc: feasible 78.8% of the circle
+  blocked runs (deg): [(np.float64(160.75), np.float64(236.89))]
+  feasible runs (deg): [(np.float64(236.9), np.float64(520.75))]
+chosen station: phi = 56.050 deg  p* = (88.8753, 76.2895)
+  r = 7.5821 m   elevation = 80.000 deg   Q = 0.1319 /m
+  margin = 9.625 m   LOS clearance = 7.41 m
+  nearest vehicle V4  travel time = 2.78 s
+  travel times from all vehicles: V1: 32.21s, V2: 22.10s, V3: 25.17s, V4: 2.78s, V5: 14.10s
+sensitivity: dr*/dH = 0.1763 m/m ; dr*/d(eps_max) = -0.7738 m/deg
+area scan base = 5652.3 m^2
+area vs B2 height: [(20, 6354.8), (24, 6074.5), (28, 5652.3), (32, 4960.9), (36, 4103.0), (40, 3587.7), (45, 3481.5)]
+area vs vehicle radius: [(1.0, 5858.5), (1.5, 5652.3), (2.0, 5438.4), (2.5, 5217.9)]
+alt metric Q2: station (92.2, 69.4), r = 7.583 m, elev = 80.00 deg
