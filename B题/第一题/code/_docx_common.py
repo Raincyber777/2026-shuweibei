@@ -8,7 +8,8 @@ from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 
-BASE = r"C:\Users\ASUS\Desktop\shuwei材料包\shuwei材料包\B题\第一题"
+# 使用脚本所在目录的上一级（第一题/），避免依赖某台机器的绝对路径
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def load_results():

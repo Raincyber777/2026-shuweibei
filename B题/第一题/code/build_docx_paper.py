@@ -16,7 +16,7 @@ T1 = R["target"]["xy"]
 
 doc = new_doc()
 title(doc, "2026 “数维杯”B题  第一问论文素材文档",
-      "（给论文手）可直接粘贴的英文段落 + 数字总表 + 图注 + 格式红线")
+      "（给论文手）可直接粘贴的段落（中文先行，最终统一英译） + 数字总表 + 图注 + 格式红线")
 
 # ============ I ============
 h1(doc, "I. 使用说明")
@@ -63,7 +63,10 @@ table(doc, ["Item", "Value"], [
 spacer(doc)
 
 # ============ III ============
-h1(doc, "III. 可直接粘贴的英文段落")
+h1(doc, "III. 可直接粘贴的段落（中文先行，最终统一英译）")
+para(doc, "【中文先行说明】3.3、3.4、3.6、3.7 暂以中文稿给出，便于先定稿内容与数字；"
+          "3.1、3.2、3.5 暂保留英文。全部内容将在最终阶段统一翻译为英文。", indent=False)
+# 各节 en 变量保留，作为最终英译参考；本轮先输出中文稿。
 
 h2(doc, "3.1 Problem analysis（可放在 Problem Analysis 节）")
 en = ("Problem 1 asks for the vehicle-observable region of target T1 and the station that maximizes the "
@@ -102,6 +105,22 @@ en = ("Let p = (x, y) denote the station center. The observable region is define
       "the camera; and C3 requires the LOS segment (p, 2) → (84.6410, 70, 45) to be disjoint from every "
       "prism Bᵢ = [x₀, x₁] × [y₀, y₁] × [0, hᵢ], tested with the 3-D slab (interval-clipping) method, "
       "where tangency counts as occlusion. The optimization criterion is stated explicitly as")
+# 中文先行稿（最终英译时按此中文稿翻译）
+para(doc, "令 p = (x, y) 为观测站圆心，即车辆等效圆盘中心在地面上的投影。"
+          "可观测区域定义为三个约束的交集 Ω = C1 ∩ C2 ∩ C3。", indent=False)
+para(doc, "C1（车辆几何）：车辆等效为半径 1.5 m 的圆盘，圆心须满足 1.5 ≤ x ≤ 98.5、1.5 ≤ y ≤ 98.5，"
+          "且到各建筑矩形足迹的距离 d(p, B_i) ≥ 1.5（i = 1, …, 5）。该条件等价于车辆圆盘不越出场界、"
+          "不侵入建筑，即建筑足迹的 1.5 m Minkowski 外扩缓冲。", indent=False)
+para(doc, "C2（云台俯仰）：视线仰角 ε(p) = arctan(Δz / r(p))，其中 Δz = H1 − h_cam = 43 m，"
+          "须满足 ε(p) ∈ [−10°, 80°]。由于目标恒高于相机，下界自动满足；上界等价于 "
+          "r(p) ≥ r_min = Δz / tan 80° = 43 / 5.67128 ≈ 7.5821 m。几何上，这是以 T1 水平投影 "
+          "T′ = (84.6410, 70.0000) 为圆心、半径 7.5821 m 的圆形禁区。", indent=False)
+para(doc, "C3（视线遮挡）：视线为三维线段 L: (x, y, 2) → (84.6410, 70, 45)。对每个建筑长方体 "
+          "[x0, x1] × [y0, y1] × [0, h_i]，用三维 slab（区间裁剪）法判断线段是否与其相交；"
+          "按题面规定，触碰、相切或穿过边、面、顶点一律视为遮挡，数值实现保留 10⁻⁹ 容差。", indent=False)
+para(doc, "优化准则：在 Ω 上最大化观测质量 Q(p) = 1 / r(p)。由于 Q 关于 r 严格单调递减，"
+          "p* = argmax_{p∈Ω} Q(p) = argmin_{p∈Ω} r(p)，即在所有可行站点中取离目标水平投影最近者。"
+          "该等价性把连续优化问题转化为对 r = r_min 圆弧的可行性判定，后文据此证明全局最优性。", indent=False)
 code_block(doc, """        p*  =  argmax  Q(p) = 1 / r(p)   subject to  p in Omega
             =  argmin  r(p)            subject to  p in Omega ,
 which is well posed because Q is strictly decreasing in r.""")
@@ -113,7 +132,7 @@ en = ("The optimal value admits a proof of global optimality rather than a mere 
       "By C2, every feasible station satisfies r ≥ r_min = 7.5821 m; this lower bound depends only on "
       "the target altitude, the camera height and the gimbal bound, and is independent of the building "
       "layout. Sampling 200,000 polar angles on the circle r = r_min and testing C1 and C3 at each point "
-      "shows that 78.8% of the circle is feasible; the blocked arc [160.75°, 236.89°] (76.14° in total) "
+      "shows that 78.8% of the circle is feasible; the blocked arc [160.75°, 236.89°] (76.15° in total) "
       "is produced exactly by building B2 and its 1.5 m clearance buffer, which matches the analytic "
       "estimate obtained by intersecting the circle with the inflated footprint [160.7°, 236.9°]. "
       "Hence the lower bound is attainable and r* = 7.5821 m with elevation ε* = 80° is the global "
@@ -122,6 +141,21 @@ en = ("The optimal value admits a proof of global optimality rather than a mere 
       "the analytic result. Since the entire feasible arc of the r*-circle attains the same optimal "
       "value, the optimal set is a continuum — a structural multiplicity, not an artifact — which is "
       "precisely why tie-breaking rules are required.")
+# 中文先行稿（最终英译时按此中文稿翻译）
+para(doc, "首先给出与建筑布局无关的闭式下界。由 C2，对任意 p ∈ Ω 有 "
+          "r(p) ≥ r_min = (H1 − h_cam) / tan ε_max = 43 / tan 80° = 7.5821 m。"
+          "该下界只依赖目标高度、相机高度和云台俯仰上限，与建筑布局、场界大小无关。"
+          "若圆 r = r_min 上存在非空可行弧，则下界可达，于是全局最优值 r* = 7.5821 m、"
+          "最优仰角 ε* = 80°（主动约束）、最优质量 Q* = 1 / r* = 0.1319 m⁻¹。", indent=False)
+para(doc, "沿该圆均匀采样 200,000 个方位角，并逐点判定 C1 与 C3：约 78.8% 的圆周可行；"
+          "被挡弧段为 160.75°–236.89°（合计 76.15°），全部由 B2 及其 1.5 m 缓冲造成。"
+          "解析复核：B2 原始足迹对应的挡弧为 φ ∈ [172.4°, 221.9°]；叠加 1.5 m 缓冲后扩为约 "
+          "[160.7°, 236.9°]，与数值采样一致。LOS 在该圆上没有额外增加遮挡：西侧被挡段已由几何约束覆盖，"
+          "其余弧段的视线或从 B2 上方掠过，或位于 B2 东侧 x ≥ 79 的区域。", indent=False)
+para(doc, "进一步用 0.1 m 全场网格独立搜索：最小可行 r = 7.5828 m，位于 (92.2, 69.4)，"
+          "仅比解析下界高 0.0007 m，属于网格量化误差。因此 r* = 7.5821 m 是全局最优，"
+          "而不是网格搜索得到的近似值。由于整段可行弧都取到同一最优值，最优解集是 r* 圆上一段连续弧"
+          "（约 283.9°）；并列最优是结构性的，这正是需要 tie-breaking 的原因。", indent=False)
 para(doc, "【中文备注】“解析下界 + 可行弧验证 + 网格交叉验证”三步走是本题的得分点，"
           "评审最忌讳“网格搜出来的最优”，这一段正面回应了 global optimality。")
 
@@ -153,6 +187,23 @@ en = ("Two closed-form sensitivities follow immediately from r* = (H − h_cam)/
       "radius (5858.5 → 5217.9 m² as R_veh grows from 1.0 m to 2.5 m). Finally, replacing the metric "
       "by Q₂ = (1/r)·cos²(ε − 45°), which additionally prefers mid-range elevation angles, leaves the "
       "optimum on the same r*-circle, so the choice Q = 1/r is robust within a reasonable metric family.")
+# 中文先行稿（最终英译时按此中文稿翻译，注意“可行弧非空”的限定）
+para(doc, "由 r* = (H1 − h_cam) / tan ε_max 可直接求偏导："
+          "∂r*/∂H1 = 1 / tan 80° = +0.1763 m/m；"
+          "∂r*/∂ε_max = −43·csc²(80°)·π/180 = −0.7738 m/deg；"
+          "∂r*/∂h_cam = −0.1763 m/m。", indent=False)
+para(doc, "这些闭式关系表明，最优值只由目标高度、相机高度和云台上限决定，对建筑布局不敏感。"
+          "更准确地说，在可行弧非空的前提下，改变建筑高度或位置只会改变最优弧在圆上的位置与长度，"
+          "不会改变 r* 和 Q*；如果环境变化使整条 r = r_min 圆都不可行，最优值才会外移。"
+          "这是“值稳健、位置敏感”结论的适用条件。", indent=False)
+para(doc, "区域层面，可观测面积随 B2 高度增加而单调下降：h_B2 从 20 m 增到 45 m 时，"
+          "面积由约 6355 m² 降到 3482 m²；h_B2 达到目标高度 45 m 后阴影饱和，继续增高不再改变面积。"
+          "面积随车辆半径增大近似线性下降：R_veh 从 1.0 m 增到 2.5 m 时，面积由约 5859 m² 降到 5218 m²。"
+          "需要说明的是，这些面积由网格估计得到，绝对量存在约 0.5% 量级的网格/估计器误差，"
+          "但单调趋势是稳健的。", indent=False)
+para(doc, "最后，构造兼顾俯仰角居中的备选度量 Q2 = (1/r)·cos²(ε − 45°)，在可行域上重新求解："
+          "最优仍在 r* 圆上（网格解 r = 7.583 m，ε ≈ 80.0°）。由于 Q2 仍随 r 单调下降，"
+          "这一检验说明度量选择不改变最优值 r*；最优弧上具体站点的选择仍需 tie-breaking。", indent=False)
 para(doc, "【中文备注】“值稳健—位置敏感”分解 + 面积扫描 + 备选度量检验，三层递进，"
           "模板自带的 Sensitivity Analysis 章节正好用这段。")
 
@@ -162,6 +213,12 @@ en = ("For Problem 1, the observable region of T1 covers about 5.63 × 10³ m² 
       "line-of-sight elevation of exactly 80°, where Q attains its maximum 0.1319 m⁻¹; the optimality "
       "is proven analytically and verified numerically, and a three-level tie-breaking rule selects "
       "the unique station on the 284°-feasible optimal arc.")
+# 中文先行稿（最终英译时按此中文稿翻译）
+para(doc, "第一问中，T1 的可观测区域约为 5.6×10³ m²（约占场地的 56%）。"
+          "最优站点位于 (88.8753, 76.2895) m，水平距离 r* = 7.5821 m，视线仰角恰为 80°，"
+          "此时 Q 取最大值 0.1319 m⁻¹。该最优性由闭式下界、可行弧验证和 0.1 m 网格交叉验证共同证明；"
+          "最优解集是 r* 圆上一段约 284° 的连续可行弧，本文用“最大裕度 → 带内最短可达 → 字典序”"
+          "三级规则将其唯一化为 p*。", indent=False)
 para(doc, "【中文备注】摘要里第一问的浓缩版。")
 
 # ============ IV ============
