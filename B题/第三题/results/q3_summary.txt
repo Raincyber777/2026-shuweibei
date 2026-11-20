@@ -1,0 +1,13 @@
+==== Problem 3 numeric summary ====
+model: dpsi ~ N(0, (sigma(s)/40*180/pi)^2 + 0.64 + 0.36), sigma(s)=0.3+0.02s
+z_0.975 = 1.959964 ; sigma_psi_max = 5/z = 2.551067 deg
+s_max = 66.9223 m  (sigma(s_max) = 1.638446 m)
+s = 80 nominal: sigma_psi = 2.8995 deg, P = 0.9154 (< 0.95, deficit 0.0346)
+a,b region: a >= 0, b >= 0, a + 80 b <= 1.638446 m (b_max = 0.020481 m/m @ a=0 ; a_max = 1.6384 m @ b=0 ; nominal (0.3, 0.02) inside = False)
+crossover (loc var = gimbal var) at s = 19.907 m
+variance shares (loc/zero/ctrl): s=0: 15.6/54.0/30.4%, s=10: 33.9/42.3/23.8%, s=19.91: 50.0/32.0/18.0%, s=30: 62.4/24.0/13.5%, s=40: 71.3/18.4/10.3%, s=50: 77.6/14.3/8.1%, s=66.92: 84.6/9.8/5.5%, s=80: 88.1/7.6/4.3%
+MC validation (n=1e6): s=0: P_emp=1.0000 vs 1.0000 (diff +0.00000), s=20: P_emp=0.9996 vs 0.9996 (diff -0.00000), s=40: P_emp=0.9927 vs 0.9926 (diff +0.00007), s=66.9223: P_emp=0.9497 vs 0.9500 (diff -0.00027), s=80: P_emp=0.9152 vs 0.9154 (diff -0.00015)
+linearization residual RMS at s=80: 0.1293 deg (4.46% of sigma_psi)
+sensitivity: d(s_max)/d(d_tgt) = 2.0481 m per m ; s_max vs d: [(30.0, 46.4), (35.0, 56.7), (40.0, 66.9), (45.0, 77.2), (50.0, 87.4), (60.0, 107.9)]
+s_max vs gimbal scale: [(0.5, 72.3), (0.75, 70.1), (1.0, 66.9), (1.25, 62.6), (1.5, 57.0)]
+s_max vs confidence: [(0.9, 85.2), (0.95, 66.9), (0.98, 51.4), (0.99, 43.1)]
