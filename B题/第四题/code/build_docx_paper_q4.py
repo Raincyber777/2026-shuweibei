@@ -162,6 +162,25 @@ rows2 = [["Baseline starts (s)", f"T1 {BL['starts']['T1']:.2f} / T2 "
                                    f"resched ({r2['eta']:.2f}, {r2['t_last']:.2f})"]]
 table(doc, ["Item", "Value"], rows2)
 
+h1(doc, "VI.A 逐图英文标注清单（复核第二轮逐图核对后给出，PPT 手补用）")
+para(doc, "图内当前仅数字刻度；以下为每张图需要手补的英文要素。插论文前逐张核对，"
+          "全程不得出现中文。最终插入论文的图必须真正带上英文 caption 与坐标轴名"
+          "（不要停留在 PPT 备注页）。", indent=False)
+table(doc, ["图", "坐标轴", "图例/标号"], [
+    ["Fig. 1", "x: x (m); y: y (m)；刻度 0–100",
+     "建筑矩形标 B1–B5；colorbar 标 t_last (s)；红五星 = 代表场景；蓝方块 = vehicles V1–V5"],
+    ["Fig. 2", "x: θ (deg) 0–360; y: t_last (s)",
+     "三条线 legend：R = 30 / 40 / 50 m；水平红线 = keep-original 60 s；黑点线 = 基线 ≈10.36 s"],
+    ["Fig. 3", "左：x: 1–5 = V1–V5, y: η；右：y: t_last (s)",
+     "图例：pink = keep-original、green = reschedule"],
+    ["Fig. 4", "x: t_rec (s) 10/20/30; y: t_last (s)",
+     "每条线一个故障车辆（legend 按车号 V1–V5）；紫 × = keep-original"],
+    ["Fig. 5", "x: time (s) 0–60; y: V1–V5",
+     "色标图例：travel / slew / wait / observe (5 s) / reset；左图 V1 长灰条 = V4 故障致 T2 孤儿、等待至 60 s"],
+    ["Fig. 6", "x: t_last (s); y: η",
+     "图例：green circle = reschedule、red cross = keep-original"],
+])
+
 h1(doc, "VII. 图注建议（图内无文字）")
 table(doc, ["Label", "File", "Caption (suggest)"], [
     ["Fig. 1", "fig1_map_new_alerts",

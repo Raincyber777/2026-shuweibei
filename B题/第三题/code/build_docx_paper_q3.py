@@ -135,6 +135,26 @@ table(doc, ["Label", "File", "Caption (suggest)"], [
      "s_max vs standoff distance d (slope 2.048 m/m); s_max vs confidence level."],
 ])
 
+h1(doc, "VI.A 逐图英文标注清单（复核第二轮逐图核对后给出，PPT 手补用）")
+para(doc, "图内当前仅数字刻度；以下为每张图需要手补的英文要素（轴名/图例/标号），"
+          "插论文前逐张核对。全程不得出现中文。", indent=False)
+table(doc, ["图", "坐标轴", "图例/标号"], [
+    ["Fig. 1", "x: s (m); y: σ (deg)",
+     "4 条线：σ_loc(s) / gimbal floor (1.0°) / total σ_ψ(s) / 2.5511° ceiling；绿点标 s_max = 66.92 m"],
+    ["Fig. 2", "x: s (m); y: P(|Δψ| ≤ 5°)",
+     "图例：analytic / MC points (n = 10⁶)；水平 0.95 线"],
+    ["Fig. 3", "x: a (m); y: b (m/m)",
+     "可行三角形区标 feasible region；iso-confidence 线标 0.90/0.95/0.98/0.99；名义点 (0.3, 0.02) 标 nominal (outside)"],
+    ["Fig. 4", "x: s (m); y: variance (deg²)",
+     "堆叠三色 legend：localization / zero-offset / control；竖线标 crossover 19.91 m、s_max 66.92 m"],
+    ["Fig. 5", "x: Δψ (deg); y: density",
+     "±5° 两条竖线标 −5 / +5；图例：MC histogram / analytic density"],
+    ["Fig. 6", "左：x: d (m), y: s_max (m)；右：x: confidence, y: s_max (m)",
+     "左标斜率 2.048 m/m 与名义点 d = 40 m；右标 0.95 点"],
+])
+para(doc, "另：主答案 66.92 m（线性化闭式）与保守设计值 66.84 m（精确几何）并存，"
+          "建议在 Fig.1 caption 加注 conservative design value 66.8 m，避免读者误读两处数值。", indent=False)
+
 h1(doc, "VII. 格式红线提醒")
 bullet(doc, "全文英文、12 号 Times New Roman；正文 ≤ 25 页；图注在下、表注在上；图形图表无中文。")
 bullet(doc, "本问务必显式回应题面四处点名：近似/数值方法适用性论证、结果验证（MC）、三误差源相对贡献比较、部署启示。")
