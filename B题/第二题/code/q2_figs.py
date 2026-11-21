@@ -27,10 +27,19 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from q2_lib import (BUILDINGS, TARGETS, TARGET_H, VEHICLES, R_MIN_GEO,
                     FIELD, O_POS)
 
+import scienceplots  # noqa: F401  (SciencePlots: science/ieee/grid)
+
+plt.style.use(["science", "ieee", "no-latex", "grid"])
 matplotlib.rcParams["svg.fonttype"] = "none"
 matplotlib.rcParams["font.family"] = "Times New Roman"
 matplotlib.rcParams["mathtext.fontset"] = "stix"
+matplotlib.rcParams["font.size"] = 10
 matplotlib.rcParams["axes.linewidth"] = 0.8
+matplotlib.rcParams["xtick.direction"] = "in"
+matplotlib.rcParams["ytick.direction"] = "in"
+matplotlib.rcParams["axes.grid"] = True
+matplotlib.rcParams["grid.alpha"] = 0.35
+matplotlib.rcParams["grid.linewidth"] = 0.5
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIG_DIR = os.path.join(BASE, "figures")
@@ -101,6 +110,7 @@ ax.plot(VEHICLES[:, 0], VEHICLES[:, 1], linestyle="none", marker="s", ms=6,
 ax.add_patch(Rectangle((0, 0), 100, 100, fill=False, ec="k", lw=1.2))
 ax.set_xlim(0, 100); ax.set_ylim(0, 100)
 ax.set_xticks(range(0, 101, 20)); ax.set_yticks(range(0, 101, 20))
+ax.grid(False)
 _clean(ax)
 save(fig, "fig1_region_reach")
 
@@ -135,6 +145,7 @@ for k, (m, lbl) in enumerate(stages):
     axs[k].set_title(f"{lbl}\n" + r"$\Delta A$ = "
                      f"{newly.sum() * cell_m2:.1f} m$^2$", fontsize=10)
     _clean(axs[k])
+    axs[k].grid(False)
     prev = m
 from matplotlib.lines import Line2D
 fig.legend(handles=[
@@ -198,6 +209,7 @@ ax.plot([V5[0]], [V5[1]], linestyle="none", marker="s", ms=8, mfc=VEH_COLORS[4],
 ax.set_xlim(x0v, x1v); ax.set_ylim(y0v, y1v)
 ax.set_xticks(range(-0, 35, 10)); ax.set_yticks(range(50, 91, 10))
 ax.set_aspect("equal")
+ax.grid(False)
 _clean(ax)
 save(fig, "fig3_optimal_pair_zoom")
 
@@ -388,6 +400,7 @@ ax.legend(handles=[
     Line2D([], [], color=COL_TGT, lw=0.8, ls="--", alpha=0.6,
            label="O-alert line")],
     loc="upper left", bbox_to_anchor=(1.02, 1.0), frameon=False, fontsize=8)
+ax.grid(False)
 _clean(ax)
 save(fig, "fig9_routes_map")
 

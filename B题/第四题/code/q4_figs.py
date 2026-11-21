@@ -14,10 +14,19 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import q4_lib4  # noqa: F401  (sets sys.path for 第二题/code)
 from q2_lib import BUILDINGS, TARGETS, VEHICLES, FIELD
 
+import scienceplots  # noqa: F401  (SciencePlots: science/ieee/grid)
+
+plt.style.use(["science", "ieee", "no-latex", "grid"])
 matplotlib.rcParams["svg.fonttype"] = "none"
 matplotlib.rcParams["font.family"] = "Times New Roman"
 matplotlib.rcParams["mathtext.fontset"] = "stix"
+matplotlib.rcParams["font.size"] = 10
 matplotlib.rcParams["axes.linewidth"] = 0.8
+matplotlib.rcParams["xtick.direction"] = "in"
+matplotlib.rcParams["ytick.direction"] = "in"
+matplotlib.rcParams["axes.grid"] = True
+matplotlib.rcParams["grid.alpha"] = 0.35
+matplotlib.rcParams["grid.linewidth"] = 0.5
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIG_DIR = os.path.join(BASE, "figures")
@@ -75,6 +84,7 @@ ax.set_ylim(0, 100)
 ax.set_xticks(range(0, 101, 20))
 ax.set_yticks(range(0, 101, 20))
 ax.set_aspect("equal")
+ax.grid(False)
 _clean(ax)
 save(fig, "fig1_map_new_alerts")
 

@@ -26,11 +26,17 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
+import scienceplots  # noqa: F401  (SciencePlots styles: science/ieee/grid)
+
 # ----------------------------- global settings ------------------------------
+plt.style.use(["science", "ieee", "no-latex", "grid"])
 matplotlib.rcParams["svg.fonttype"] = "none"      # digits stay editable text in PPT
 matplotlib.rcParams["font.family"] = "Times New Roman"
 matplotlib.rcParams["mathtext.fontset"] = "stix"
+matplotlib.rcParams["font.size"] = 10
 matplotlib.rcParams["axes.linewidth"] = 0.8
+matplotlib.rcParams["xtick.direction"] = "in"
+matplotlib.rcParams["ytick.direction"] = "in"
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo-relative
 FIG_DIR = os.path.join(BASE, "figures")
@@ -491,6 +497,7 @@ axm.add_patch(Rectangle((0, 0), 100, 100, fill=False, ec="k", lw=1.0))
 axm.set_xlim(x0v, x1v); axm.set_ylim(y0v, y1v)
 axm.set_xticks(range(70, 101, 10)); axm.set_yticks(range(55, 86, 10))
 axm.set_aspect("equal")
+axm.grid(False)
 _clean_axes(axm)
 
 # margin profile on the feasible arc, zoomed on the near-optimal lobe: a local

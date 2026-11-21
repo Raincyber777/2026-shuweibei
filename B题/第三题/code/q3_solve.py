@@ -24,10 +24,19 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-matplotlib.rcParams["svg.fonttype"] = "none"
+import scienceplots  # noqa: F401  (SciencePlots styles: science/ieee/grid)
+
+plt.style.use(["science", "ieee", "no-latex", "grid"])
+matplotlib.rcParams["svg.fonttype"] = "none"      # tick text stays editable in PPT
 matplotlib.rcParams["font.family"] = "Times New Roman"
 matplotlib.rcParams["mathtext.fontset"] = "stix"
+matplotlib.rcParams["font.size"] = 10
 matplotlib.rcParams["axes.linewidth"] = 0.8
+matplotlib.rcParams["axes.grid"] = True
+matplotlib.rcParams["grid.alpha"] = 0.35
+matplotlib.rcParams["grid.linewidth"] = 0.5
+matplotlib.rcParams["xtick.direction"] = "in"
+matplotlib.rcParams["ytick.direction"] = "in"
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo-relative
 FIG_DIR = os.path.join(BASE, "figures")
