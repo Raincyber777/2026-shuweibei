@@ -64,8 +64,10 @@ para(doc, f"Selecting the vehicle pair by C(5,2)=10 enumeration with two-stage L
           f"(95% circle radius {ch['ellipse95_radius_m']:.4f} m, area "
           f"{ch['ellipse95_area_m2']:.4f} m^2). A 200,000-sample Monte-Carlo experiment "
           f"gives RMSE {ch['MC']['rmse_m']:.4f} m and a 95th percentile of {ch['MC']['p95_m']:.4f} m, "
-          f"matching the closed form (sigma*sqrt(2) = {DRMS_S*np.sqrt(2):.4f} m and "
-          f"sigma*2.4477 = {ch['ellipse95_radius_m']:.4f} m).", indent=False)
+          f"matching the closed form (RMSE = sqrt(tr Sigma) = sigma_alpha(rad)*d*sqrt(2) "
+          f"= sqrt(2)*DRMS = {DRMS_S*np.sqrt(2):.4f} m, and the 95% radius = "
+          f"sqrt(5.991)*DRMS = {ch['ellipse95_radius_m']:.4f} m — both differ from "
+          f"the azimuth sigma by the geometric factor G = {RSTAR:.4f}).", indent=False)
 para(doc, "Degeneracy. As gamma -> 0 or 180 deg, G ~ 1/|sin gamma| -> infinity and the design matrix A "
           "becomes singular (kappa = 1/|sin gamma|); we therefore impose the operating window "
           "gamma in [30 deg, 150 deg] (G <= 2 G* for symmetric ranges), use a ridge-regularized "

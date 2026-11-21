@@ -186,7 +186,10 @@ ties by a three-level lexicographic rule:
       at phi = 56.50 deg where the B2-buffer distance equals the east-boundary
       distance.
   T2 (responsiveness)  within that band, choose the point with the shortest
-      travel time from the nearest standby vehicle.
+      travel time from the nearest standby vehicle. Reachability inside the
+      band is evaluated along obstacle-avoiding shortest paths; for the
+      finally selected station the straight path to V4 happens to be clear,
+      so the straight-line and detour times coincide (2.78 s).
   T3 (determinism)  if still tied, take the lexicographically smallest (x, y).
 The rule yields the unique station p* = (88.8753, 76.2895) m, whose own margin
 is 9.625 m (set by the east field boundary; 0.0001 m inside the band), with an
@@ -212,7 +215,7 @@ en = ("Two closed-form sensitivities follow immediately from r* = (H − h_cam)/
       "from 20 m to 45 m, saturating once h_B2 reaches the target altitude) and decreases near-linearly "
       f"with the vehicle radius ({sen['area_vs_vehicle_radius'][0][1]:.0f} → "
       f"{sen['area_vs_vehicle_radius'][-1][1]:.0f} m² as R_veh grows from 1.0 m to 2.5 m); over the "
-      "sampled ranges the B2 height moves the area about 4.5 times more in total, yet per unit of "
+      "sampled ranges the B2 height moves the area about 4.4 times more in total, yet per unit of "
       "parameter change the vehicle radius is the stronger lever (≈427 vs ≈115 m² per m). Areas are "
       "cell-center (midpoint) estimates: the h = 0.1 m and h = 0.05 m midpoints agree to "
       "~0.03–0.04%, while the node-count convention runs ~0.4% higher; the regional scans use a "

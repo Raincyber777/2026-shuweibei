@@ -261,6 +261,24 @@ ax.set_xlim(-6.0, 26.0); ax.set_ylim(60.0, 86.0)
 ax.set_xticks(range(-5, 26, 5)); ax.set_yticks(range(60, 87, 5))
 ax.set_aspect("equal")
 _clean(ax)
+# inset: zoom at T2' so the 0.10-0.25 m circles are actually visible
+axi = ax.inset_axes([0.60, 0.60, 0.37, 0.37])
+for k, col, ls in ((1, COL_VEH, "-"), (2, COL_VEH, "--"),
+                   (2.4477, COL_TGT, "-")):
+    axi.add_patch(Circle(T2P, s_iso * k, fill=False, ec=col, lw=1.8, ls=ls))
+axi.plot([T2P[0] - dir1[0] * 1.4, T2P[0] + dir1[0] * 1.4],
+         [T2P[1] - dir1[1] * 1.4, T2P[1] + dir1[1] * 1.4],
+         color=COL_EDGE, lw=0.8, ls=":")
+axi.plot([T2P[0] - dir2[0] * 1.4, T2P[0] + dir2[0] * 1.4],
+         [T2P[1] - dir2[1] * 1.4, T2P[1] + dir2[1] * 1.4],
+         color=COL_EDGE, lw=0.8, ls=":")
+axi.plot(T2P[0], T2P[1], marker="*", ms=12, color=COL_TGT)
+axi.set_xlim(T2P[0] - 1.2, T2P[0] + 1.2)
+axi.set_ylim(T2P[1] - 1.2, T2P[1] + 1.2)
+axi.set_xticks([10, 11, 12])
+axi.set_yticks([72, 72.5, 73])
+axi.tick_params(labelsize=7)
+ax.indicate_inset_zoom(axi, edgecolor="k", alpha=0.8)
 save(fig, "fig6_error_ellipses")
 
 # --- fig7/fig8: Gantt charts --------------------------------------------------
