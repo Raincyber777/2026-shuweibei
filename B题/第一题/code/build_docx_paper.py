@@ -78,7 +78,7 @@ table(doc, ["Item", "Value"], [
 spacer(doc)
 
 # ============ III ============
-h1(doc, "III. 可直接粘贴的段落（3.3–3.7 中英对照；3.1/3.2/3.5 仅英文+中文备注）")
+h1(doc, "III. 可直接粘贴的段落（3.3/3.4/3.6/3.7 中英对照；3.1/3.2/3.5 仅英文+中文备注）")
 para(doc, "【使用说明】3.3/3.4/3.6/3.7 每节先给可整段粘贴的英文（en 段落），随后附中文稿供核对内容与数字；"
           "3.1/3.2/3.5 仅英文段落 + 中文使用备注。粘贴后请统一用 Word 公式编辑器重录公式并编号。", indent=False)
 
@@ -120,6 +120,9 @@ en = ("Let p = (x, y) denote the station center. The observable region is define
       "prism Bᵢ = [x₀, x₁] × [y₀, y₁] × [0, hᵢ], tested with the 3-D slab (interval-clipping) method, "
       "where tangency counts as occlusion. The optimization criterion is stated explicitly as")
 para(doc, en, indent=False)
+code_block(doc, """        p*  =  argmax  Q(p) = 1 / r(p)   subject to  p in Omega
+            =  argmin  r(p)            subject to  p in Omega ,
+which is well posed because Q is strictly decreasing in r.""")
 # 中文对照稿
 para(doc, "令 p = (x, y) 为观测站圆心，即车辆等效圆盘中心在地面上的投影。"
           "可观测区域定义为三个约束的交集 Ω = C1 ∩ C2 ∩ C3。", indent=False)
@@ -135,10 +138,8 @@ para(doc, "C3（视线遮挡）：视线为三维线段 L: (x, y, 2) → (84.641
           "按题面规定，触碰、相切或穿过边、面、顶点一律视为遮挡，数值实现保留 10⁻⁹ 容差。", indent=False)
 para(doc, "优化准则：在 Ω 上最大化观测质量 Q(p) = 1 / r(p)。由于 Q 关于 r 严格单调递减，"
           "p* = argmax_{p∈Ω} Q(p) = argmin_{p∈Ω} r(p)，即在所有可行站点中取离目标水平投影最近者。"
-          "该等价性把连续优化问题转化为对 r = r_min 圆弧的可行性判定，后文据此证明全局最优性。", indent=False)
-code_block(doc, """        p*  =  argmax  Q(p) = 1 / r(p)   subject to  p in Omega
-            =  argmin  r(p)            subject to  p in Omega ,
-which is well posed because Q is strictly decreasing in r.""")
+          "该等价性把连续优化问题转化为对 r = r_min 圆弧的可行性判定，后文据此证明全局最优性。"
+          "（公式块见本节开头的英文段之后。）", indent=False)
 para(doc, "【中文备注】题面明确要求“Explicitly state the mathematical optimization criterion”，"
           "这个 argmax = argmin 的表述就是答案，务必出现在论文里。")
 

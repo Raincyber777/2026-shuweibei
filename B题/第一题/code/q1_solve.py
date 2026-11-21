@@ -203,23 +203,6 @@ m_star_phi = float(phi_deg[k_star])
 m_star_point = (float(ax_[k_star]), float(ay_[k_star]))
 band = margins >= m_star - 0.05          # tolerance band for tie-break step 1
 
-# tie-break step 2: shortest travel time from the nearest standby vehicle
-dist_v = np.hypot(ax_[:, None] - VEHICLES[None, :, 0],
-                  ay_[:, None] - VEHICLES[None, :, 1])
-travel_t = dist_v.min(axis=1) / SPEED
-cand = np.where(band, travel_t, np.inf)
-best = np.unravel_index(np.argmin(cand), cand.shape)[0]
-# tie-break step 3: lexicographic (deterministic) -- already unique in practice
-opt_phi = float(phi_deg[best])
-opt_x = float(ax_[best])
-opt_y = float(ay_[best])
-opt_margin = float(margins[best])
-opt_r = float(np.hypot(opt_x - T1[0], opt_y - T1[1]))
-opt_elev = float(np.degrees(np.arctan((H1 - H_CAM) / opt_r)))
-opt_ttime = float(travel_t[best])
-near_v = int(np.argmin(dist_v[best])) + 1
-
-
 # ----------------------------- 3b) obstacle-aware travel times --------------
 # Vehicles cannot cross buildings; the straight line is only a LOWER bound.
 # Shortest feasible path = visibility graph over the 1.5 m inflated building
@@ -272,6 +255,42 @@ def path_length(p, q):
         for j in range(n):
             dist[j] = min(dist[j], dist[k] + adj[k][j])
     return float(dist[1]), False
+
+
+# tie-break step 2: shortest travel time from the nearest standby vehicle.
+# Ranking inside the band uses the obstacle-aware path time (straight time is
+# only a lower bound when the direct segment crosses a building): candidates
+# are visited in straight-LB order and the exact path time is computed until
+# the LB exceeds the incumbent, which makes the minimum exact.
+dist_v = np.hypot(ax_[:, None] - VEHICLES[None, :, 0],
+                  ay_[:, None] - VEHICLES[None, :, 1])
+travel_t = dist_v.min(axis=1) / SPEED
+cand = np.where(band, travel_t, np.inf)
+band_sorted = np.flatnonzero(band)[np.argsort(cand[band])]
+tt_best, best, veh_best = np.inf, None, None
+for i in band_sorted:
+    if cand[i] >= tt_best:
+        break                       # LB already >= incumbent -> exact minimum
+    tt_v = [path_length((VEHICLES[j, 0], VEHICLES[j, 1]),
+                        (ax_[i], ay_[i]))[0] / SPEED for j in range(5)]
+    k = int(np.argmin(tt_v))
+    if tt_v[k] < tt_best:
+        tt_best, best, veh_best = tt_v[k], i, k
+if best is None:                    # defensive fallback (never expected)
+    best = np.unravel_index(np.argmin(cand), cand.shape)[0]
+# tie-break step 3: lexicographic (deterministic) -- already unique in practice
+opt_phi = float(phi_deg[best])
+opt_x = float(ax_[best])
+opt_y = float(ay_[best])
+opt_margin = float(margins[best])
+opt_r = float(np.hypot(opt_x - T1[0], opt_y - T1[1]))
+opt_elev = float(np.degrees(np.arctan((H1 - H_CAM) / opt_r)))
+opt_ttime = float(tt_best) if tt_best < np.inf else float(travel_t[best])
+near_v = (veh_best + 1) if veh_best is not None \
+    else int(np.argmin(dist_v[best])) + 1
+
+
+# ----------------------------- 3c) clearance of the chosen station -----------
 
 
 def seg_box_dist(x0, y0, building, n=4000):

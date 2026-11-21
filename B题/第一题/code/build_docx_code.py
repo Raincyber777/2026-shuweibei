@@ -50,7 +50,8 @@ table(doc, ["模块/函数", "职责", "对应建模文档章节"], [
     ["constraint_masks(X, Y, …)", "一次性返回 C1、C2、C3 三个布尔掩码与 r 场", "IV 4.5"],
     ["make_grid(step, center)", "场域等距网格；center=True 生成单元中心网格（面积估计用）", "V 5.4"],
     ["bool_runs(flag)", "周期布尔序列的连续 True 游程（处理 0°/360° 环绕）", "V 5.2"],
-    ["margins / band / best", "tie-breaking 三级规则：最大裕度 → 0.05 m 带内最短可达 → 字典序", "V 5.3"],
+    ["margins / band / best", "tie-breaking 三级规则：最大裕度 → 0.05 m 带内绕障最短可达 → 字典序", "V 5.3"],
+    ["path_length / _seg_hits_rect", "带内排序与各车行驶时间均用绕障最短路径（可视图+Dijkstra）", "V 5.3 / 行驶时间"],
     ["seg_box_dist(x0, y0, building)", "视线线段到建筑长方体的最小距离（密集采样），报告 LOS 净空", "V 5.4"],
     ["path_length(p, q) / _seg_hits_rect", "绕障最短路径（1.5 m 膨胀矩形的可视图 + Dijkstra）；"
      "直线净空时返回直线长度，并给出路径是否受阻标志", "V 5.4 / 行驶时间"],
@@ -82,7 +83,8 @@ h2(doc, "3.4 tie-breaking 实现")
 para(doc, f"对圆弧每点计算几何安全裕度 m(p) = min(各建筑 d(p,Bᵢ) − 1.5, 到内缩场界的距离)，"
           f"弧上真实最大值 m* = {arc['m_star_margin_m']:.4f} m（φ = {arc['m_star_phi_deg']:.2f}°，"
           "该点 B2 缓冲距离与东场界距离恰好平衡）；随后在 m ≥ m* − 0.05 m 的并列带内比较 5 辆车的"
-          f"行驶时间取最短，得最终站点 p*（其自身裕度 {opt['margin_m']:.4f} m，来源为东侧场界，"
+          "绕障行驶时间取最短（带内候选按直线时间升序访问、逐点算绕障时间，直线时间作下界剪枝，"
+          f"故最小值为精确解），得最终站点 p*（其自身裕度 {opt['margin_m']:.4f} m，来源为东侧场界，"
           "以 0.0001 m 余量入带）；若仍并列按 (x, y) 字典序兜底（本例未触发）。"
           "JSON 同时存储 m*（arc.m_star_margin_m）与所选站裕度（optimal_station.margin_m），勿混淆。", indent=False)
 h2(doc, "3.5 敏感性批量计算")
