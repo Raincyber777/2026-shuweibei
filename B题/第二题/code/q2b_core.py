@@ -573,7 +573,7 @@ print("heuristic:", h_assignment, "orders", h_orders, "obj", h_obj)
 # ------------------------------------------------- 6) optimized scheme detail
 obj, assignment, orders, stations, starts = best_scheme
 detail = {"objective_s": obj, "LB_s": LB_global, "certified_optimal":
-          bool(abs(obj - LB_global) < 1e-6), "assignment": {a: list(assignment[a]) for a in ALERT_KEYS},
+          bool(abs(obj - LB_global) < 1e-6), "assignment": {a: [v + 1 for v in assignment[a]] for a in ALERT_KEYS},  # 1-based
           "orders": {f"V{v+1}": orders.get(v, []) for v in range(5)},
           "stations": {f"V{v+1}": {a: list(stations[(v, a)]) for a in orders.get(v, [])}
                        for v in range(5)},
@@ -636,7 +636,7 @@ results = {
     "optimized": detail,
     "top5_structures": top5,
     "heuristic": {
-        "assignment": {a: list(h_assignment[a]) for a in ALERT_KEYS},
+        "assignment": {a: [v + 1 for v in h_assignment[a]] for a in ALERT_KEYS},  # 1-based
         "orders": {f"V{v+1}": h_orders.get(v, []) for v in range(5)},
         "stations": {f"V{v+1}": {a: list(h_stations[(v, a)]) for a in h_orders.get(v, [])}
                      for v in range(5)},

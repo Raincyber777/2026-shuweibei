@@ -27,16 +27,16 @@ heuristic: {'T1': (2, 4), 'T2': (0, 2), 'T3': (0, 4)} orders {0: ['T2', 'T3'], 1
  "certified_optimal": false,
  "assignment": {
   "T1": [
-   2,
-   4
+   3,
+   5
   ],
   "T2": [
-   0,
-   3
+   1,
+   4
   ],
   "T3": [
-   1,
-   2
+   2,
+   3
   ]
  },
  "orders": {
@@ -108,7 +108,7 @@ r(v,a) earliest-ready table (s): rows V1..V5 x cols T1,T2,T3
  [ 1.532  5.075  2.766]]
 per-alert LB = {'T1': np.float64(1.532), 'T2': np.float64(3.414), 'T3': np.float64(2.766)}  global LB = 3.414 s
 OPTIMIZED: obj = 10.355 s (certified optimal: False)
-  assignment: {'T1': [2, 4], 'T2': [0, 3], 'T3': [1, 2]}
+  assignment: {'T1': [3, 5], 'T2': [1, 4], 'T3': [2, 3]}
   orders: {'V1': ['T2'], 'V2': ['T3'], 'V3': ['T1', 'T3'], 'V4': ['T2'], 'V5': ['T1']}
   alert starts: T1: 1.607 s, T2: 6.994 s, T3: 10.355 s
 HEURISTIC (nearest-assignment): obj = 20.968 s

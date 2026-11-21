@@ -58,7 +58,8 @@ for it in issues[:10]:
     print("  ", it)
 
 # ---------------- shared machinery -------------------------------------------
-BASE_ASG = {a: tuple(v) for a, v in Q2["optimized"]["assignment"].items()}
+BASE_ASG = {a: tuple(vv - 1 for vv in v)          # q2b JSON is 1-based
+                    for a, v in Q2["optimized"]["assignment"].items()}
 BASE_ORDERS = {int(k[1:]) - 1: v for k, v in Q2["optimized"]["orders"].items()}
 BASE_ST = {(int(k[1:]) - 1, a): tuple(p)
            for k, d in Q2["optimized"]["stations"].items() for a, p in d.items()}

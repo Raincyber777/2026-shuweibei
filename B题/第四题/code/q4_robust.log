@@ -1,7 +1,7 @@
 audit: 74 scenarios, 0 issues
 margin failV4: m00 eta=1.00 tlast=11.17 minclr=4.7596 | m05 eta=1.00 tlast=11.17 minclr=4.7596 repaired=0 (2s)
-margin new_th135_R30: m00 eta=1.00 tlast=15.87 minclr=0.0669 | m05 eta=1.00 tlast=15.87 minclr=0.5145 repaired=1 (18s)
-margin triple_th135_R30: m00 eta=1.00 tlast=25.01 minclr=0.0013 | m05 eta=1.00 tlast=25.01 minclr=0.0013 repaired=1 (7s)
+margin new_th135_R30: m00 eta=1.00 tlast=15.87 minclr=0.0669 | m05 eta=1.00 tlast=15.87 minclr=0.5145 repaired=1 (19s)
+margin triple_th135_R30: m00 eta=1.00 tlast=25.01 minclr=0.0013 | m05 eta=1.00 tlast=25.01 minclr=0.0013 repaired=1 (8s)
 eps 0.02: eta=1.00 tlast=11.17
 eps 0.05: eta=1.00 tlast=11.17
 eps 0.1: eta=1.00 tlast=11.17

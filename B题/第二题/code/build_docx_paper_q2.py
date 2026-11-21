@@ -132,8 +132,8 @@ def chain_en(op):
     return "; ".join(parts)
 
 
-para(doc, f"The optimized scheme assigns T1 <- (V{oa['T1'][0]+1}, V{oa['T1'][1]+1}), "
-          f"T2 <- (V{oa['T2'][0]+1}, V{oa['T2'][1]+1}), T3 <- (V{oa['T3'][0]+1}, V{oa['T3'][1]+1}); "
+para(doc, f"The optimized scheme assigns T1 <- (V{oa['T1'][0]}, V{oa['T1'][1]}), "
+          f"T2 <- (V{oa['T2'][0]}, V{oa['T2'][1]}), T3 <- (V{oa['T3'][0]}, V{oa['T3'][1]}); "
           f"the reuse chain is {chain_en(op)}. Observation starts are "
           f"T1 = {starts['T1']:.2f} s, T2 = {starts['T2']:.2f} s, "
           f"T3 = {starts['T3']:.2f} s, so the maximum is {op['objective_s']:.2f} s "
