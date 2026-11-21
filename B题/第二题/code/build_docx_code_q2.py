@@ -11,6 +11,8 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "第二题_编程文档.docx")
 RA = load_results("q2a_results.json")
 RB = load_results("q2b_results.json")
+ch = RA["chosen"]
+RSTAR = RA["r_min_geo_m"]
 
 doc = new_doc()
 title(doc, "第二题编程文档（实现结构与运行手册）",
@@ -51,7 +53,8 @@ para(doc, "每车维护 (chain_ready, chain_pos)；每轮逐车沿任务链推�
           "但链推进需同伴就绪已知；一轮无链推进且仍有告警未定 → 循环依赖（互等死锁）→ 该 (指派,顺序) 不可行。"
           "收敛后目标 = max(三告警开始时刻)。")
 h2(doc, "II.5 2(2) 的枚举 + 精修")
-para(doc, "1000 组合按乐观界 est=max_a(两成员 r) 升序排列，est ≥ 当前最优即剪枝断言（本例最优 10.83 s，est 上界 10.2 s，"
+para(doc, f"1000 组合按乐观界 est=max_a(两成员 r) 升序排列，est ≥ 当前最优即剪枝断言（本例最优 "
+          f"{RB['optimized']['objective_s']:.2f} s，est 上界 10.2 s，"
           "故全部评估）；每组合贪心初始化 + 双任务车 (p₁×p₂) 候选坐标下降；对最优 12 个结构做全局目标 NM 精修（所有站点、"
           "严格可行性罚函数），二级 tie-breaking 取告警开始时刻之和最小者唯一化。")
 h2(doc, "II.6 蒙特卡洛与核验")
@@ -95,9 +98,14 @@ rows = [
     ["第二题_图集.pptx", "10 页，SVG 矢量可转形状手改，英文图注在备注页"],
 ]
 table(doc, ["输出", "内容"], rows)
-para(doc, "摘要级结论：2(1) 选 V3+V5，站 (5.2787,73.3912)/(11.9201,78.2501)，d₁=d₂=5.8188 m，γ=90°，B=8.229 m，"
-          "DRMS=0.1016 m（95% 圆 0.2486 m），行驶 (5.11,13.61) s；2(2) 优化目标 10.830 s"
-          "（T1 1.532 / T2 6.994 / T3 10.830），基线 30.207 s，改进 19.38 s。")
+op2 = RB["optimized"]
+para(doc, f"摘要级结论：2(1) 选 {ch['vehicles']}，站 ({ch['stations'][0][0]:.4f},{ch['stations'][0][1]:.4f})/"
+          f"({ch['stations'][1][0]:.4f},{ch['stations'][1][1]:.4f})，d₁=d₂={RSTAR:.4f} m，γ=90°，"
+          f"B={ch['baseline_m']:.3f} m，DRMS={ch['DRMS_m']:.4f} m（95% 圆 {ch['ellipse95_radius_m']:.4f} m），"
+          f"行驶 ({ch['travel_s'][0]:.2f},{ch['travel_s'][1]:.2f}) s；2(2) 优化目标 {op2['objective_s']:.3f} s"
+          f"（T1 {op2['alert_starts']['T1']:.3f} / T2 {op2['alert_starts']['T2']:.3f} / "
+          f"T3 {op2['alert_starts']['T3']:.3f}），基线 {RB['heuristic']['objective_s']:.3f} s，"
+          f"改进 {RB['comparison']['gap_s']:.2f} s。")
 
 doc.save(OUT)
 print("saved", OUT)

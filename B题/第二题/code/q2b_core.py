@@ -155,16 +155,17 @@ def simulate(assignment, orders, stations):
     alert_start = {}
     chain_ready = {v: 0.0 for v in range(5)}
     chain_pos = {v: tuple(VEHICLES[v]) for v in range(5)}
-    pending = {a for v in range(5) for a in orders.get(v, [])}
+    done = {v: 0 for v in range(5)}
+    total = sum(len(orders.get(v, [])) for v in range(5))
     rounds = 0
-    while pending and rounds < 12:
+    while sum(done.values()) < total and rounds < 12:
         rounds += 1
         progress = False
         for v in range(5):
             t_free = chain_ready[v]
             pos = chain_pos[v]
             walked = []
-            for a in orders.get(v, []):
+            for a in orders.get(v, [])[done[v]:]:
                 st = stations.get((v, a))
                 if st is None:
                     return (np.inf, None, None, False)
@@ -182,13 +183,13 @@ def simulate(assignment, orders, stations):
                 pos = st
                 walked.append(a)
             if walked:
+                done[v] += len(walked)
                 chain_ready[v] = t_free
                 chain_pos[v] = pos
-                pending -= set(walked)
                 progress = True
         if not progress:
             return (np.inf, None, None, False)      # deadlock
-    if pending or len(alert_start) < 3:
+    if sum(done.values()) < total or len(alert_start) < 3:
         return (np.inf, None, None, False)
     obj = max(alert_start.values())
     return (obj, alert_start, ready, True)

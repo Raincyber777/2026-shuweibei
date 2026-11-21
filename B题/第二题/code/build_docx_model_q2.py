@@ -18,6 +18,50 @@ DRMS_S = RA["certificate"]["DRMS_star_m"]
 RSTAR = RA["r_min_geo_m"]
 REACH_DESC = "B(Vᵢ, 90 m)（30 s 绕障可达域，路径时间 ≤ 30 s）"
 
+
+def chain_facts(op):
+    """Data-driven description of the reuse chain(s) from Gantt segments."""
+    orders = op["orders"]
+    segs = RB["gantt_opt"]
+    out = []
+    for v, tasks in sorted(orders.items()):
+        if len(tasks) < 2:
+            continue
+        ss = segs[v]
+        obs = [s for s in ss if s[0] == "obs"]
+        facts = {"v": int(v[1:]) - 1, "tasks": tasks, "obs": obs, "legs": []}
+        # legs between consecutive observations: reset -> travel -> slew
+        cur = {"reset": None, "travel": 0.0, "slew": None}
+        for s in ss:
+            if s[0] == "obs":
+                if cur["reset"] is not None:
+                    facts["legs"].append(dict(cur))
+                cur = {"reset": None, "travel": 0.0, "slew": None}
+            elif s[0] == "reset" and cur["reset"] is None:
+                cur["reset"] = float(s[2]) - float(s[1])
+            elif s[0] == "travel" and cur["reset"] is not None:
+                cur["travel"] += float(s[2]) - float(s[1])
+            elif s[0] == "slew" and cur["reset"] is not None:
+                cur["slew"] = float(s[2]) - float(s[1])
+        out.append(facts)
+    return out
+
+
+def chain_zh(facts):
+    parts = []
+    for f in facts:
+        legs = "；".join(
+            f"复位 {g['reset']:.2f} s，行驶 {g['travel']:.2f} s，转云台 "
+            f"{g['slew']:.2f} s" for g in f["legs"])
+        parts.append(f"V{f['v']+1} 依次执行 {'→'.join(f['tasks'])}"
+                     f"（{'；'.join('观测 [{:.2f}, {:.2f}]'.format(o[1], o[2]) for o in f['obs'])}；{legs}）")
+    return "；".join(parts)
+
+
+CH = chain_facts(RB["optimized"])
+OP = RB["optimized"]
+HP = RB["heuristic"]
+
 doc = new_doc()
 title(doc, "第二题（双站交会定位与多目标车辆复用调度）建模文档",
       "2026 第十二届数维杯秋季赛 B 题 · Problem 2(1) & 2(2) · 2026-11-20")
@@ -105,9 +149,9 @@ para(doc, "单车任务的就绪时刻 = 前站出发时刻 + 行驶 + 转云台
           "完成位置与时刻，而第一任务的观测开始又取决于同伴——形成链式耦合。处理：贪心初始化 + 高斯-赛德尔坐标下降"
           "（双任务车在候选集上做 p₁×p₂ 枚举）+ 对最优结构的全部站点做全局目标下的 Nelder-Mead 连续精修（严格可行性罚函数）。")
 h2(doc, "III.4 下界与死锁判定")
-para(doc, "下界证书：r(v,a)=min_p[|V_v−p|/3 + max(|α|,ε)/30] 为车辆 v 对告警 a 的最早可就绪时刻；告警 a 需两辆互异车，"
-          "故 start(a) ≥ r(v,a) 的次小值，全局 LB = max_a 次小值 = 3.414 s（T2 列）。该界不计复用延迟，故偏松；"
-          "在全部 1000 结构 × 站点精修意义下搜索到的最优为 10.830 s（见 IV）。")
+para(doc, f"下界证书：r(v,a)=min_p[|V_v−p|/3 + max(|α|,ε)/30] 为车辆 v 对告警 a 的最早可就绪时刻；告警 a 需两辆互异车，"
+          f"故 start(a) ≥ r(v,a) 的次小值，全局 LB = max_a 次小值 = {RB['LB']['global']:.3f} s（T2 列）。该界不计复用延迟，故偏松；"
+          f"在全部 1000 结构 × 站点精修意义下搜索到的最优为 {RB['optimized']['objective_s']:.3f} s（见 IV）。")
 para(doc, "死锁判定：若两辆复用车互相等待对方先完成的告警（如 v₁ 先 T2 后 T1、v₂ 先 T1 后 T2），链条形成循环依赖，"
           "物理上互等、无合法时刻表；仿真器以定点迭代检测，无进展即判该结构不可行并剔除。")
 h2(doc, "III.5 最近指派启发式基线（题面点名，独立定义）")
@@ -138,7 +182,7 @@ table(doc, ["告警", "优化方案 (s)", "最近指派基线 (s)"], rows)
 oa = op["assignment"]
 ha = hp["assignment"]
 para(doc, f"优化指派：T1←({oa['T1'][0]+1},{oa['T1'][1]+1})，T2←({oa['T2'][0]+1},{oa['T2'][1]+1})，"
-          f"T3←({oa['T3'][0]+1},{oa['T3'][1]+1})；V5 复用链 T1→T3（同站不移动，复位后原地转云台）。"
+          f"T3←({oa['T3'][0]+1},{oa['T3'][1]+1})；复用链：{chain_zh(CH)}。"
           f"基线指派：T1←({ha['T1'][0]+1},{ha['T1'][1]+1})，T2←({ha['T2'][0]+1},{ha['T2'][1]+1})，"
           f"T3←({ha['T3'][0]+1},{ha['T3'][1]+1})，V1、V3 双任务。目标差距 "
           f"{RB['comparison']['gap_s']:.2f} s（基线劣化 "
@@ -148,12 +192,17 @@ bullet(doc, "同步配对损失：基线把“最近”的两辆车配给同一�
             "而真正受限的 T2 反而由更慢的组合覆盖。优化方案把 V4（pan 转角 176.7° 导致就绪 6.99 s）配给 T2 时，"
             "让 V1 只承担 3.13 s 即就绪的一侧，避免双慢配对。")
 bullet(doc, "复用链次序效应：基线让 V1 先 T2 后 T3、V3 先 T1 后 T2，两条链把慢任务串在快告警之后，阻塞了 T3 的早期窗口；"
-            "优化方案仅 V5 一车复用且 T1→T3 同站零行驶（转 1.53 s 复位 + 2.77 s 转云台即就绪），链代价最小。")
+            f"优化方案仅 {'、'.join('V%d' % (f['v']+1) for f in CH)} 一车复用，"
+            f"链内复位+转位+转云台合计 "
+            f"{sum(g['reset']+g['travel']+g['slew'] for f in CH for g in f['legs']):.2f} s，链代价最小。")
 bullet(doc, "方位角驱动的站点选择：就绪时刻对 pan 转角高度敏感（30°/s），基线以行驶距离选站而忽略转角；"
             "优化模型的就绪时刻最小化天然偏向“小转角、近原位”的站。")
 h2(doc, "IV.4 并列最优与 tie-breaking")
-para(doc, "结构枚举+精修后有 3 个结构并列达到 10.830 s（对应 T2 由 (V1,V4)、(V1,V2)、(V2,V4) 承担的变体），"
-          "二级 tie-breaking 取三告警开始时刻之和最小者（19.36 s），唯一确定最终方案。")
+top5 = RB["top5_structures"]
+n_tie = sum(1 for t in top5 if abs(t["obj_s"] - top5[0]["obj_s"]) < 1e-6)
+para(doc, f"结构枚举+精修后有 {n_tie} 个结构并列达到最优 {top5[0]['obj_s']:.3f} s"
+          f"（对应 T2 由 {'、'.join('(%d,%d)' % (t['assignment']['T2'][0], t['assignment']['T2'][1]) for t in top5[:n_tie])} 承担的变体），"
+          f"二级 tie-breaking 取三告警开始时刻之和最小者（{top5[0]['sum_starts_s']:.2f} s），唯一确定最终方案。")
 
 # ============================ V ============================
 h1(doc, "V. 模型检验与敏感性")
@@ -163,8 +212,12 @@ para(doc, f"在最优双站下注入 N(0,1°) 方位角误差 {mc['n']//10000} �
           f"RMSE={mc['rmse_m']:.4f} m（解析 σ·√2={DRMS_S*np.sqrt(2):.4f}），"
           f"P95={mc['p95_m']:.4f} m（解析 {ch['ellipse95_radius_m']:.4f}）——闭式传播模型成立。")
 h2(doc, "V.2 逐项核验（2(2)）")
-para(doc, "r(v,a) 表与手算一致；甘特图各环节时长与“行驶/转云台/同步等待/5 s/复位”逐项吻合；三告警开始时刻与链式推演一致"
-          "（V5 链：就绪 1.53 → 观测 [1.53,6.53] → 复位至 8.06 → 同站转云台 2.77 → 就绪 10.83）。")
+chain0 = CH[0]
+g0 = chain0["legs"][0]
+para(doc, f"r(v,a) 表与手算一致；甘特图各环节时长与“行驶/转云台/同步等待/5 s/复位”逐项吻合；三告警开始时刻与链式推演一致"
+          f"（复用链：就绪 {chain0['obs'][0][1]:.2f} → 观测 [{chain0['obs'][0][1]:.2f},{chain0['obs'][0][2]:.2f}] → "
+          f"复位至 {chain0['obs'][0][2]+g0['reset']:.2f} → 行驶 {g0['travel']:.2f} s → 转云台 {g0['slew']:.2f} s → "
+          f"就绪 {chain0['obs'][1][1]:.2f}）。")
 h2(doc, "V.3 敏感性（参数扰动重仿真）")
 sens = RB["sensitivity_speed_omega"]
 rows = []

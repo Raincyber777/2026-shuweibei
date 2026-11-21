@@ -6,14 +6,14 @@ r(v,a) earliest-ready table (s): rows V1..V5 x cols T1,T2,T3
  [ 5.077  6.892  3.908]
  [ 1.532  5.075  2.766]]
 per-alert LB = {'T1': np.float64(1.532), 'T2': np.float64(3.414), 'T3': np.float64(2.766)}  global LB = 3.414 s
-OPTIMIZED: obj = 10.830 s (certified optimal: False)
-  assignment: {'T1': [2, 4], 'T2': [0, 3], 'T3': [1, 4]}
-  orders: {'V1': ['T2'], 'V2': ['T3'], 'V3': ['T1'], 'V4': ['T2'], 'V5': ['T1', 'T3']}
-  alert starts: T1: 1.532 s, T2: 6.994 s, T3: 10.830 s
-HEURISTIC (nearest-assignment): obj = 30.207 s
+OPTIMIZED: obj = 10.355 s (certified optimal: False)
+  assignment: {'T1': [2, 4], 'T2': [0, 3], 'T3': [1, 2]}
+  orders: {'V1': ['T2'], 'V2': ['T3'], 'V3': ['T1', 'T3'], 'V4': ['T2'], 'V5': ['T1']}
+  alert starts: T1: 1.607 s, T2: 6.994 s, T3: 10.355 s
+HEURISTIC (nearest-assignment): obj = 20.968 s
   assignment: {'T1': (2, 4), 'T2': (0, 2), 'T3': (0, 4)}
   orders: {0: ['T2', 'T3'], 1: [], 2: ['T1', 'T2'], 3: [], 4: ['T1', 'T3']}
-  alert starts: T1: 20.674 s, T2: 30.207 s, T3: 30.035 s
-GAP = 19.378 s
+  alert starts: T1: 1.607 s, T2: 11.140 s, T3: 20.968 s
+GAP = 10.613 s
 sensitivity (speed, omega) -> obj:
-[(2.5, 24.0, 12.29), (2.5, 30.0, 10.83), (2.5, 36.0, 9.86), (3.0, 24.0, 12.29), (3.0, 30.0, 10.83), (3.0, 36.0, 9.86), (3.5, 24.0, 12.29), (3.5, 30.0, 10.83), (3.5, 36.0, 9.86)]
+[(2.5, 24.0, 11.5), (2.5, 30.0, 10.35), (2.5, 36.0, 9.68), (3.0, 24.0, 11.5), (3.0, 30.0, 10.35), (3.0, 36.0, 9.68), (3.5, 24.0, 11.5), (3.5, 30.0, 10.35), (3.5, 36.0, 9.68)]

@@ -99,10 +99,40 @@ op = RB["optimized"]
 hp2 = RB["heuristic"]
 starts = op["alert_starts"]
 oa = op["assignment"]
+
+
+def chain_en(op):
+    orders = op["orders"]
+    segs = RB["gantt_opt"]
+    parts = []
+    for v, tasks in sorted(orders.items()):
+        if len(tasks) < 2:
+            continue
+        vi = int(v[1:]) - 1
+        ss = segs[v]
+        obs_idx = [i for i, s in enumerate(ss) if s[0] == "obs"]
+        obs = [ss[i] for i in obs_idx]
+        legs = []
+        for k in range(len(obs_idx) - 1):
+            between = ss[obs_idx[k] + 1: obs_idx[k + 1]]
+            reset = next((float(s[2]) - float(s[1]) for s in between
+                          if s[0] == "reset"), 0.0)
+            travel = sum(float(s[2]) - float(s[1]) for s in between
+                         if s[0] == "travel")
+            slew = next((float(s[2]) - float(s[1]) for s in between
+                         if s[0] == "slew"), 0.0)
+            legs.append((reset, travel, slew))
+        legtxt = "; ".join(f"{r:.2f} s reset, {t:.2f} s travel, "
+                           f"{s:.2f} s slew" for r, t, s in legs)
+        parts.append(f"V{vi+1} serves {' then '.join(tasks)} "
+                     f"(observation [{obs[0][1]:.2f}, {obs[0][2]:.2f}] s; "
+                     f"{legtxt})")
+    return "; ".join(parts)
+
+
 para(doc, f"The optimized scheme assigns T1 <- (V{oa['T1'][0]+1}, V{oa['T1'][1]+1}), "
           f"T2 <- (V{oa['T2'][0]+1}, V{oa['T2'][1]+1}), T3 <- (V{oa['T3'][0]+1}, V{oa['T3'][1]+1}); "
-          "vehicle V5 is reused for T1 then T3 from the same station (zero travel leg, 1.53 s reset "
-          "+ 2.77 s slew in place). Observation starts are "
+          f"the reuse chain is {chain_en(op)}. Observation starts are "
           f"T1 = {starts['T1']:.2f} s, T2 = {starts['T2']:.2f} s, "
           f"T3 = {starts['T3']:.2f} s, so the maximum is {op['objective_s']:.2f} s. The independently "
           "defined nearest-assignment heuristic - alerts processed in index order, each slot taken by "
@@ -116,7 +146,7 @@ para(doc, f"The optimized scheme assigns T1 <- (V{oa['T1'][0]+1}, V{oa['T1'][1]+
           "pairing loss - the heuristic pairs the two nearest vehicles with one alert while the "
           "alert start is governed by the slower partner; (ii) chain-order effects - it stacks a slow "
           "task after a fast one on the same vehicle and blocks the early window of T3, whereas the "
-          "optimized plan concentrates all reuse in a single zero-travel chain of V5; (iii) "
+          "optimized plan concentrates all reuse in a single short-travel chain; (iii) "
           "azimuth-blind station choice - ready times are pan-angle dominated (30 deg/s), so "
           "distance-nearest stations are not time-nearest.", indent=False)
 senB = {(s["speed"], s["omega_deg_s"]): s["obj_s"] for s in RB["sensitivity_speed_omega"]}
@@ -171,12 +201,15 @@ rv = RB["r_va_table"]
 rows2 = [[v] + [f"{rv[v][a]:.2f}" for a in ["T1", "T2", "T3"]] for v in ["V1", "V2", "V3", "V4", "V5"]]
 table(doc, ["Earliest-ready r(v,a) (s)", "T1", "T2", "T3"], rows2)
 
+op3 = RB["optimized"]
+hp3 = RB["heuristic"]
 rows3 = [
-    ["T1", "1.53", "20.67"],
-    ["T2", "6.99", "30.21"],
-    ["T3", "10.83", "30.04"],
-    ["Objective (max)", "10.83", "30.21"],
-    ["Improvement", "+19.38 s (+179%)", "-"],
+    ["T1", f"{op3['alert_starts']['T1']:.2f}", f"{hp3['alert_starts']['T1']:.2f}"],
+    ["T2", f"{op3['alert_starts']['T2']:.2f}", f"{hp3['alert_starts']['T2']:.2f}"],
+    ["T3", f"{op3['alert_starts']['T3']:.2f}", f"{hp3['alert_starts']['T3']:.2f}"],
+    ["Objective (max)", f"{op3['objective_s']:.2f}", f"{hp3['objective_s']:.2f}"],
+    ["Improvement", f"+{RB['comparison']['gap_s']:.2f} s "
+                    f"(+{(hp3['objective_s']/op3['objective_s']-1)*100:.0f}%)", "-"],
 ]
 table(doc, ["Alert / metric", "Optimized (s)", "Nearest baseline (s)"], rows3)
 
