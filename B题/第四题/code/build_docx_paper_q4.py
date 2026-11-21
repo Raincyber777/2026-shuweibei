@@ -82,7 +82,8 @@ blocks = (("new-alert", "scen_new"), ("single-failure", "scen_fail"),
           ("new x failure", "scen_new_fail"), ("new x outage", "scen_new_out"),
           ("triple", "scen_triple"))
 para(doc, "Across the scenario set the rescheduling policy never performs worse than "
-          "keep-original and strictly improves every structurally damaged case; "
+          "keep-original at the 0.01 s reporting precision and strictly improves every "
+          "structurally damaged case; "
           "keep-original retains eta = 1 only in scenarios without a new alert and "
           "without an impacted failure. Per block (rescheduling gains in eta / in "
           "t_last among equal-eta cases):", indent=False)
@@ -118,7 +119,9 @@ para(doc, "Rescheduling converts structural losses (an unassigned alert, an orph
           "the recovery delay (slew plus travel), and the communication blackout - "
           "during the outage no command can be issued, so a failure occurring at "
           "t = 5 s is only repaired at t_rec and t_last grows roughly linearly with "
-          "t_rec. Rescheduling never underperforms keep-original in our scenario set — "
+          "t_rec. Rescheduling never underperforms keep-original in our scenario set at "
+          "the 0.01 s reporting precision (the only deviation is a 2e-5 s numerical "
+          "artifact in the no-impact V5-failure case) — "
           "a property that relies on the re-optimization sharing the baseline's "
           "objective and on its constraint set containing the baseline plan "
           "(the baseline plan itself belongs to the searched feasible set), and the "
