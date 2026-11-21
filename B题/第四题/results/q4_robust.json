@@ -18,7 +18,7 @@
         "min_clearance_m": 4.7596,
         "repaired": 0
       },
-      "runtime_s": 2.4
+      "runtime_s": 2.0
     },
     {
       "case": "new_th135_R30",
@@ -34,7 +34,7 @@
         "min_clearance_m": 0.5145,
         "repaired": 1
       },
-      "runtime_s": 19.0
+      "runtime_s": 19.5
     },
     {
       "case": "triple_th135_R30",
@@ -50,7 +50,7 @@
         "min_clearance_m": 0.0013,
         "repaired": 1
       },
-      "runtime_s": 7.5
+      "runtime_s": 9.8
     }
   ],
   "eps_travel": [
