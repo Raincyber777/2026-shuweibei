@@ -124,7 +124,11 @@ A("|---|---|---|---|")
 A(f"| 4.2.5 | 优化开始时刻/目标 | {f(R2B['optimized']['alert_starts']['T1'],3)}/{f(R2B['optimized']['alert_starts']['T2'],3)}/{f(R2B['optimized']['alert_starts']['T3'],3)} s，目标 {f(R2B['optimized']['objective_s'],3)} s | `q2b_results.json → optimized.alert_starts/objective_s` |")
 A(f"| 4.2.5 | 指派/次序 | {R2B['optimized']['assignment']}；{R2B['optimized']['orders']} | `q2b_results.json → optimized.assignment/orders` |")
 A(f"| 4.2.5 | 最近指派基线 | {f(R2B['heuristic']['alert_starts']['T1'],3)}/{f(R2B['heuristic']['alert_starts']['T2'],3)}/{f(R2B['heuristic']['alert_starts']['T3'],3)} s，目标 {f(R2B['heuristic']['objective_s'],3)} s | `q2b_results.json → heuristic.alert_starts/objective_s` |")
-A(f"| 4.2.5 | 差距/改善 | {f(R2B['comparison']['gap_s'],3)} s / +102.5% | `q2b_results.json → comparison.gap_s`；百分比派生 gap/obj_opt |")
+_gap = R2B["comparison"]["gap_s"]
+_imp = 100.0 * (R2B["optimized"]["objective_s"]
+                - R2B["heuristic"]["objective_s"]) / R2B["heuristic"]["objective_s"]
+_imp_s = f"{_imp:+.1f}".replace("-", "−")
+A(f"| 4.2.5 | 时间降低（相对基线） | {_gap:.3f} s（{_imp_s}%） | `q2b_results.json → comparison.gap_s`；百分比派生 (opt−base)/base |")
 A(f"| 4.2.4 | 下界 LB | {f(R2B['LB']['global'],3)} s | `q2b_results.json → LB.global` |")
 A(f"| 5.2 | top-5 并列解 sum starts | {f(R2B['top5_structures'][0]['sum_starts_s'],3)} s | `q2b_results.json → top5_structures[0].sum_starts_s` |")
 A(f"| 4.2.6 | 鲁棒变体目标/开始 | {f(R2B['robust_05']['obj_s'],3)} s；{R2B['robust_05']['starts']} | `q2b_results.json → robust_05.obj_s/starts` |")
@@ -134,6 +138,12 @@ A(f"| 4.2.6 | 刀锋净空 | 最小 {f(R2B['knife_edge']['min_station_clearance_
 A(f"| 4.2.1 | T1/T2/T3 区域面积 | {f(R2B['region_areas']['T1'],1)}/{f(R2B['region_areas']['T2'],1)}/{f(R2B['region_areas']['T3'],1)} m² | `q2b_results.json → region_areas` |")
 _dv = {x["alert"]: x for x in R2P["delivered"]}
 A(f"| 4.2.7/表 4-4 | 交付方案 γ/G/DRMS | T1 {_dv['T1']['gamma_deg']:.2f}°/{_dv['T1']['G_m']:.2f} m/{_dv['T1']['DRMS_m']:.3f} m；T2 {_dv['T2']['gamma_deg']:.2f}°/{_dv['T2']['G_m']:.2f} m/{_dv['T2']['DRMS_m']:.3f} m；T3 {_dv['T3']['gamma_deg']:.2f}°/{_dv['T3']['G_m']:.2f} m/{_dv['T3']['DRMS_m']:.3f} m | `q2b_precision.json → delivered[]` |")
+_r95 = {x["alert"]: x["r95_semi_axes_m"] for x in R2P["delivered"]}
+_c95 = R2P["constrained"]["geometry"]
+_ar = R2P["delivered"][0]["axis_ratio_variance"]
+_al = R2P["delivered"][0]["axis_ratio_linear"]
+A(f"| 4.2.7/表 4-4 | T1 的 Σ 各向异性 | 特征值比 {_ar:.1f}:1，线性半轴比 {_al:.1f}:1；R95,iso 仅为名义圆半径 | `q2b_precision.json → delivered[T1].axis_ratio_variance/axis_ratio_linear` |")
+A(f"| 4.2.7/表 4-4 | 精确 95% 椭圆半轴 | T1 ({_r95['T1'][0]:.2f},{_r95['T1'][1]:.2f})；T2 ({_r95['T2'][0]:.2f},{_r95['T2'][1]:.2f})；T3 ({_r95['T3'][0]:.2f},{_r95['T3'][1]:.2f})；约束 T1 ({_c95['T1']['r95_semi_axes_m'][0]:.2f},{_c95['T1']['r95_semi_axes_m'][1]:.2f}) m | `q2b_precision.json → delivered[].r95_semi_axes_m / constrained.geometry.*.r95_semi_axes_m` |")
 A(f"| 4.2.7 | γ≥30° 约束解 | γ={f(R2P['constrained']['geometry']['T1']['gamma_deg'],2)}°，DRMS={f(R2P['constrained']['geometry']['T1']['DRMS_m'],3)} m；t_last {f(R2P['constrained']['objective_s'],3)} s（+{f(R2P['constrained']['delta_s'],3)} s，+{f(R2P['constrained']['delta_pct'],2)}%） | `q2b_precision.json → constrained.*` |")
 A("")
 A("## 5. 第三问")
@@ -179,7 +189,7 @@ _tls = [x["resched"]["t_last"] for x in R4["scen_new"]]
 A(f"| 4.4.4/表 4-7 | V4 故障代表 | η={_v4['eta']:.3f}，t_last={_v4['t_last']:.2f} s | `q4_results.json → representative.resched_failV4` |")
 A(f"| 4.4.4/表 4-7 | 三重代表 | η={_tri['eta']:.3f}，t_last={_tri['t_last']:.2f} s | `q4_results.json → representative.resched_triple` |")
 A(f"| 4.4.4 | 新告警 θ=0°,R=30 | η={_th0['eta']:.3f}，t_last={_th0['t_last']:.2f} s | `q4_results.json → scen_new[key='th0_R30'].resched` |")
-A(f"| 4.4.4 | V1 故障×中断 10/20/30 | " + "/".join(f"{_fo1[('V1', t)]['resched']['t_last']:.2f}" for t in (10.0, 20.0, 30.0)) + " s | `q4_results.json → scen_fail_out[failed='V1'][t_rec].resched.t_last` |")
+A(f"| 4.4.4 | V1 故障×中断 10/20/30 | " + "/".join(f"{_fo1[('V1', t)]['resched']['t_last']:.2f}" for t in (10.0, 20.0, 30.0)) + " s（增量 4.07/10.0 s；两段式：链受限段 + 斜率 1 段） | `q4_results.json → scen_fail_out[failed='V1'][t_rec].resched.t_last` |")
 A(f"| 6.2 | 新告警 t_last 范围 | {min(_tls):.2f}–{max(_tls):.2f} s | `scen_new[].resched.t_last` 的 min/max |")
 A(f"| 5.4 | 记账审计问题数 | {len(R4R['audit']['issues'])} | `q4_robust.json → audit.issues` |")
 _mg = {x["case"]: x for x in R4R["margin_05"]}

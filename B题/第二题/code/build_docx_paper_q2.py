@@ -221,8 +221,8 @@ rows3 = [
     ["T2", f"{op3['alert_starts']['T2']:.2f}", f"{hp3['alert_starts']['T2']:.2f}"],
     ["T3", f"{op3['alert_starts']['T3']:.2f}", f"{hp3['alert_starts']['T3']:.2f}"],
     ["Objective (max)", f"{op3['objective_s']:.2f}", f"{hp3['objective_s']:.2f}"],
-    ["Improvement", f"+{RB['comparison']['gap_s']:.2f} s "
-                    f"(+{(hp3['objective_s']/op3['objective_s']-1)*100:.0f}%)", "-"],
+    ["Time reduction", f"{RB['comparison']['gap_s']:.2f} s "
+                       f"(-{RB['comparison']['gap_s']/hp3['objective_s']*100:.1f}% vs baseline)", "-"],
 ]
 table(doc, ["Alert / metric", "Optimized (s)", "Nearest baseline (s)"], rows3)
 

@@ -110,26 +110,55 @@ def add_field(paragraph, instr, size=9):
 
 
 def add_toc_field(doc):
+    """Insert a real Word TOC field (standard multi-run structure).
+
+    The field result is a short placeholder until Word updates it; the
+    w:dirty flag plus settings/updateFields make Word refresh it on open.
+    """
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    run = p.add_run()
-    set_run_font(run, size=BODY_SIZE)
+
+    def _run():
+        r = p.add_run()
+        set_run_font(r, size=BODY_SIZE)
+        return r
+
+    r1 = _run()
     fld1 = OxmlElement('w:fldChar')
     fld1.set(qn('w:fldCharType'), 'begin')
+    fld1.set(qn('w:dirty'), 'true')
+    r1._r.append(fld1)
+
+    r2 = _run()
     it = OxmlElement('w:instrText')
     it.set(qn('xml:space'), 'preserve')
     it.text = 'TOC \\o "1-3" \\h \\z \\u'
+    r2._r.append(it)
+
+    r3 = _run()
     fld2 = OxmlElement('w:fldChar')
     fld2.set(qn('w:fldCharType'), 'separate')
+    r3._r.append(fld2)
+
+    r4 = _run()
     t = OxmlElement('w:t')
-    t.text = "（在 Word 中右键“更新域”生成目录）"
+    t.text = "（目录将在打开文档时自动更新）"
+    r4._r.append(t)
+
+    r5 = _run()
     fld3 = OxmlElement('w:fldChar')
     fld3.set(qn('w:fldCharType'), 'end')
-    run._r.append(fld1)
-    run._r.append(it)
-    run._r.append(fld2)
-    run._r.append(t)
-    run._r.append(fld3)
+    r5._r.append(fld3)
+
+
+def enable_update_fields(doc):
+    """Ask Word to update all fields when the document is opened."""
+    settings = doc.settings.element
+    uf = settings.find(qn('w:updateFields'))
+    if uf is None:
+        uf = OxmlElement('w:updateFields')
+        settings.append(uf)
+    uf.set(qn('w:val'), 'true')
 
 
 def setup_styles(doc):
@@ -320,16 +349,24 @@ def add_table(doc, rows):
         widths = [3.0, 3.25, 3.25, 3.25, 3.25]
     elif ncol == 6:
         widths = [2.4, 2.6, 2.7, 2.7, 2.8, 2.8]
+    elif ncol == 9 and rows[0][0].strip() == "告警":
+        # two-row-per-alert layout of 表 4-4
+        widths = [2.0, 1.6, 0.9, 3.0, 1.7, 1.5, 1.6, 1.7, 1.7]
     else:
         widths = [16.0 / ncol] * ncol
 
     size = TABLE_SIZE if len(rows) > 15 or ncol >= 5 else 10.5
 
+    merge_up = []
     for i, row in enumerate(rows):
         for j, val in enumerate(row):
             cell = table.cell(i, j)
             cell.width = Cm(widths[j])
             cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+            if i > 0 and val.strip() == "^":
+                # merge with the cell above instead of printing the marker
+                merge_up.append((i, j))
+                continue
             p = cell.paragraphs[0]
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER if j > 0 else WD_ALIGN_PARAGRAPH.LEFT
             p.paragraph_format.first_line_indent = Cm(0)
@@ -339,6 +376,19 @@ def add_table(doc, rows):
             set_run_font(r, size=size, bold=(i == 0))
             if i == 0:
                 shade_cell(cell)
+
+    for i, j in merge_up:
+        merged = table.cell(i - 1, j).merge(table.cell(i, j))
+        for p in list(merged.paragraphs)[1:]:
+            if not p.text.strip():
+                p._element.getparent().remove(p._element)
+
+    # keep short tables on one page (the caption already has keep_with_next)
+    if len(rows) <= 12:
+        for row in table.rows[:-1]:
+            for cell in row.cells:
+                for p in cell.paragraphs:
+                    p.paragraph_format.keep_with_next = True
 
     # repeat header row across pages
     trPr = table.rows[0]._tr.get_or_add_trPr()
@@ -369,7 +419,10 @@ def parse_table(lines, i):
     while i < len(lines) and lines[i].strip().startswith("|"):
         line = lines[i].strip()
         if not is_sep_row(line):
-            cells = [c.strip() for c in line.strip("|").split("|")]
+            # "\|" is an escaped literal pipe (e.g. |sin γ| inside a cell)
+            line = line.replace("\\|", "\u0000")
+            cells = [c.strip().replace("\u0000", "|")
+                     for c in line.strip("|").split("|")]
             rows.append(cells)
         i += 1
     return rows, i
@@ -506,6 +559,7 @@ def main():
     doc.core_properties.title = "数维杯 B 题 多移动观测车协同的无人机快速定位与调度（中文初稿）"
     doc.core_properties.subject = "2026 年第十二届数维杯全国大学生数学建模挑战赛（秋季赛）"
     doc.core_properties.author = "Team <队伍号>"
+    enable_update_fields(doc)
     doc.save(OUT)
     print("saved", OUT)
     print("figures inserted:", n_fig)

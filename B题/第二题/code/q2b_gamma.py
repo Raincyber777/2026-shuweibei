@@ -41,9 +41,20 @@ def pair_geometry(st1, st2, a):
     cosg = float(np.dot(u1, u2) / (d1 * d2))
     gam = math.degrees(math.acos(max(-1.0, min(1.0, cosg))))
     G = math.sqrt((d1 * d1 + d2 * d2) / 2.0) / abs(math.sin(math.radians(gam)))
+    # exact covariance Sigma = A^{-1} D A^{-T}, D=diag(d1^2 sig^2, d2^2 sig^2)
+    A = np.array([[-(u1[1] / d1), u1[0] / d1],
+                  [-(u2[1] / d2), u2[0] / d2]])
+    D = np.diag([d1 * d1 * SIGMA_RAD ** 2, d2 * d2 * SIGMA_RAD ** 2])
+    Sigma = np.linalg.inv(A) @ D @ np.linalg.inv(A).T
+    lam = np.sort(np.linalg.eigvalsh(Sigma))
     return {"d1_m": d1, "d2_m": d2, "gamma_deg": gam, "G_m": G,
             "DRMS_m": SIGMA_RAD * G,
-            "r95_m": SIGMA_RAD * G * math.sqrt(5.991)}
+            "r95_m": SIGMA_RAD * G * math.sqrt(5.991),
+            "Sigma_eig_m2": [float(lam[0]), float(lam[1])],
+            "axis_ratio_variance": float(lam[1] / lam[0]),
+            "axis_ratio_linear": float(math.sqrt(lam[1] / lam[0])),
+            "r95_semi_axes_m": [float(math.sqrt(5.991 * lam[1])),
+                                float(math.sqrt(5.991 * lam[0]))]}
 
 
 # ---------------------------------------------------------------- part 1
@@ -238,9 +249,10 @@ with open(os.path.join(RES_DIR, "q2b_precision.json"), "w",
 lines = ["# 第二问（2）时效方案的精度几何", "",
          "定义：γ 为两站至目标的两条水平视线夹角；d₁,d₂ 为站-目标水平距离；"
          "G=√((d₁²+d₂²)/2)/|sin γ|（m）；DRMS=σ·G，σ=1°=0.017453 rad；"
-         "95% 圆半径 = 2.4477·DRMS。", "",
+         "95% 圆半径 = 2.4477·DRMS（仅各向同性时精确；本表站对均非各向同性，"
+      "精确 95% 椭圆半轴见 JSON 字段 r95_semi_axes_m）。", "",
          "## 交付的时间最优方案", "",
-         "| 告警 | 配对 | 站 1 (m) | 站 2 (m) | d₁ (m) | d₂ (m) | γ (°) | G (m) | DRMS (m) | 95% 半径 (m) |",
+         "| 告警 | 配对 | 站 1 (m) | 站 2 (m) | d₁ (m) | d₂ (m) | γ (°) | G (m) | DRMS (m) | R95,iso (m) |",
          "|---|---|---|---|---|---|---|---|---|---|"]
 for g in rows:
     s = g["stations"]
@@ -249,7 +261,8 @@ for g in rows:
                  f"{g['d1_m']:.2f} | {g['d2_m']:.2f} | {g['gamma_deg']:.2f} | "
                  f"{g['G_m']:.2f} | {g['DRMS_m']:.3f} | {g['r95_m']:.3f} |")
 c = out["constrained"]
-lines += ["", "## γ∈[30°,150°] 约束重解（同一指派/次序结构，重选 T1 双站与 V3 的 T3 站）", "",
+lines += ["", "## γ∈[30°,150°] 约束重解（同一指派/次序结构，重选 T1 双站；"
+          "V3 的 T3 站优选后仍为原站）", "",
           "| 告警 | γ (°) | G (m) | DRMS (m) |", "|---|---|---|---|"]
 for a in ALERTS3:
     gg = c["geometry"][a]

@@ -84,7 +84,7 @@
 | 4.2.5 | 优化开始时刻/目标 | 1.607/6.994/10.355 s，目标 10.355 s | `q2b_results.json → optimized.alert_starts/objective_s` |
 | 4.2.5 | 指派/次序 | {'T1': [3, 5], 'T2': [1, 4], 'T3': [2, 3]}；{'V1': ['T2'], 'V2': ['T3'], 'V3': ['T1', 'T3'], 'V4': ['T2'], 'V5': ['T1']} | `q2b_results.json → optimized.assignment/orders` |
 | 4.2.5 | 最近指派基线 | 1.607/11.140/20.968 s，目标 20.968 s | `q2b_results.json → heuristic.alert_starts/objective_s` |
-| 4.2.5 | 差距/改善 | 10.613 s / +102.5% | `q2b_results.json → comparison.gap_s`；百分比派生 gap/obj_opt |
+| 4.2.5 | 时间降低（相对基线） | 10.613 s（−50.6%） | `q2b_results.json → comparison.gap_s`；百分比派生 (opt−base)/base |
 | 4.2.4 | 下界 LB | 3.414 s | `q2b_results.json → LB.global` |
 | 5.2 | top-5 并列解 sum starts | 18.956 s | `q2b_results.json → top5_structures[0].sum_starts_s` |
 | 4.2.6 | 鲁棒变体目标/开始 | 10.837 s；{'T1': 1.54, 'T3': 10.837, 'T2': 10.804} | `q2b_results.json → robust_05.obj_s/starts` |
@@ -93,6 +93,8 @@
 | 4.2.6 | 刀锋净空 | 最小 0.0013 m | `q2b_results.json → knife_edge.min_station_clearance_m` |
 | 4.2.1 | T1/T2/T3 区域面积 | 5610.4/6413.1/5459.8 m² | `q2b_results.json → region_areas` |
 | 4.2.7/表 4-4 | 交付方案 γ/G/DRMS | T1 19.34°/176.67 m/3.084 m；T2 85.08°/67.93 m/1.186 m；T3 127.39°/81.32 m/1.419 m | `q2b_precision.json → delivered[]` |
+| 4.2.7/表 4-4 | T1 的 Σ 各向异性 | 特征值比 46.3:1，线性半轴比 6.8:1；R95,iso 仅为名义圆半径 | `q2b_precision.json → delivered[T1].axis_ratio_variance/axis_ratio_linear` |
+| 4.2.7/表 4-4 | 精确 95% 椭圆半轴 | T1 (10.56,1.55)；T2 (3.27,2.48)；T3 (4.77,1.19)；约束 T1 (6.87,1.58) m | `q2b_precision.json → delivered[].r95_semi_axes_m / constrained.geometry.*.r95_semi_axes_m` |
 | 4.2.7 | γ≥30° 约束解 | γ=30.12°，DRMS=2.036 m；t_last 12.983 s（+2.629 s，+25.38%） | `q2b_precision.json → constrained.*` |
 
 ## 5. 第三问
@@ -126,7 +128,7 @@
 | 4.4.4/表 4-7 | V4 故障代表 | η=1.000，t_last=11.17 s | `q4_results.json → representative.resched_failV4` |
 | 4.4.4/表 4-7 | 三重代表 | η=1.000，t_last=25.01 s | `q4_results.json → representative.resched_triple` |
 | 4.4.4 | 新告警 θ=0°,R=30 | η=1.000，t_last=16.77 s | `q4_results.json → scen_new[key='th0_R30'].resched` |
-| 4.4.4 | V1 故障×中断 10/20/30 | 21.01/25.08/35.08 s | `q4_results.json → scen_fail_out[failed='V1'][t_rec].resched.t_last` |
+| 4.4.4 | V1 故障×中断 10/20/30 | 21.01/25.08/35.08 s（增量 4.07/10.0 s；两段式：链受限段 + 斜率 1 段） | `q4_results.json → scen_fail_out[failed='V1'][t_rec].resched.t_last` |
 | 6.2 | 新告警 t_last 范围 | 14.39–16.77 s | `scen_new[].resched.t_last` 的 min/max |
 | 5.4 | 记账审计问题数 | 0 | `q4_robust.json → audit.issues` |
 | 5.4 | 0.5 m 裕度/ε 容差/稳健基线/方位加密 | failV4 11.17 s；new_th135_R30 15.87 s；triple 25.01 s；ε 三档均 11.17 s；加密 14.57–16.45 s | `q4_robust.json → margin_05/eps_travel/baseline_robust/azimuth_densification` |

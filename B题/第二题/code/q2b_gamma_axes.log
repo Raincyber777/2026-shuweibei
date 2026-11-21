@@ -1,0 +1,11 @@
+T1 pair [3, 5]: d=(71.547,41.555) gamma=19.34 G=176.67 DRMS=3.084 r95=7.547
+T2 pair [1, 4]: d=(58.322,75.888) gamma=85.08 G=67.93 DRMS=1.186 r95=2.902
+T3 pair [2, 3]: d=(28.518,86.803) gamma=127.39 G=81.32 DRMS=1.419 r95=3.474
+T1 feasible cloud: 14813  T3: 14824
+candidates: V3 350  V5 350
+feasible pairs: 3422 of 122500
+constrained T1 pair: {'i': 9, 'j': 346, 'obj_s': 12.983463623383374, 'T1_start_s': 3.7462034842658944, 'T3_start_s': 12.983463623383374, 'T2_start_s': 6.993600945194824, 'gamma_deg': 30.124573587139135} stations [14.9 85.6] [53.9 98.4]
+refined V3/T3 station: [16.7656 88.659 ] travel+slew delta: 3.2028 | V2 ready: 5.9151
+constrained scheme starts: {'T2': 6.994, 'T3': 12.983, 'T1': 3.746} obj: 12.9835
+constrained gammas: 30.12 85.08 127.39
+written q2b_precision.json / q2b_precision.md

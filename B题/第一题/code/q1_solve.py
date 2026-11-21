@@ -369,6 +369,7 @@ alt_elev = float(eps_grid[idx2])
 # ----------------------------- 5) figures -----------------------------------
 COL_FEAS = "#d6e8fa"     # feasible region fill
 COL_INFEAS = "#f2f2f2"   # infeasible fill
+COL_NEW = "#f4a582"      # region excluded by the constraint just added
 COL_BLD = "#b3b3b3"      # building fill
 COL_EDGE = "#4d4d4d"
 COL_TGT = "#d62728"      # target marker
@@ -418,31 +419,45 @@ _clean_axes(ax)
 save(fig, "fig1_observable_region")
 
 # --- Fig 2: three constraint layers ------------------------------------------
-fig, axs = plt.subplots(1, 3, figsize=(13.2, 4.9))
-layers = [(c1, "(a) C1: vehicle geometry"),
+# Each panel highlights, in a distinct colour, exactly the region removed by the
+# constraint added at that step, so the three panels remain distinguishable.
+fig, axs = plt.subplots(1, 3, figsize=(13.4, 5.0))
+stages = [(c1, "(a) C1: vehicle geometry"),
           (c1 & c2, "(b) C1 + C2: elevation bound"),
           (mask, "(c) C1 + C2 + C3: line of sight")]
-for k, (m, lbl) in enumerate(layers):
-    axs[k].imshow(m, extent=(0, 100, 0, 100), origin="lower",
-                  cmap=matplotlib.colors.ListedColormap([COL_INFEAS, COL_FEAS]),
-                  interpolation="nearest", aspect="equal")
+prev = np.ones_like(c1, dtype=bool)
+for k, (m, lbl) in enumerate(stages):
+    newly = prev & ~m
+    cat = np.zeros(c1.shape, dtype=int)
+    cat[~prev] = 1          # already infeasible before this step
+    cat[m] = 0              # feasible after this step
+    cat[newly] = 2          # removed by the constraint added at this step
+    axs[k].imshow(cat, extent=(0, 100, 0, 100), origin="lower",
+                  cmap=matplotlib.colors.ListedColormap(
+                      [COL_FEAS, COL_INFEAS, COL_NEW]),
+                  interpolation="nearest", aspect="equal", vmin=0, vmax=2)
     draw_field(axs[k])
     axs[k].plot(T1[0], T1[1], marker="*", ms=12, color=COL_TGT)
     axs[k].add_patch(Rectangle((0, 0), 100, 100, fill=False, ec="k", lw=1.0))
     axs[k].set_xlim(0, 100); axs[k].set_ylim(0, 100)
     axs[k].set_xticks(range(0, 101, 20)); axs[k].set_yticks(range(0, 101, 20))
-    axs[k].set_title(lbl, fontsize=11)
+    axs[k].set_title(f"{lbl}\n" + r"$\Delta A$ = "
+                     f"{newly.sum() * STEP * STEP:.1f} m$^2$", fontsize=10)
     _clean_axes(axs[k])
+    prev = m
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 fig.legend(handles=[
     Patch(facecolor=COL_FEAS, edgecolor=COL_EDGE, label="feasible"),
-    Patch(facecolor=COL_INFEAS, edgecolor=COL_EDGE, label="infeasible"),
+    Patch(facecolor=COL_NEW, edgecolor=COL_EDGE,
+          label="excluded by the added constraint"),
+    Patch(facecolor=COL_INFEAS, edgecolor=COL_EDGE,
+          label="already infeasible"),
     Patch(facecolor=COL_BLD, edgecolor=COL_EDGE, label="building"),
     Line2D([], [], marker="*", color=COL_TGT, linestyle="none",
            ms=11, label="target T1")],
-    loc="lower center", ncol=4, frameon=False, fontsize=10)
-fig.subplots_adjust(wspace=0.12, bottom=0.16)
+    loc="lower center", ncol=5, frameon=False, fontsize=9)
+fig.subplots_adjust(wspace=0.12, bottom=0.18)
 save(fig, "fig2_constraint_layers")
 
 # --- Fig 3: zoom on the optimal circle + margin profile ----------------------
@@ -478,23 +493,22 @@ axm.set_xticks(range(70, 101, 10)); axm.set_yticks(range(55, 86, 10))
 axm.set_aspect("equal")
 _clean_axes(axm)
 
-# margin profile relative to the arc maximum; the polyline is broken wherever
-# the margin is not competitive (m - m* < -1 m) instead of diving off the axis
-MPLOT_FLOOR = -1.0
-mplot = np.where(arc_feasible & (margins - m_star >= MPLOT_FLOOR),
-                 margins - m_star, np.nan)
-axp.plot(phi_deg, mplot, color=COL_ARC_OK, lw=1.6)
+# margin profile on the feasible arc, zoomed on the near-optimal lobe: a local
+# view avoids both the blocked-arc shading and the spike-like appearance that a
+# 0-360 deg plot with a clipped y-range would produce
+mrel = margins - m_star
+sel = (phi_deg >= 52.0) & (phi_deg <= 62.0)
+axp.plot(phi_deg[sel], mrel[sel], color=COL_ARC_OK, lw=1.8)
 axp.axhspan(-0.05, 0.0, color="#d6e8fa", alpha=0.8, zorder=0)
+axp.axhline(0.0, color=COL_EDGE, lw=0.6, ls=":")
 axp.plot([m_star_phi], [0.0], marker="o", ms=11, mfc="none",
          mec=COL_TGT, mew=1.6, zorder=6)
 axp.plot([opt_phi], [opt_margin - m_star], marker="p", ms=9, mfc=COL_OPT,
          mec="w", mew=1.0, zorder=7)
-for a, b in blocked_runs:
-    axp.axvspan(a, b, color=COL_INFEAS, zorder=0)
-axp.set_xlim(0, 360)
-axp.set_ylim(MPLOT_FLOOR - 0.05, 0.08)
-axp.set_yticks([-1, -0.8, -0.6, -0.4, -0.2, 0])
-axp.set_xticks(range(0, 361, 60))
+axp.set_xlim(52.0, 62.0)
+axp.set_ylim(-0.42, 0.05)
+axp.set_xticks(range(52, 63, 2))
+axp.set_yticks([-0.4, -0.3, -0.2, -0.1, 0.0])
 axp.set_xlabel(" ")
 axp.tick_params(labelsize=10)
 from matplotlib.patches import Patch as _Patch
@@ -502,11 +516,9 @@ from matplotlib.lines import Line2D as _Line2D
 axp.legend(handles=[
     _Line2D([], [], color=COL_ARC_OK, lw=1.8,
             label=r"$(m-m^\ast)$ on feasible arc"),
-    _Patch(facecolor=COL_INFEAS, edgecolor=COL_EDGE,
-           label="blocked arc"),
     _Patch(facecolor="#d6e8fa", edgecolor="none",
            label="0.05 m tie band")],
-    loc="lower left", frameon=False, fontsize=8)
+    loc="lower left", frameon=False, fontsize=9)
 for s in ("top", "right"):
     axp.spines[s].set_visible(False)
 save(fig, "fig3_optimal_arc_zoom")

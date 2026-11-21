@@ -21,7 +21,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle, Arc
+from matplotlib.patches import Rectangle, Circle, Arc, Patch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from q2_lib import (BUILDINGS, TARGETS, TARGET_H, VEHICLES, R_MIN_GEO,
@@ -38,6 +38,7 @@ RES_DIR = os.path.join(BASE, "results")
 
 COL_FEAS = "#d6e8fa"
 COL_INFEAS = "#f2f2f2"
+COL_NEW = "#f4a582"
 COL_BLD = "#b3b3b3"
 COL_EDGE = "#4d4d4d"
 COL_TGT = "#d62728"
@@ -110,19 +111,43 @@ for b in BUILDINGS:
     c1 &= dist_to_rect(X, Y, b) >= 1.5
 r2 = np.hypot(X - T2P[0], Y - T2P[1])
 c2 = r2 >= RMIN - 1e-9
-layers = [c1, c1 & c2, mask]
-fig, axs = plt.subplots(1, 3, figsize=(13.2, 4.6))
-for k, m in enumerate(layers):
-    axs[k].imshow(m, extent=(0, 100, 0, 100), origin="lower",
-                  cmap=matplotlib.colors.ListedColormap([COL_INFEAS, COL_FEAS]),
-                  interpolation="nearest", aspect="equal")
+stages = [(c1, "(a) C1: vehicle geometry"),
+          (c1 & c2, "(b) C1 + C2: elevation bound"),
+          (mask, "(c) C1 + C2 + C3: line of sight")]
+cell_m2 = float((X[0, 1] - X[0, 0]) * (Y[1, 0] - Y[0, 0]))
+fig, axs = plt.subplots(1, 3, figsize=(13.4, 4.8))
+prev = np.ones_like(c1, dtype=bool)
+for k, (m, lbl) in enumerate(stages):
+    newly = prev & ~m
+    cat = np.zeros(c1.shape, dtype=int)
+    cat[~prev] = 1          # already infeasible before this step
+    cat[m] = 0              # feasible after this step
+    cat[newly] = 2          # removed by the constraint added at this step
+    axs[k].imshow(cat, extent=(0, 100, 0, 100), origin="lower",
+                  cmap=matplotlib.colors.ListedColormap(
+                      [COL_FEAS, COL_INFEAS, COL_NEW]),
+                  interpolation="nearest", aspect="equal", vmin=0, vmax=2)
     draw_field(axs[k])
     axs[k].plot(T2P[0], T2P[1], marker="*", ms=12, color=COL_TGT)
     axs[k].add_patch(Rectangle((0, 0), 100, 100, fill=False, ec="k", lw=1.0))
     axs[k].set_xlim(0, 100); axs[k].set_ylim(0, 100)
     axs[k].set_xticks(range(0, 101, 20)); axs[k].set_yticks(range(0, 101, 20))
+    axs[k].set_title(f"{lbl}\n" + r"$\Delta A$ = "
+                     f"{newly.sum() * cell_m2:.1f} m$^2$", fontsize=10)
     _clean(axs[k])
-fig.subplots_adjust(wspace=0.12)
+    prev = m
+from matplotlib.lines import Line2D
+fig.legend(handles=[
+    Patch(facecolor=COL_FEAS, edgecolor=COL_EDGE, label="feasible"),
+    Patch(facecolor=COL_NEW, edgecolor=COL_EDGE,
+          label="excluded by the added constraint"),
+    Patch(facecolor=COL_INFEAS, edgecolor=COL_EDGE,
+          label="already infeasible"),
+    Patch(facecolor=COL_BLD, edgecolor=COL_EDGE, label="building"),
+    Line2D([], [], marker="*", color=COL_TGT, linestyle="none",
+           ms=11, label="target T2")],
+    loc="lower center", ncol=5, frameon=False, fontsize=9)
+fig.subplots_adjust(wspace=0.12, bottom=0.18)
 save(fig, "fig2_layers_T2")
 
 # --- fig3: zoom at T2' -------------------------------------------------------
@@ -282,29 +307,41 @@ ax.indicate_inset_zoom(axi, edgecolor="k", alpha=0.8)
 save(fig, "fig6_error_ellipses")
 
 # --- fig7/fig8: Gantt charts --------------------------------------------------
-def gantt(segs, fname):
-    fig, ax = plt.subplots(figsize=(11.6, 4.2))
+def gantt(segs, fname, title):
+    fig, ax = plt.subplots(figsize=(11.6, 4.8))
     style = {"travel": ("#c9dff0", 0.95), "slew": ("#f4c78f", 0.95),
              "wait": ("#e4e4e4", 0.9), "obs": ("#2ca02c", 1.0),
              "reset": ("#f2a19b", 0.95)}
+    tmax = 0.0
     for v in range(5):
         for seg in segs[f"V{v+1}"]:
             typ, t0, t1 = seg[0], float(seg[1]), float(seg[2])
             col, al = style[typ]
+            tmax = max(tmax, t1)
             ax.broken_barh([(t0, max(t1 - t0, 0.02))], (v - 0.32, 0.64),
                            facecolors=col, edgecolor=COL_EDGE, linewidth=0.4,
                            alpha=al)
+    xmax = float(np.ceil(tmax / 5.0) * 5.0)
     ax.set_ylim(-0.7, 4.7)
     ax.set_yticks(range(5))
-    ax.set_yticklabels(["1", "2", "3", "4", "5"])
-    ax.set_xlim(0, None)
+    ax.set_yticklabels([f"V{v + 1}" for v in range(5)])
+    ax.set_xlim(0, xmax)
+    ax.set_xticks(range(0, int(xmax) + 1, 5))
+    ax.set_title(title, fontsize=11)
     _clean(ax)
+    fig.legend(handles=[
+        Patch(facecolor=style[k][0], edgecolor=COL_EDGE, label=lbl)
+        for k, lbl in (("travel", "travel"), ("slew", "slew"),
+                       ("wait", "wait"), ("obs", "observation (5 s)"),
+                       ("reset", "reset"))],
+        loc="lower center", ncol=5, frameon=False, fontsize=9)
+    fig.subplots_adjust(bottom=0.2)
     save(fig, fname)
 
 
-gantt(RB["gantt_opt"], "fig7_gantt_opt")
+gantt(RB["gantt_opt"], "fig7_gantt_opt", "Optimized schedule")
 if RB["heuristic"].get("objective_s") is not None:
-    gantt(RB["gantt_heu"], "fig8_gantt_heu")
+    gantt(RB["gantt_heu"], "fig8_gantt_heu", "Nearest-assignment baseline")
 
 # --- fig9: field map of the optimized scheme ---------------------------------
 fig, ax = plt.subplots(figsize=(6.6, 6.2))
