@@ -56,7 +56,7 @@ def short(k):
     parts = k.split("|")
     tag = parts[0].replace("scen_", "")
     rest = [p for p in parts[1:] if p not in ("-", "")]
-    return tag + ("|" + "|".join(rest) if rest else "")
+    return tag + (" / " + " / ".join(rest) if rest else "")
 
 
 n_prefix_neg = 0
@@ -93,7 +93,7 @@ md = ["# 第四问 t_last 前后对照（时间轴修复前 → 修复后）", "
       "调度器给出的开始时刻本身是正确的；因此多数场景 t_last 不变，"
       "但时间轴段的起点/终点被纠正。修复后全部 70 条场景时间轴经审计为 0 负等待/重叠。",
       "",
-      "| 场景 | η 前 | η 后 | t_last 前 (s) | t_last 后 (s) | Δt_last (s) | 修复前负等待段 | 修复后负等待段 |",
+      "| 场景 | η 前 | η 后 | t_last 前 (s) | t_last 后 (s) | Δt_last (s) | 修复前问题段 | 修复后问题段 |",
       "|---|---|---|---|---|---|---|---|"]
 for r in rows:
     md.append(f"| {r['id']} | {r['eta_old']:.3f} | {r['eta_new']:.3f} | "

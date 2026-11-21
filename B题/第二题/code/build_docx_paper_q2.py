@@ -51,9 +51,10 @@ para(doc, "A provable global lower bound follows from the QM-AM inequality: G >=
           "tie-breaking rules are required, exactly as in Problem 1.", indent=False)
 
 h1(doc, "II. 2(1) 结果段（Results）")
+_v2pair = [p for p in RA["pair_table"] if p["pair"] == "V1+V2"][0]
 para(doc, f"Selecting the vehicle pair by C(5,2)=10 enumeration with two-stage LB-pruned polar search "
           f"(continuous Nelder-Mead refinement; pairs containing V2 cannot reach the r_min circle and "
-          f"attain G = 9.0063 m, DRMS = 0.1572 m), the tie-breaking rules - (i) minimum total travel "
+          f"attain G = {_v2pair['G_m']:.4f} m, DRMS = {_v2pair['DRMS_m']:.4f} m), the tie-breaking rules - (i) minimum total travel "
           f"time within the robust interior (LOS roof clearance and geometric margin >= 0.75 m, "
           f"straight paths avoiding building buffers), (ii) minimum worst-case travel, (iii) "
           f"lexicographic - uniquely select V3 + V5 with stations "
