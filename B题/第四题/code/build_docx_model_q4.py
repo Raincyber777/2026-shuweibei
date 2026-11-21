@@ -123,7 +123,39 @@ bullet(doc, "失效/受限情形：三重组合中若 t_rec 很晚（如 30 s）
 bullet(doc, "机理小结：重调度的价值 = 把“结构性损失”（无指派/缺车）转化为“时间性损失”（开始时刻推迟）；"
             "其上限受制于（a）空闲车辆的方位分布、（b）转台+行车的恢复时延、（c）中断封锁期的长度。")
 
-h1(doc, "VI. 与题面要求的对应")
+h1(doc, "VI. 鲁棒性与检验（复核后新增）")
+RB5 = load_results("q4_robust.json")
+para(doc, f"记账审计：对全部 {RB5['audit']['n_scenarios']} 个场景重推 (η, t_last) 的记账关系"
+          f"（η = k/N、存在未开始告警时 t_last = 60、t_last = 已开始告警的最大开始时刻），"
+          f"发现 {len(RB5['audit']['issues'])} 处问题。")
+mg = RB5["margin_05"]
+rows = [["代表场景", "η（无裕度 → 0.5 m 裕度）", "t_last（无裕度 → 0.5 m 裕度）",
+         "修复后最小 LOS 净空 (m)"]]
+for m in mg:
+    rows.append([m["case"].replace("new_", "新告警 ").replace("triple_", "三重 ")
+                 .replace("failV4", "V4 故障"),
+                 f"{m['m00']['eta']:.2f} → {m['m05']['eta']:.2f}",
+                 f"{m['m00']['t_last']:.2f} → {m['m05']['t_last']:.2f}",
+                 f"{m['m00']['min_clearance_m']:.4f} → {m['m05']['min_clearance_m']:.4f}"
+                 f"（修复 {m['m05']['repaired']} 站）"])
+table(doc, rows[0], rows[1:])
+eps_lines = "；".join(f"ε = {e['eps_m']} m：η = {e['eta']:.2f}、t_last = {e['t_last']:.2f} s"
+                      for e in RB5["eps_travel"])
+para(doc, f"零位移容差 ε 的敏感性：{eps_lines}——结论不随 ε 变化。")
+br_lines = "；".join(f"{b['case']}：keep η = {b['keep']['eta']:.2f} → resched η = "
+                     f"{b['resched']['eta']:.2f}（t_last {b['resched']['t_last']:.2f} s）"
+                     for b in RB5["baseline_robust"])
+para(doc, f"基线鲁棒变体（Q2(2) 的 0.5 m 裕度方案 10.837 s）替换基线后：{br_lines}"
+          "——重调度相对 keep-original 的结论方向不变。")
+dn = RB5["azimuth_densification"]
+dn_txt = "；".join(f"θ = {d['theta']:g}°：t_last = {d['t_last']:.2f} s" for d in dn)
+para(doc, "如实披露：三重组合场景中有 1 站位于 T3 可观测域的固有薄区（B3 东角附近），"
+          "±1.5 m 邻域内不存在 0.5 m 净空的可行点，该站未完成裕度化——但 η 与 t_last 均不受影响；"
+          "其完全裕度化需要更大的重定位或接受更晚的开始时刻。")
+para(doc, f"方位网格加密验证（8 个 22.5° 中间方位，R = 40 m）：{dn_txt}——"
+          "t_last 曲线在网格点之间平滑过渡，45° 采样的场景集论证成立。")
+
+h1(doc, "VII. 与题面要求的对应")
 bullet(doc, "重调度模型：事件触发 + 状态快照 + 完备结构枚举 + 连续精修（II）。")
 bullet(doc, "与保持原方案对比：(η, t_last) 全场景对照（IV），策略细节与规则逐条落实（锁定/可重指派/中断期继续在手任务）。")
 bullet(doc, "单扰动与组合扰动：A/B/C/D/E/F/G 六类共 "

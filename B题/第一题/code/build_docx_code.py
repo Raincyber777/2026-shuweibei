@@ -79,14 +79,14 @@ para(doc, "在 r = R_MIN 圆上以 20 万个方位角采样（0.0018° 分辨率
           "bool_runs 把周期布尔序列还原为连续弧段区间，环绕 0°/360° 的游程做了模 360 处理。"
           "数值端点与解析估计（B2 缓冲几何）互相印证（见建模文档 5.2）。", indent=False)
 h2(doc, "3.4 tie-breaking 实现")
-para(doc, f"对圆弧每点计算几何安全裕度 m(p) = min(各建筑 d(p,Bᵢ) − 1.5, 到四边距离)，"
+para(doc, f"对圆弧每点计算几何安全裕度 m(p) = min(各建筑 d(p,Bᵢ) − 1.5, 到内缩场界的距离)，"
           f"弧上真实最大值 m* = {arc['m_star_margin_m']:.4f} m（φ = {arc['m_star_phi_deg']:.2f}°，"
           "该点 B2 缓冲距离与东场界距离恰好平衡）；随后在 m ≥ m* − 0.05 m 的并列带内比较 5 辆车的"
           f"行驶时间取最短，得最终站点 p*（其自身裕度 {opt['margin_m']:.4f} m，来源为东侧场界，"
           "以 0.0001 m 余量入带）；若仍并列按 (x, y) 字典序兜底（本例未触发）。"
           "JSON 同时存储 m*（arc.m_star_margin_m）与所选站裕度（optimal_station.margin_m），勿混淆。", indent=False)
 h2(doc, "3.5 敏感性批量计算")
-para(doc, "区域面积扫描改用 0.25 m 网格（401×401）以控制耗时：替换 B2 高度（20–45 m，7 档）或车辆半径"
+para(doc, "区域面积扫描改用 0.25 m 单元中心网格（400×400）以控制耗时：替换 B2 高度（20–45 m，7 档）或车辆半径"
           "（1.0–2.5 m，4 档）后重算三约束并积分面积。r* 对 H、ε_max 的敏感性直接用闭式表达式生成，无需求解。", indent=False)
 h2(doc, "3.6 计算量与稳定性")
 para(doc, "主网格约 1.0×10⁶ 点 × 5 建筑 × O(10) 向量化运算 ≈ 5×10⁷ 浮点操作/约束，总耗时 < 40 s；"
@@ -114,7 +114,8 @@ table(doc, ["项目", "数值"], [
     ["可观测区域面积", f"{gr['area_m2']:.1f} m²（0.1 m 单元中心估计；节点计数 {gr['area_node_count_m2']:.1f} m²）"],
     ["∂r*/∂H₁ ; ∂r*/∂ε_max", f"{sen['dr_dH']:.4f} m/m ; {sen['dr_deps_deg']:.4f} m/deg"],
     ["备选度量 Q₂ 最优", f"仍在 r* 圆上（r = {sen['alt_metric']['r']:.3f} m，ε = "
-                          f"{sen['alt_metric']['elevation_deg']:.1f}°）"],
+                          f"{sen['alt_metric']['elevation_deg']:.1f}°）；仅验证 r* 不变，"
+                          "不验证站点选择（Q₂ 仍随 r 单调下降）"],
 ])
 spacer(doc)
 

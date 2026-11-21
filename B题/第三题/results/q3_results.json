@@ -142,6 +142,13 @@
     }
   ],
   "s_crossover_m": 19.90658503988659,
+  "exact_geometry": {
+    "P_at_linear_smax": 0.9497982126065668,
+    "s_max_exact_m": 66.83725842793137,
+    "P_at_80_exact": 0.9150682311608254,
+    "ab_max_exact_m": 1.6367451685600827,
+    "method": "256x256 probabilists' Hermite quadrature of the exact atan2 geometry"
+  },
   "monte_carlo": {
     "n": 1000000,
     "seed": 20261121,

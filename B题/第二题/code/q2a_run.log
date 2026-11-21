@@ -2,13 +2,13 @@ Omega_2 area (midpoint) = 6413.1 m^2 (node count 6432.4)
 feasible runs: [(np.float64(59.66), np.float64(244.24))]
 robust  runs: [(np.float64(70.95), np.float64(238.63))]
 certificate 90-deg family exists: True phi span: (70.96000000000001, 238.62)
-V1+V2: G=9.0063 m  d=(5.825,11.314) gamma=92.41  travel=(19.27,30.28)
+V1+V2: G=8.9678 m  d=(5.819,11.269) gamma=90.00  travel=(19.19,30.29)
 V1+V3: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(18.29,3.97)
 V1+V4: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(18.29,27.64)
 V1+V5: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(18.29,15.42)
-V2+V3: G=9.0063 m  d=(11.314,5.825) gamma=92.41  travel=(30.28,5.78)
-V2+V4: G=9.0063 m  d=(11.314,5.825) gamma=92.41  travel=(30.28,29.39)
-V2+V5: G=9.0063 m  d=(11.314,5.825) gamma=92.41  travel=(30.28,17.17)
+V2+V3: G=8.9678 m  d=(5.819,11.269) gamma=90.00  travel=(34.75,10.08)
+V2+V4: G=8.9678 m  d=(5.819,11.269) gamma=90.00  travel=(34.75,25.37)
+V2+V5: G=8.9678 m  d=(5.819,11.269) gamma=90.00  travel=(34.75,16.54)
 V3+V4: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(6.49,27.64)
 V3+V5: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(6.49,15.42)
 V4+V5: G=5.8188 m  d=(5.819,5.819) gamma=90.00  travel=(28.95,15.42)
@@ -68,13 +68,13 @@ r_min circle feasible runs: [(np.float64(59.66), np.float64(244.24))]
 r_min circle robust  runs: [(np.float64(70.95), np.float64(238.63))]
 certificate: G_lower = r_min = 5.8188 m ; 90-deg family: True (phi in (70.96000000000001, 238.62))
 per-pair optima:
-  V1+V2: G=9.0063 m DRMS=0.1572 m d=(5.825,11.314) gamma=92.41 travel=(19.27,30.28) s
+  V1+V2: G=8.9678 m DRMS=0.1565 m d=(5.819,11.269) gamma=90.00 travel=(19.19,30.29) s
   V1+V3: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(18.71,3.49) s
   V1+V4: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(18.29,27.64) s
   V1+V5: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(19.47,14.17) s
-  V2+V3: G=9.0063 m DRMS=0.1572 m d=(11.314,5.825) gamma=92.41 travel=(30.28,5.78) s
-  V2+V4: G=9.0063 m DRMS=0.1572 m d=(11.314,5.825) gamma=92.41 travel=(30.28,29.39) s
-  V2+V5: G=9.0063 m DRMS=0.1572 m d=(11.314,5.825) gamma=92.41 travel=(30.28,17.17) s
+  V2+V3: G=8.9678 m DRMS=0.1565 m d=(5.819,11.269) gamma=90.00 travel=(34.75,10.08) s
+  V2+V4: G=8.9678 m DRMS=0.1565 m d=(5.819,11.269) gamma=90.00 travel=(34.75,25.37) s
+  V2+V5: G=8.9678 m DRMS=0.1565 m d=(5.819,11.269) gamma=90.00 travel=(34.75,16.54) s
   V3+V4: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(6.49,27.64) s
   V3+V5: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(5.11,13.61) s
   V4+V5: G=5.8188 m DRMS=0.1016 m d=(5.819,5.819) gamma=90.00 travel=(28.95,15.42) s

@@ -1,0 +1,18 @@
+==== Problem 4 robustness summary ====
+audit: 74 scenarios, 0 accounting issues
+margin0.5 failV4: eta 1.00->1.00, t_last 11.17->11.17, min_clearance 4.7596->4.7596 (stations repaired: 0)
+margin0.5 new_th135_R30: eta 1.00->1.00, t_last 15.87->15.87, min_clearance 0.0669->0.5145 (stations repaired: 1)
+margin0.5 triple_th135_R30: eta 1.00->1.00, t_last 25.01->25.01, min_clearance 0.0013->0.0013 (stations repaired: 1)
+eps 0.02 m: eta=1.00 t_last=11.17
+eps 0.05 m: eta=1.00 t_last=11.17
+eps 0.1 m: eta=1.00 t_last=11.17
+robust-baseline failV4: keep 0.67/60 -> resched 1.00/10.84
+robust-baseline new_th135_R30: keep 0.50/60 -> resched 1.00/15.87
+dens th22.5 R40: eta=1.00 t_last=16.45
+dens th67.5 R40: eta=1.00 t_last=15.47
+dens th112.5 R40: eta=1.00 t_last=15.61
+dens th157.5 R40: eta=1.00 t_last=16.39
+dens th202.5 R40: eta=1.00 t_last=16.07
+dens th247.5 R40: eta=1.00 t_last=15.57
+dens th292.5 R40: eta=1.00 t_last=14.57
+dens th337.5 R40: eta=1.00 t_last=15.51

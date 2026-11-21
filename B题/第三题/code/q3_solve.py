@@ -163,6 +163,83 @@ resid_rms_deg = float(np.degrees((sig_s_80 / D_TGT) ** 2))    # sigma^2/d^2
 print(f"linearization residual RMS at s=80 ~ {resid_rms_deg:.4f} deg "
       f"({resid_rms_deg / sig80 * 100:.2f}% of sigma_psi)")
 
+# ----------------------------- 4b) exact-geometry probability ---------------
+# The linearized model replaces arctan2(-d_perp, d - d_par) by -d_perp/d.
+# Exact P(|dpsi| <= 5) integrates the exact geometry over the joint normal
+# (d_perp, d_par) with the N(0,1) gimbal sum absorbed in closed form:
+#   P(s) = E[ Phi(5 - dalpha(d)) - Phi(-5 - dalpha(d)) ],
+#   dalpha = atan2(-d_perp, d - d_par) in deg,  (d_perp, d_par) iid N(0, sig^2).
+# Evaluated by 256x256 probabilists' Hermite quadrature (stdlib only).
+from numpy.polynomial.hermite_e import hermegauss
+
+_HN, _HW = hermegauss(256)
+_HW = _HW / _HW.sum()            # weights for N(0,1)
+
+
+def p_exact(s):
+    """Exact-geometry P(|dpsi| <= 5 deg) at travel distance s."""
+    sig = SIG0 + GSLOPE * float(s)
+    nd = statistics.NormalDist()
+    X = _HN * sig                   # nodes for each coordinate (m)
+    W = _HW
+    # d_perp, d_par iid N(0, sig^2): full 2-D grid via outer product
+    dpar = np.repeat(X, 256)
+    dperp = np.tile(X, 256)
+    ww = np.repeat(W, 256) * np.tile(W, 256)
+    dalpha = np.degrees(np.arctan2(-dperp, D_TGT - dpar))
+    ndv = np.vectorize(lambda v: nd.cdf(v))
+    pv = ndv((PSI_LIM - dalpha)) - ndv((-PSI_LIM - dalpha))
+    return float(ww @ pv)
+
+
+def exact_s_max():
+    """Bisection for the exact-geometry s_max (P_exact = 0.95)."""
+    lo, hi = 0.0, 120.0
+    for _ in range(40):
+        mid = 0.5 * (lo + hi)
+        if p_exact(mid) >= CONF:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+S_MAX_EXACT = exact_s_max()
+P_AT_LIN = p_exact(S_MAX)
+AB_EXACT = float((SIG0 + GSLOPE * S_CHECK) * 0.0 + np.nan)  # placeholder
+# exact a + 80b bound: P_exact(s=80 | sigma = a+80b) = 0.95 -> sigma_ex(80)
+# invert via bisection on sigma directly with the exact geometry
+def sigma_for_exact(s_target_p):
+    lo, hi = 0.0, 4.0
+    for _ in range(40):
+        mid = 0.5 * (lo + hi)
+        # P_exact as a function of sigma: temporarily evaluate via s-mapping
+        # p_exact depends on sigma only through sig = SIG0+GSLOPE*s; build a
+        # direct evaluator:
+        sig = mid
+        X = _HN * sig
+        dpar = np.repeat(X, 256)
+        dperp = np.tile(X, 256)
+        ww = np.repeat(_HW, 256) * np.tile(_HW, 256)
+        dalpha = np.degrees(np.arctan2(-dperp, D_TGT - dpar))
+        nd = statistics.NormalDist()
+        ndv = np.vectorize(lambda v: nd.cdf(v))
+        pv = ndv((PSI_LIM - dalpha)) - ndv((-PSI_LIM - dalpha))
+        p = float(ww @ pv)
+        if p >= CONF:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+SIG_EXACT_80 = sigma_for_exact(CONF)                 # allowable sigma at 80 m
+AB_EXACT = SIG_EXACT_80                              # a + 80b <= SIG_EXACT_80
+P_EXACT_80 = p_exact(S_CHECK)
+print(f"exact geometry: P({S_MAX:.2f}) = {P_AT_LIN:.5f}; "
+      f"s_max_exact = {S_MAX_EXACT:.3f} m; "
+      f"P(80) exact = {P_EXACT_80:.5f}; a+80b exact <= {AB_EXACT:.4f} m")
+
 # ----------------------------- 5) sensitivity -------------------------------
 # (a) s_max vs standoff distance d (linear: slope k*C/GSLOPE)
 sens_d = []
@@ -261,7 +338,7 @@ ax.plot(ss, vl + vz + vc, color="k", lw=1.4)
 ax.axvline(S_CROSS, color="k", lw=1.0, ls=":")
 ax.axvline(S_MAX, color="k", lw=1.0, ls=":")
 ax.set_xlim(0, 90)
-ax.set_ylim(0, 9)
+ax.set_ylim(0, 10.5)
 ax.set_xticks(range(0, 91, 15))
 _clean(ax)
 save(fig, "fig4_variance_shares")
@@ -322,6 +399,12 @@ results = {
                   "iso_levels": iso},
     "contributions": contrib,
     "s_crossover_m": S_CROSS,
+    "exact_geometry": {"P_at_linear_smax": P_AT_LIN,
+                       "s_max_exact_m": float(S_MAX_EXACT),
+                       "P_at_80_exact": P_EXACT_80,
+                       "ab_max_exact_m": AB_EXACT,
+                       "method": "256x256 probabilists' Hermite quadrature "
+                                 "of the exact atan2 geometry"},
     "monte_carlo": {"n": N_MC, "seed": 20261121, "points": mc,
                     "linearization_residual_rms_deg_at80": resid_rms_deg},
     "sensitivity": {"s_max_vs_d": sens_d, "ds_max_dd_m_per_m": d_smax_dd,
@@ -346,6 +429,9 @@ lines = [
     "MC validation (n=1e6): " +
     ", ".join(f"s={m['s']:g}: P_emp={m['P_emp']:.4f} vs {m['P_ana']:.4f} "
               f"(diff {m['P_diff']:+.5f})" for m in mc),
+    f"exact geometry (Hermite quadrature): P({S_MAX:.2f}) = {P_AT_LIN:.5f}, "
+    f"s_max_exact = {S_MAX_EXACT:.2f} m, P(80) exact = {P_EXACT_80:.5f}, "
+    f"a+80b exact <= {AB_EXACT:.4f} m",
     f"linearization residual RMS at s=80: {resid_rms_deg:.4f} deg "
     f"({resid_rms_deg/sig80*100:.2f}% of sigma_psi)",
     f"sensitivity: d(s_max)/d(d_tgt) = {d_smax_dd:.4f} m per m ; "

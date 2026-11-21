@@ -78,9 +78,9 @@ table(doc, ["Item", "Value"], [
 spacer(doc)
 
 # ============ III ============
-h1(doc, "III. 可直接粘贴的段落（英文先行，中文稿为对照）")
-para(doc, "【使用说明】3.1–3.7 每节先给可整段粘贴的英文（en 段落），随后附中文稿供核对内容与数字；"
-          "粘贴后请统一用 Word 公式编辑器重录公式并编号。", indent=False)
+h1(doc, "III. 可直接粘贴的段落（3.3–3.7 中英对照；3.1/3.2/3.5 仅英文+中文备注）")
+para(doc, "【使用说明】3.3/3.4/3.6/3.7 每节先给可整段粘贴的英文（en 段落），随后附中文稿供核对内容与数字；"
+          "3.1/3.2/3.5 仅英文段落 + 中文使用备注。粘贴后请统一用 Word 公式编辑器重录公式并编号。", indent=False)
 
 h2(doc, "3.1 Problem analysis（可放在 Problem Analysis 节）")
 en = ("Problem 1 asks for the vehicle-observable region of target T1 and the station that maximizes the "
@@ -119,7 +119,8 @@ en = ("Let p = (x, y) denote the station center. The observable region is define
       "the camera; and C3 requires the LOS segment (p, 2) → (84.6410, 70, 45) to be disjoint from every "
       "prism Bᵢ = [x₀, x₁] × [y₀, y₁] × [0, hᵢ], tested with the 3-D slab (interval-clipping) method, "
       "where tangency counts as occlusion. The optimization criterion is stated explicitly as")
-# 中文先行稿（最终英译时按此中文稿翻译）
+para(doc, en, indent=False)
+# 中文对照稿
 para(doc, "令 p = (x, y) 为观测站圆心，即车辆等效圆盘中心在地面上的投影。"
           "可观测区域定义为三个约束的交集 Ω = C1 ∩ C2 ∩ C3。", indent=False)
 para(doc, "C1（车辆几何）：车辆等效为半径 1.5 m 的圆盘，圆心须满足 1.5 ≤ x ≤ 98.5、1.5 ≤ y ≤ 98.5，"
@@ -178,9 +179,9 @@ h2(doc, "3.5 Tie-breaking rules（紧跟 3.4）")
 code_block(doc, """Because every point of the feasible arc attains the same optimal value, we break
 ties by a three-level lexicographic rule:
   T1 (safety-margin band)  with the geometric margin m(p) = min{ d(p, Bi) - 1.5,
-      distance to the four field edges } (on the optimal arc the elevation slack
+      distance to the inset field boundary } (on the optimal arc the elevation slack
       is zero by construction, so m covers geometric boundaries only; the LOS
-      roof clearance is reported separately), keep the band
+      clearance is reported separately), keep the band
       m(p) >= m* - 0.05 m, where m* = 9.6746 m is the true arc maximum, attained
       at phi = 56.50 deg where the B2-buffer distance equals the east-boundary
       distance.
@@ -213,7 +214,9 @@ en = ("Two closed-form sensitivities follow immediately from r* = (H − h_cam)/
       f"{sen['area_vs_vehicle_radius'][-1][1]:.0f} m² as R_veh grows from 1.0 m to 2.5 m); over the "
       "sampled ranges the B2 height moves the area about 4.5 times more in total, yet per unit of "
       "parameter change the vehicle radius is the stronger lever (≈427 vs ≈115 m² per m). Areas are "
-      "cell-center (midpoint) grid estimates with ~0.4% estimator uncertainty at h = 0.1 m; the trends "
+      "cell-center (midpoint) estimates: the h = 0.1 m and h = 0.05 m midpoints agree to "
+      "~0.03–0.04%, while the node-count convention runs ~0.4% higher; the regional scans use a "
+      "0.25 m midpoint grid. The trends "
       "are robust. Finally, replacing the metric by Q₂ = (1/r)·cos²(ε − 45°), which additionally prefers "
       "mid-range elevation angles, leaves the optimum on the same r*-circle; since Q₂ is still "
       "decreasing in r on this instance, this checks only the invariance of r* within that metric "
@@ -228,11 +231,14 @@ para(doc, "这些闭式关系表明，最优值只由目标高度、相机高度
           "更准确地说，在可行弧非空的前提下，改变建筑高度或位置只会改变最优弧在圆上的位置与长度，"
           "不会改变 r* 和 Q*；如果环境变化使整条 r = r_min 圆都不可行，最优值才会外移。"
           "这是“值稳健、位置敏感”结论的适用条件。", indent=False)
-para(doc, "区域层面，可观测面积随 B2 高度增加而单调下降：h_B2 从 20 m 增到 45 m 时，"
-          "面积由约 6355 m² 降到 3482 m²；h_B2 达到目标高度 45 m 后阴影饱和，继续增高不再改变面积。"
-          "面积随车辆半径增大近似线性下降：R_veh 从 1.0 m 增到 2.5 m 时，面积由约 5859 m² 降到 5218 m²。"
-          "需要说明的是，这些面积由网格估计得到，绝对量存在约 0.5% 量级的网格/估计器误差，"
-          "但单调趋势是稳健的。", indent=False)
+para(doc, f"区域层面，可观测面积随 B2 高度增加而单调下降：h_B2 从 20 m 增到 45 m 时，"
+          f"面积由约 {sen['area_vs_B2_height'][0][1]:.0f} m² 降到 {sen['area_vs_B2_height'][-1][1]:.0f} m²；"
+          "h_B2 达到目标高度 45 m 后阴影饱和，继续增高不再改变面积。"
+          f"面积随车辆半径增大近似线性下降：R_veh 从 1.0 m 增到 2.5 m 时，面积由约 "
+          f"{sen['area_vs_vehicle_radius'][0][1]:.0f} m² 降到 {sen['area_vs_vehicle_radius'][-1][1]:.0f} m²。"
+          "需要说明的是：这些扫描使用 0.25 m 单元中心网格，主面积（0.1 m 中点）与 0.05 m 中点"
+          "相差仅 ~0.03–0.04%（收敛）；节点计数口径约偏高 0.4%，那是口径差而非估计器误差。"
+          "单调趋势是稳健的。", indent=False)
 para(doc, "最后，构造兼顾俯仰角居中的备选度量 Q2 = (1/r)·cos²(ε − 45°)，在可行域上重新求解："
           "最优仍在 r* 圆上（网格解 r = 7.583 m，ε ≈ 80.0°）。由于 Q2 仍随 r 单调下降，"
           "这一检验说明度量选择不改变最优值 r*；最优弧上具体站点的选择仍需 tie-breaking。", indent=False)
@@ -271,10 +277,10 @@ table(doc, ["图", "文件", "建议英文 caption（PPT 备注页里也有）",
      "三个子图下标 (a)(b)(c)；坐标轴；标 T1′"],
     ["Fig. 3", "fig3_optimal_arc_zoom",
      "Left: the optimal circle r* = 7.58 m near T1 — green arc feasible (≈284°), red arc blocked by B2 and "
-     "its 1.5 m buffer; right: safety-margin profile along the circle — red open circle = arc maximum "
-     "m* = 9.675 m at φ = 56.5°, black pentagon = selected station (margin 9.625 m, band member with "
-     "shortest travel).",
-     "坐标轴 φ (deg) / margin (m)；标 “p* (chosen station)” “m*” “T1′” “V4” “B2”"],
+     "its 1.5 m buffer; right: margin profile relative to the arc maximum, m(p) − m* — the shaded "
+     "horizontal strip is the 0.05 m tie-breaking band, the black pentagon (selected station, "
+     "m − m* ≈ −0.05) sits at the band's lower edge, red open circle = the arc maximum at φ = 56.5°.",
+     "坐标轴 φ (deg) / m − m* (m)；标 “p* (chosen station)” “m*” “T1′” “V4” “B2”；区分竖向灰带=被挡弧、横向浅蓝带=并列带"],
     ["Fig. 4", "fig4_sensitivity_rstar",
      "Closed-form sensitivity of r*: versus target altitude H (left) and versus the gimbal elevation bound "
      "(right); nominal parameters marked.",

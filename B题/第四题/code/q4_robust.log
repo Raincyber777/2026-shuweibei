@@ -1,0 +1,36 @@
+audit: 74 scenarios, 0 issues
+margin failV4: m00 eta=1.00 tlast=11.17 minclr=4.7596 | m05 eta=1.00 tlast=11.17 minclr=4.7596 repaired=0 (2s)
+margin new_th135_R30: m00 eta=1.00 tlast=15.87 minclr=0.0669 | m05 eta=1.00 tlast=15.87 minclr=0.5145 repaired=1 (18s)
+margin triple_th135_R30: m00 eta=1.00 tlast=25.01 minclr=0.0013 | m05 eta=1.00 tlast=25.01 minclr=0.0013 repaired=1 (7s)
+eps 0.02: eta=1.00 tlast=11.17
+eps 0.05: eta=1.00 tlast=11.17
+eps 0.1: eta=1.00 tlast=11.17
+robust baseline replay starts: {'T1': 1.54, 'T3': 10.837, 'T2': 10.804}
+robust-baseline failV4: keep eta=0.67 | resched eta=1.00 tlast=10.84
+robust-baseline new_th135_R30: keep eta=0.50 | resched eta=1.00 tlast=15.87
+dens th22.5: eta=1.00 tlast=16.45
+dens th67.5: eta=1.00 tlast=15.47
+dens th112.5: eta=1.00 tlast=15.61
+dens th157.5: eta=1.00 tlast=16.39
+dens th202.5: eta=1.00 tlast=16.07
+dens th247.5: eta=1.00 tlast=15.57
+dens th292.5: eta=1.00 tlast=14.57
+dens th337.5: eta=1.00 tlast=15.51
+==== Problem 4 robustness summary ====
+audit: 74 scenarios, 0 accounting issues
+margin0.5 failV4: eta 1.00->1.00, t_last 11.17->11.17, min_clearance 4.7596->4.7596 (stations repaired: 0)
+margin0.5 new_th135_R30: eta 1.00->1.00, t_last 15.87->15.87, min_clearance 0.0669->0.5145 (stations repaired: 1)
+margin0.5 triple_th135_R30: eta 1.00->1.00, t_last 25.01->25.01, min_clearance 0.0013->0.0013 (stations repaired: 1)
+eps 0.02 m: eta=1.00 t_last=11.17
+eps 0.05 m: eta=1.00 t_last=11.17
+eps 0.1 m: eta=1.00 t_last=11.17
+robust-baseline failV4: keep 0.67/60 -> resched 1.00/10.84
+robust-baseline new_th135_R30: keep 0.50/60 -> resched 1.00/15.87
+dens th22.5 R40: eta=1.00 t_last=16.45
+dens th67.5 R40: eta=1.00 t_last=15.47
+dens th112.5 R40: eta=1.00 t_last=15.61
+dens th157.5 R40: eta=1.00 t_last=16.39
+dens th202.5 R40: eta=1.00 t_last=16.07
+dens th247.5 R40: eta=1.00 t_last=15.57
+dens th292.5 R40: eta=1.00 t_last=14.57
+dens th337.5 R40: eta=1.00 t_last=15.51

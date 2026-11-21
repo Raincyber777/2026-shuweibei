@@ -41,12 +41,14 @@ FIGS = [
      "Fig. 3  Left: zoom near T1 showing the optimal circle r* = 7.58 m; green arc = "
      "feasible portion (~284 deg), red arc = blocked by B2 and its 1.5 m clearance "
      "buffer (~76 deg); black pentagon = chosen optimal station (88.88, 76.29); "
-     "blue square = nearest vehicle V4. Right: geometric safety-margin profile along "
-     "the circle vs. polar angle; shaded band = blocked arc; the red open circle marks "
-     "the true maximum margin m* = 9.675 m at phi = 56.5 deg (where the B2-buffer "
-     "distance equals the east-boundary distance); the black pentagon is the finally "
-     "selected station -- the shortest-to-reach point inside the tie-breaking band "
-     "m >= m* - 0.05 m (its own margin is 9.625 m, limited by the east boundary)."),
+     "blue square = nearest vehicle V4; the vertical grey band marks the blocked arc. "
+     "Right: margin profile relative to the arc maximum, m(p) - m*; the horizontal "
+     "light-blue strip is the 0.05 m tie-breaking band [m*-0.05, m*]; the red open "
+     "circle marks the arc maximum m* = 9.675 m at phi = 56.5 deg (B2-buffer distance "
+     "equals the east-boundary distance there); the black pentagon is the finally "
+     "selected station -- the shortest-to-reach point inside the band, sitting at the "
+     "band's lower edge (m - m* = -0.05, its own margin 9.625 m limited by the east "
+     "boundary)."),
     ("fig4_sensitivity_rstar",
      "Fig. 4  Closed-form sensitivity of the optimal distance r* = (H-2)/tan(80 deg). "
      "Left: r* vs. target altitude H (nominal H = 45 m marked; slope 0.176 m per m). "

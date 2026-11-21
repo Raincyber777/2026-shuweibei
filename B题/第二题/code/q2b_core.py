@@ -404,6 +404,91 @@ top5 = [{"obj_s": round(t[0], 3), "sum_starts_s": round(t[1], 3),
         for t in top_full[:5]]
 print("top-5 structures after polish:", json.dumps(top5))
 
+# ---- knife-edge disclosure + robust variant (LOS clearance >= 0.5 m) -------
+def los_clearance(px, py, a):
+    """Min clearance of the LOS from station (px,py) to alert a over roofs (m)."""
+    tgt, h = TARGETS[a], TARGET_H[a]
+    t = np.linspace(0.0, 1.0, 4001)
+    sx = px + (tgt[0] - px) * t
+    sy = py + (tgt[1] - py) * t
+    sz = H_CAM + (h - H_CAM) * t
+    best = np.inf
+    for (bx0, bx1, by0, by1, bh) in BUILDINGS:
+        over = (sx >= bx0) & (sx <= bx1) & (sy >= by0) & (sy <= by1)
+        if over.any():
+            best = min(best, float(sz[over].min()) - bh)
+        else:
+            dx = np.maximum(np.maximum(bx0 - sx, sx - bx1), 0.0)
+            dy = np.maximum(np.maximum(by0 - sy, sy - by1), 0.0)
+            dz = np.maximum(np.maximum(0.0 - sz, sz - bh), 0.0)
+            best = min(best, float(np.min(np.sqrt(dx * dx + dy * dy + dz * dz))))
+    return best
+
+knife = {f"V{v+1}": {a: round(los_clearance(*stations[(v, a)], a), 6)
+                     for a in orders.get(v, [])} for v in range(5)}
+min_knife = min(min(d.values()) for d in knife.values())
+print("station LOS clearances:", knife, " min:", min_knife)
+
+MARGIN = 0.5
+robust_best = None
+for ob_e, asg_e, ord_e, st_e in top_polished[:8]:
+    st_r = dict(st_e)
+    ob_r = ob_e
+
+    def feas_m(x, y, a):
+        return feasible_scalar(x, y, a) and \
+            los_clearance(x, y, a) >= MARGIN - 1e-9
+
+    for _s in range(3):
+        imp = False
+        _o2, _s2, ready2, ok2 = simulate(asg_e, ord_e, st_r)
+        if not ok2:
+            break
+        for v in range(5):
+            for a in ord_e.get(v, []):
+                cur = np.array(st_r[(v, a)], float)
+
+                def rob_obj(p, v=v, a=a, cur=cur, st_r=st_r):
+                    if not feas_m(p[0], p[1], a):
+                        return 1e4 + np.hypot(p[0] - cur[0], p[1] - cur[1])
+                    s2 = dict(st_r)
+                    s2[(v, a)] = (float(p[0]), float(p[1]))
+                    o2, _s3, _r3, ok3 = simulate(asg_e, ord_e, s2)
+                    return o2 if ok3 else 1e4
+
+                px, pf = nelder_mead(rob_obj, cur, step=0.6, tol=1e-4,
+                                     max_iter=160)
+                if pf < ob_r - 1e-9 and feas_m(px[0], px[1], a):
+                    st_r[(v, a)] = (float(px[0]), float(px[1]))
+                    ob_r, _s4, _r4, ok4 = simulate(asg_e, ord_e, st_r)
+                    imp = True
+        if not imp:
+            break
+    if ok2 or True:
+        clr = {f"V{v+1}": {a: round(los_clearance(*st_r[(v, a)], a), 4)
+                           for a in ord_e.get(v, [])} for v in range(5)}
+        ok_final = all(c >= MARGIN - 1e-9 for d in clr.values()
+                       for c in d.values())
+        if ok_final and (robust_best is None or ob_r < robust_best[0]):
+            robust_best = (ob_r, asg_e, ord_e, st_r, clr)
+if robust_best is not None:
+    ob_rb, asg_rb, ord_rb, st_rb, clr_rb = robust_best
+    obj_rb, starts_rb, _rd, ok_rb = simulate(asg_rb, ord_rb, st_rb)
+    robust = {"margin_m": MARGIN, "obj_s": float(obj_rb),
+              "starts": {a: round(v, 3) for a, v in starts_rb.items()},
+              "clearances": clr_rb,
+              "assignment": {a: [v + 1 for v in asg_rb[a]]
+                             for a in ("T1", "T2", "T3")},
+              "orders": {f"V{v+1}": ord_rb.get(v, []) for v in range(5)},
+              "stations": {f"V{v+1}": {a: [round(x, 4) for x in st_rb[(v, a)]]
+                                       for a in ord_rb.get(v, [])}
+                           for v in range(5)}}
+    print(f"robust (LOS >= {MARGIN} m): obj = {obj_rb:.3f} s  starts "
+          f"{ {a: round(v,3) for a,v in starts_rb.items()} }")
+else:
+    robust = {"margin_m": MARGIN, "obj_s": None}
+    print("robust variant: no margin-feasible scheme found in top structures")
+
 # ------------------------------------------ 5) nearest-assignment heuristic
 def nearest_assignment_baseline():
     stations = {}
@@ -532,11 +617,12 @@ for sp in (2.5, 3.0, 3.5):
     for om in (24.0, 30.0, 36.0):
         SPEED = sp
         OMEGA = om
+        _lib.SPEED = sp          # travel_time reads q2_lib.SPEED — must patch too
         _lib.OMEGA = om
         obj2, starts2, _r2, ok2 = simulate(assignment, orders, stations)
         sens.append({"speed": sp, "omega_deg_s": om,
                      "obj_s": float(obj2) if ok2 else None})
-SPEED, OMEGA, _lib.OMEGA = _sp0, _om0, _om0
+SPEED, OMEGA, _lib.SPEED, _lib.OMEGA = _sp0, _om0, _sp0, _om0
 
 # ------------------------------------------------------------- 8) dump
 results = {
@@ -566,6 +652,9 @@ results = {
     "gantt_opt": {f"V{v+1}": opt_segs[v] for v in range(5)},
     "gantt_heu": {f"V{v+1}": h_segs[v] for v in range(5)},
     "sensitivity_speed_omega": sens,
+    "knife_edge": {"station_clearances_m": knife,
+                   "min_station_clearance_m": float(min_knife)},
+    "robust_05": robust,
 }
 with open(os.path.join(RES_DIR, "q2b_results.json"), "w", encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False, indent=2, default=float)

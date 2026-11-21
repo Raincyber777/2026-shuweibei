@@ -447,16 +447,18 @@ axm.set_xticks(range(70, 101, 10)); axm.set_yticks(range(55, 86, 10))
 axm.set_aspect("equal")
 _clean_axes(axm)
 
-mplot = np.where(arc_feasible, margins, np.nan)
+mplot = np.where(arc_feasible, margins - m_star, np.nan)
 axp.plot(phi_deg, mplot, color=COL_ARC_OK, lw=1.6)
-axp.axhspan(m_star - 0.05, m_star, color="#d6e8fa", alpha=0.6, zorder=0)
-axp.plot([m_star_phi], [m_star], marker="o", ms=11, mfc="none",
+axp.axhspan(-0.05, 0.0, color="#d6e8fa", alpha=0.8, zorder=0)
+axp.plot([m_star_phi], [0.0], marker="o", ms=11, mfc="none",
          mec=COL_TGT, mew=1.6, zorder=6)
-axp.plot([opt_phi], [opt_margin], marker="p", ms=9, mfc=COL_OPT, mec="w",
-         mew=1.0, zorder=7)
+axp.plot([opt_phi], [opt_margin - m_star], marker="p", ms=9, mfc=COL_OPT,
+         mec="w", mew=1.0, zorder=7)
 for a, b in blocked_runs:
     axp.axvspan(a, b, color=COL_INFEAS, zorder=0)
 axp.set_xlim(0, 360)
+axp.set_ylim(-4.2, 0.4)
+axp.set_yticks([-4, -3, -2, -1, 0])
 axp.set_xticks(range(0, 361, 60))
 axp.set_xlabel(" ")
 axp.tick_params(labelsize=10)

@@ -243,6 +243,40 @@ def pair_optimize(iv, jv, mask_g, Xg, Yg, rg):
                             float(TY + xv[0] * np.sin(np.radians(xv[1]))),
                             float(TX + xv[2] * np.cos(np.radians(xv[3]))),
                             float(TY + xv[2] * np.sin(np.radians(xv[3])))))
+
+    # boundary-aware refinement for non-certified pairs: put the capable
+    # vehicle's station exactly on the r_min circle (d1 = r_min), open the
+    # intersection angle to exactly 90 deg (phi2 = phi1 +/- 90), and minimize
+    # the far station's feasible range d2 along that ray. Removes the boundary
+    # bias of the penalty-based NM (review: G 9.0063 -> 8.9962 for V2 pairs).
+    if best[0] > G_STAR * 1.0005:
+        d2g = np.arange(RMIN, 60.0, 0.05)
+        for capable in (0, 1):
+            iv_c, jv_c = (iv, jv) if capable == 0 else (jv, iv)
+            for ph1 in np.arange(0.0, 360.0, 0.25):
+                x1 = TX + RMIN * np.cos(np.radians(ph1))
+                y1 = TY + RMIN * np.sin(np.radians(ph1))
+                if not feas_ok(RMIN, ph1, iv_c):
+                    continue
+                for sgn in (+1.0, -1.0):
+                    ph2 = (ph1 + sgn * 90.0) % 360.0
+                    x2g = TX + d2g * np.cos(np.radians(ph2))
+                    y2g = TY + d2g * np.sin(np.radians(ph2))
+                    okg = ((x2g >= R_VEH) & (x2g <= FIELD - R_VEH) &
+                           (y2g >= R_VEH) & (y2g <= FIELD - R_VEH) &
+                           (np.hypot(x2g - VEHICLES[jv_c, 0],
+                                     y2g - VEHICLES[jv_c, 1]) <= REACH))
+                    for b in BUILDINGS:
+                        okg &= dist_to_rect(x2g, y2g, b) >= R_VEH
+                    okg &= ~los_blocked_h(x2g, y2g, T2P, H2)
+                    idx = np.flatnonzero(okg)
+                    if len(idx) == 0:
+                        continue
+                    d2 = float(d2g[idx[0]])
+                    g_b = float(np.sqrt((RMIN ** 2 + d2 ** 2) / 2.0))
+                    if g_b < best[0] - 1e-9:
+                        best = (g_b, (float(x1), float(y1),
+                                      float(x2g[idx[0]]), float(y2g[idx[0]])))
     return best
 
 

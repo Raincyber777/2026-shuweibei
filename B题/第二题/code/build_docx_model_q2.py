@@ -205,6 +205,20 @@ para(doc, f"结构枚举+精修后有 {n_tie} 个结构并列达到最优 {top5[
           f"二级 tie-breaking 取三告警开始时刻之和最小者（{top5[0]['sum_starts_s']:.2f} s），唯一确定最终方案。")
 
 # ============================ V ============================
+h2(doc, "IV.5 刀锋解披露与 0.5 m 裕度鲁棒变体（复核后新增）")
+knife = RB["knife_edge"]
+rob = RB["robust_05"]
+para(doc, f"最优方案（数学最优 {op['objective_s']:.3f} s）的两处站位 LOS 净空处于刀锋量级："
+          f"V3 的 T3 站 {knife['station_clearances_m']['V3']['T3']:.4g} m、V4 的 T2 站 "
+          f"{knife['station_clearances_m']['V4']['T2']:.4g} m——数学上可行（非相切），物理上脆弱。"
+          f"以 LOS 净空 ≥ {rob['margin_m']:.1f} m 为附加约束，对最优 8 个结构做裕度惩罚精修，"
+          f"得鲁棒变体 obj = {rob['obj_s']:.3f} s（+{(rob['obj_s']-op['objective_s']):.3f} s），"
+          f"开始时刻 {rob['starts']}——部署建议采用鲁棒变体；η/t_last 对比结论对两种口径均成立。"
+          f"另注：“最优”指 1000 指派结构 × 站点精修意义下的最好解（结构穷举完备、站点精修为数值方法），非全局证书。")
+para(doc, "路径模型口径说明：绕障路径用 1.5 m 方形外扩（矩形膨胀），站址判据用圆盘距离——方形外扩是圆盘外扩的"
+          "包围盒，方形路径为保守上界；V2 相关组合的不可行结论在两种口径下均成立（方形 30.28 s > 30 s，"
+          "圆盘网格上界 30.37 s），但裕度较薄。V2 的直线既穿 B4 也穿 B5 的缓冲。", indent=False)
+
 h1(doc, "V. 模型检验与敏感性")
 h2(doc, "V.1 蒙特卡洛验证（2(1)）")
 mc = ch["MC"]
@@ -225,7 +239,13 @@ for s in sorted(sens, key=lambda t: (t["speed"], t["omega_deg_s"])):
     rows.append([f"{s['speed']}", f"{s['omega_deg_s']:.0f}",
                  f"{s['obj_s']:.2f}" if s["obj_s"] is not None else "—"])
 table(doc, ["车速 (m/s)", "云台角速度 (°/s)", "目标值 (s)"], rows)
-para(doc, "目标值对云台角速度最敏感（24→36 °/s 改善约 8.4%），对车速几乎不敏感（±17% 车速仅改变 ±0.4%）——"
+sens_map = {(s["speed"], s["omega_deg_s"]): s["obj_s"] for s in sens}
+o_base = op["objective_s"]
+sp_lo, sp_hi = sens_map[(2.5, 30.0)], sens_map[(3.5, 30.0)]
+om_lo, om_hi = sens_map[(3.0, 24.0)], sens_map[(3.0, 36.0)]
+para(doc, f"目标值对云台角速度最敏感（24→36 °/s 变化 "
+          f"{(om_hi-om_lo)/o_base*100:.1f}%），对车速次之（±17% 车速变化 "
+          f"{(sp_lo-o_base)/o_base*100:+.1f}% / {(sp_hi-o_base)/o_base*100:+.1f}%）——"
           "再次印证“转角主导、行程次要”的结构性结论；部署启示：优先小转角选站、提高云台转速收益大于提速。")
 h2(doc, "V.4 2(1) 的闭式敏感性与佐证数值")
 senA = RA["sensitivity"]

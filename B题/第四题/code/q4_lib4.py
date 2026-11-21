@@ -18,6 +18,7 @@ from q2_lib import (BUILDINGS, FIELD, OMEGA, R_VEH, H_CAM, SPEED, TARGETS,
                     pointing_angles, travel_time, path_length, nelder_mead)
 
 OBS_LEN = 5.0
+EPS_TRAVEL_M = 0.05    # repositionings shorter than this count as no-travel
 ALERT_KEYS = ["T1", "T2", "T3"]
 SUB_TARGET = 15000
 
@@ -53,6 +54,25 @@ def build_cloud(tx, ty, h, step=0.1, sub_target=SUB_TARGET):
     return {"tgt": tgt, "h": h, "rmin": rmin, "pts": pts, "sub": sub,
             "az": az, "el": el, "slew": sl,
             "area": float(m.sum()) * step * step}
+
+
+def los_clearance_pt(x, y, tgt, h, n=3001):
+    """Min LOS clearance from station (x,y) to alert (tgt,h) over roofs (m)."""
+    t = np.linspace(0.0, 1.0, n)
+    sx = x + (tgt[0] - x) * t
+    sy = y + (tgt[1] - y) * t
+    sz = H_CAM + (h - H_CAM) * t
+    best = np.inf
+    for (bx0, bx1, by0, by1, bh) in BUILDINGS:
+        over = (sx >= bx0) & (sx <= bx1) & (sy >= by0) & (sy <= by1)
+        if over.any():
+            best = min(best, float(sz[over].min()) - bh)
+        else:
+            dx = np.maximum(np.maximum(bx0 - sx, sx - bx1), 0.0)
+            dy = np.maximum(np.maximum(by0 - sy, sy - by1), 0.0)
+            dz = np.maximum(np.maximum(0.0 - sz, sz - bh), 0.0)
+            best = min(best, float(np.min(np.sqrt(dx * dx + dy * dy + dz * dz))))
+    return best
 
 
 def feasible_pt(x, y, tgt, h, rmin):
@@ -221,7 +241,7 @@ def simulate_init(asg, orders, stations, init, pending):
                 az, el, _ = station_times(st, TARGETS[a] if a in ALERT_KEYS
                                           else ALERTS4[a][0], ALERTS4[a][1])
                 travel = travel_time(pos, st)
-                if travel * SPEED > 0.05:   # <= 5 cm repositioning counts as no-travel
+                if travel * SPEED > EPS_TRAVEL_M:   # <= 5 cm repositioning counts as no-travel
                     slew = max(abs(az), abs(el)) / OMEGA
                 else:
                     slew = max(abs(wrap180(az - att[0])),
@@ -282,6 +302,7 @@ def chain_candidates(cloud, pos, k=40):
 
 
 def optimize_resched(asg, orders, init, clouds, pending, topk=12,
+                     los_margin=0.0,
                      sweeps=3):
     """Fast pass over all (pair, order) structures + descent/polish on top-K.
 
@@ -373,11 +394,17 @@ def optimize_resched(asg, orders, init, clouds, pending, topk=12,
                                            cl["rmin"]):
                             return 1e4 + np.hypot(p[0] - cur[0],
                                                   p[1] - cur[1])
+                        pen = 0.0
+                        if los_margin > 0:
+                            clr = los_clearance_pt(p[0], p[1], cl["tgt"],
+                                                   cl["h"])
+                            if clr < los_margin:
+                                pen = 50.0 * (los_margin - clr)
                         s2 = dict(st_c)
                         s2[(v, a)] = (float(p[0]), float(p[1]))
                         o2, _s2, _r2, ok2 = simulate_init(asg_c, orders, s2,
                                                           init, pending)
-                        return o2 if ok2 else 1e4
+                        return (o2 if ok2 else 1e4) + pen
 
                     px, pf = nelder_mead(fpol, cur, step=0.5, tol=1e-4,
                                          max_iter=140)
@@ -422,7 +449,7 @@ def gantt_init(asg, orders, stations, init, starts, targets):
             az, el, _ = station_times(st, *targets[a])
             travel = travel_time(pos, st)
             arrive = t_free + travel
-            if travel * SPEED > 0.05:   # <= 5 cm repositioning counts as no-travel
+            if travel * SPEED > EPS_TRAVEL_M:   # <= 5 cm repositioning counts as no-travel
                 slew = max(abs(az), abs(el)) / OMEGA
             else:
                 slew = max(abs(wrap180(az - att[0])),
@@ -431,7 +458,7 @@ def gantt_init(asg, orders, stations, init, starts, targets):
             start = starts[a]
             end = start + OBS_LEN
             reset_done = end + max(abs(az), abs(el)) / OMEGA
-            if travel * SPEED > 0.05:   # <= 5 cm repositioning counts as no-travel
+            if travel * SPEED > EPS_TRAVEL_M:   # <= 5 cm repositioning counts as no-travel
                 segs[v].append(["travel", t_free, arrive])
             segs[v] += [["slew", arrive, rd], ["wait", rd, start],
                         ["obs", start, end], ["reset", end, reset_done]]

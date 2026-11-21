@@ -259,10 +259,14 @@ def path_length(p, q, buildings=None, clearance=R_VEH):
     return float(dist[1]), False
 
 
-def travel_time(p, q, buildings=None, speed=SPEED):
-    """Travel time between two points with obstacle avoidance (s)."""
+def travel_time(p, q, buildings=None, speed=None):
+    """Travel time between two points with obstacle avoidance (s).
+
+    speed=None reads the module-level SPEED at call time, so parameter
+    sweeps can patch it (a default-argument binding would be frozen).
+    """
     L, _ = path_length(p, q, buildings)
-    return L / speed
+    return L / (SPEED if speed is None else speed)
 
 
 # ----------------------------- tiny optimizer -------------------------------

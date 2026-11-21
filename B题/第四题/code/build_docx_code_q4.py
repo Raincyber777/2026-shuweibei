@@ -29,6 +29,8 @@ table(doc, ["文件", "职责"], [
     ["q4_core.py", "基线加载与自校验（回放必须复现 q2b 开始时刻）、keep-original 解析评估、"
                    f"六大类 {sum(cnt.values())} 个场景循环、代表性甘特、results/q4_results.json"],
     ["q4_figs.py", "6 张图（地图着色/方位曲线/故障柱状/中断曲线/代表甘特/全局散点），图内仅数字"],
+    ["q4_robust.py", "鲁棒性与检验：74 场景记账审计、0.5 m LOS 裕度重调度（含站点修复）、"
+                     "零位移容差 ε 敏感性、鲁棒基线替换、8 个中间方位加密 → q4_robust.json"],
     ["build_pptx_q4.py / build_docx_*_q4.py", "图集 PPTX 与三份文档（数字读自 JSON）"],
 ])
 
