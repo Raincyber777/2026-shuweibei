@@ -2,9 +2,15 @@
 """Build the Chinese Word draft from 数维杯B题_中文初稿.md.
 
 - A4, Chinese body font SimSun + Times New Roman
-- Cover page, auto TOC field, headers/footers with PAGE/NUMPAGES fields
+- Title on the summary page (no separate cover); auto TOC (levels 1-2)
+- Four sections: summary / TOC / body / appendix; body page numbering restarts at 1
 - Pipe tables -> Word tables; [[FIG:path|caption]] -> centered picture + caption
-- Insert all 28 figures from the four question folders
+- Insert all figures referenced by [[FIG:...]] markers
+
+Rebuild examples:
+  python -I build_docx_paper_cn.py                      # single-spaced, full figure set
+  PAPER_LINE_SPACING=1.5 python -I build_docx_paper_cn.py
+  PAPER_MD=... PAPER_OUT=... PAPER_APPENDIX_START=22 PAPER_BODY_PAGES=21 python -I build_docx_paper_cn.py
 """
 import os
 import re
@@ -14,6 +20,8 @@ from docx import Document
 from docx.shared import Cm, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.enum.section import WD_SECTION
+from docx.enum.style import WD_STYLE_TYPE
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.opc.part import Part
@@ -23,8 +31,8 @@ from lxml import etree
 from PIL import Image
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-MD = os.path.join(BASE, "数维杯B题_中文初稿.md")
-OUT = os.path.join(BASE, "数维杯B题_中文初稿.docx")
+MD = os.environ.get("PAPER_MD", os.path.join(BASE, "数维杯B题_中文初稿.md"))
+OUT = os.environ.get("PAPER_OUT", os.path.join(BASE, "数维杯B题_中文初稿.docx"))
 
 BODY_FONT_CN = "宋体"
 BODY_FONT_EN = "Times New Roman"
@@ -32,6 +40,17 @@ HEAD_FONT_CN = "黑体"
 BODY_SIZE = 12
 CAPTION_SIZE = 10.5
 TABLE_SIZE = 9
+
+# Submission placeholder: replace with the real team ID before submission.
+TEAM_ID = "<队伍号>"
+# "1.5" (default) or "1.0"; override with PAPER_LINE_SPACING=1.0 for the single-spaced test.
+LINE_SPACING = os.environ.get("PAPER_LINE_SPACING", "1.0")
+# "1" = force every chapter onto a new page; "0" = let short chapters flow.
+CHAPTER_BREAKS = os.environ.get("PAPER_CHAPTER_BREAKS", "0") == "1"
+# Appendix page number set to body page count + 1 so numbering continues.
+APPENDIX_START = os.environ.get("PAPER_APPENDIX_START", "")
+# Cached field hints for viewers that do not recalculate fields.
+BODY_PAGES_HINT = os.environ.get("PAPER_BODY_PAGES", "1")
 
 A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -88,7 +107,7 @@ def set_cell_margins(table, top=40, bottom=40, left=60, right=60):
     tblPr.append(mar)
 
 
-def add_field(paragraph, instr, size=9):
+def add_field(paragraph, instr, size=9, result="1"):
     run = paragraph.add_run()
     set_run_font(run, size=size)
     fld1 = OxmlElement('w:fldChar')
@@ -99,7 +118,7 @@ def add_field(paragraph, instr, size=9):
     fld2 = OxmlElement('w:fldChar')
     fld2.set(qn('w:fldCharType'), 'separate')
     t = OxmlElement('w:t')
-    t.text = "1"
+    t.text = result
     fld3 = OxmlElement('w:fldChar')
     fld3.set(qn('w:fldCharType'), 'end')
     run._r.append(fld1)
@@ -132,7 +151,7 @@ def add_toc_field(doc):
     r2 = _run()
     it = OxmlElement('w:instrText')
     it.set(qn('xml:space'), 'preserve')
-    it.text = 'TOC \\o "1-3" \\h \\z \\u'
+    it.text = 'TOC \\o "1-2" \\h \\z \\u'
     r2._r.append(it)
 
     r3 = _run()
@@ -161,13 +180,38 @@ def enable_update_fields(doc):
     uf.set(qn('w:val'), 'true')
 
 
+def setup_toc_styles(doc):
+    """Compact TOC levels so the whole TOC fits on one page."""
+    for name, size in (("TOC 1", 10.5), ("TOC 2", 10.5)):
+        try:
+            st = doc.styles[name]
+        except KeyError:
+            st = doc.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
+        st.font.name = BODY_FONT_EN
+        st.font.size = Pt(size)
+        rpr = st.element.get_or_add_rPr()
+        rfonts = rpr.find(qn('w:rFonts'))
+        if rfonts is None:
+            rfonts = OxmlElement('w:rFonts')
+            rpr.append(rfonts)
+        rfonts.set(qn('w:eastAsia'), BODY_FONT_CN)
+        pf = st.paragraph_format
+        pf.first_line_indent = Cm(0)
+        pf.space_before = Pt(0)
+        pf.space_after = Pt(0)
+        pf.line_spacing = 1.0
+
+
 def setup_styles(doc):
     normal = doc.styles['Normal']
     normal.font.name = BODY_FONT_EN
     normal.font.size = Pt(BODY_SIZE)
     normal.element.rPr.rFonts.set(qn('w:eastAsia'), BODY_FONT_CN)
     pf = normal.paragraph_format
-    pf.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
+    if LINE_SPACING == "1.0":
+        pf.line_spacing = 1.0
+    else:
+        pf.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
     pf.first_line_indent = Cm(0.85)
     pf.space_before = Pt(0)
     pf.space_after = Pt(0)
@@ -188,73 +232,107 @@ def setup_styles(doc):
             st.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
 
-def setup_page(doc):
-    sec = doc.sections[0]
+def set_section_page(sec):
     sec.page_width = Cm(21.0)
     sec.page_height = Cm(29.7)
     sec.top_margin = Cm(2.54)
     sec.bottom_margin = Cm(2.54)
     sec.left_margin = Cm(2.5)
     sec.right_margin = Cm(2.5)
-    sec.different_first_page_header_footer = True
+    sec.different_first_page_header_footer = False
 
+
+def set_page_start(sec, start=1):
+    sectPr = sec._sectPr
+    pg = sectPr.find(qn('w:pgNumType'))
+    if pg is None:
+        pg = OxmlElement('w:pgNumType')
+        sectPr.append(pg)
+    pg.set(qn('w:start'), str(start))
+
+
+def clear_page_start(sec):
+    pg = sec._sectPr.find(qn('w:pgNumType'))
+    if pg is not None:
+        pg.attrib.pop(qn('w:start'), None)
+
+
+def _blank_header_footer(sec):
+    sec.header.is_linked_to_previous = False
+    sec.footer.is_linked_to_previous = False
+    sec.different_first_page_header_footer = False
+    sec.header.paragraphs[0].text = ""
+    sec.footer.paragraphs[0].text = ""
+
+
+def setup_front_section(sec):
+    """Abstract / TOC: no page number (body restarts at 1)."""
+    _blank_header_footer(sec)
+
+
+def setup_body_section(sec):
+    """Body: Team + Page X of Y (Y = pages in this body section)."""
+    sec.header.is_linked_to_previous = False
+    sec.footer.is_linked_to_previous = False
+    sec.different_first_page_header_footer = False
     hp = sec.header.paragraphs[0]
+    hp.text = ""
     hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = hp.add_run("Team <队伍号>  Page ")
+    r = hp.add_run("Team # " + TEAM_ID + "  Page ")
     set_run_font(r, size=9)
     add_field(hp, "PAGE", 9)
     r = hp.add_run(" of ")
     set_run_font(r, size=9)
-    add_field(hp, "NUMPAGES", 9)
+    add_field(hp, "SECTIONPAGES", 9, result=BODY_PAGES_HINT)
 
     fp = sec.footer.paragraphs[0]
+    fp.text = ""
     fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = fp.add_run("第 ")
-    set_run_font(r, size=9)
-    add_field(fp, "PAGE", 9)
-    r = fp.add_run(" 页")
-    set_run_font(r, size=9)
+    add_field(fp, "PAGE", 10.5)
 
 
-def add_cover(doc):
-    for _ in range(4):
-        doc.add_paragraph()
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("2026 年第十二届数维杯全国大学生")
-    set_run_font(r, size=18, bold=True, cn=HEAD_FONT_CN)
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("数学建模挑战赛（秋季赛）")
-    set_run_font(r, size=18, bold=True, cn=HEAD_FONT_CN)
-    doc.add_paragraph()
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("B 题")
-    set_run_font(r, size=20, bold=True, cn=HEAD_FONT_CN)
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("多移动观测车协同的无人机快速定位与调度")
-    set_run_font(r, size=16, bold=True, cn=HEAD_FONT_CN)
-    for _ in range(5):
-        doc.add_paragraph()
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("中 文 初 稿")
-    set_run_font(r, size=14, bold=True, cn=HEAD_FONT_CN)
-    doc.add_paragraph()
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("2026 年 11 月")
-    set_run_font(r, size=12)
-    for _ in range(4):
-        doc.add_paragraph()
+def setup_appendix_section(sec):
+    """Appendix: no header; footer page number continues from the body."""
+    sec.header.is_linked_to_previous = False
+    sec.footer.is_linked_to_previous = False
+    sec.different_first_page_header_footer = False
+    sec.header.paragraphs[0].text = ""
+    clear_page_start(sec)
+    fp = sec.footer.paragraphs[0]
+    fp.text = ""
+    fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    add_field(fp, "PAGE", 10.5, result=APPENDIX_START.strip() or "1")
+
+
+def setup_page(doc):
+    set_section_page(doc.sections[0])
+    setup_front_section(doc.sections[0])
+
+
+def add_title_block(doc):
+    """Title at the top of the summary page (no separate cover)."""
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.first_line_indent = Cm(0)
-    r = p.add_run("本稿用于内容定稿、图表插入与格式检查；终稿按赛事要求统一英译。")
-    set_run_font(r, size=10.5, color=RGBColor(0x66, 0x66, 0x66), italic=True)
-    doc.add_page_break()
+    r = p.add_run("多移动观测车协同的无人机快速定位与调度")
+    set_run_font(r, size=18, bold=True, cn=HEAD_FONT_CN)
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.first_line_indent = Cm(0)
+    p.paragraph_format.space_after = Pt(6)
+    r = p.add_run("2026 年第十二届数维杯全国大学生数学建模挑战赛（秋季赛）B 题")
+    set_run_font(r, size=12)
+
+
+def add_front_heading(doc, text):
+    """Summary / TOC heading: visually like Heading 1 but excluded from TOC."""
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.first_line_indent = Cm(0)
+    p.paragraph_format.space_before = Pt(10)
+    p.paragraph_format.space_after = Pt(8)
+    r = p.add_run(text)
+    set_run_font(r, size=16, bold=True, cn=HEAD_FONT_CN)
 
 
 def add_caption(doc, text, size=CAPTION_SIZE):
@@ -344,9 +422,15 @@ def add_table(doc, rows):
         else:
             widths = [4.0, 6.0, 6.0]
     elif ncol == 4:
-        widths = [6.0, 3.5, 3.25, 3.25]
+        if rows[0][0].strip() == "检验对象":
+            widths = [4.2, 5.8, 4.2, 1.8]
+        else:
+            widths = [6.0, 3.5, 3.25, 3.25]
     elif ncol == 5:
-        widths = [3.0, 3.25, 3.25, 3.25, 3.25]
+        if rows[0][0].strip() == "告警":
+            widths = [2.6, 4.6, 2.6, 3.0, 3.2]
+        else:
+            widths = [3.0, 3.25, 3.25, 3.25, 3.25]
     elif ncol == 6:
         widths = [2.4, 2.6, 2.7, 2.7, 2.8, 2.8]
     elif ncol == 9 and rows[0][0].strip() == "告警":
@@ -437,7 +521,8 @@ def main():
     doc = Document()
     setup_page(doc)
     setup_styles(doc)
-    add_cover(doc)
+    setup_toc_styles(doc)
+    add_title_block(doc)
 
     # start at abstract
     start = next((k for k, l in enumerate(lines) if l.strip() == "## 摘要"), 0)
@@ -484,15 +569,16 @@ def main():
             text = s[3:].strip()
             if text == "目录":
                 in_abstract = False
-                doc.add_page_break()
-                doc.add_heading("目录", level=1)
+                sec = doc.add_section(WD_SECTION.NEW_PAGE)
+                setup_front_section(sec)
+                add_front_heading(doc, "目录")
                 add_toc_field(doc)
                 skip_toc = True
                 i += 1
                 continue
             if text == "摘要":
                 in_abstract = True
-                doc.add_heading("摘要", level=1)
+                add_front_heading(doc, "摘要")
                 content_started = True
                 i += 1
                 continue
@@ -505,7 +591,18 @@ def main():
             if text.startswith("2026 年"):
                 i += 1
                 continue
-            if content_started:
+            if text.startswith("1 问题重述"):
+                sec = doc.add_section(WD_SECTION.NEW_PAGE)
+                setup_body_section(sec)
+                set_page_start(sec, 1)
+                set_section_page(sec)
+            elif text == "附录":
+                sec = doc.add_section(WD_SECTION.NEW_PAGE)
+                setup_appendix_section(sec)
+                set_section_page(sec)
+                if APPENDIX_START.strip().isdigit():
+                    set_page_start(sec, int(APPENDIX_START.strip()))
+            elif content_started and CHAPTER_BREAKS:
                 doc.add_page_break()
             doc.add_heading(text, level=1)
             content_started = True
@@ -541,9 +638,9 @@ def main():
         p = doc.add_paragraph()
         add_runs(p, s)
         if in_abstract:
-            p.paragraph_format.line_spacing = 1.3
+            p.paragraph_format.line_spacing = 1.15
             for r in p.runs:
-                r.font.size = Pt(11)
+                r.font.size = Pt(12)
         i += 1
 
     # post-process headings so that fonts are explicit (Word sometimes keeps theme fonts)
