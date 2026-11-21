@@ -1,0 +1,25 @@
+saved fig1_observable_region
+saved fig2_constraint_layers
+saved fig3_optimal_arc_zoom
+saved fig4_sensitivity_rstar
+saved fig5_sensitivity_area
+saved fig6_los_3d
+==== Problem 1 numeric summary ====
+T1 horizontal projection : (84.6410, 70.0000)  H = 45.0 m
+closed-form r* = (H-Hcam)/tan(80deg) = 7.5821 m   Q* = 0.1319 /m
+grid(0.1 m): area (midpoint) = 5610.4 m^2 (node-count 5628.7 m^2) ; best feasible r = 7.5828 m at (92.2, 69.4) (diff +0.0007 m)
+optimal arc: feasible 78.8% of the circle
+  blocked runs (deg): [(160.75, 236.89)]
+  feasible runs (deg): [(236.9, 360.0), (0.0, 160.75)]
+  TRUE max margin m* = 9.6746 m at phi = 56.504 deg (point (88.82541624622819, 76.32285001203971), B2-buffer and east-boundary balanced there)
+chosen station: phi = 56.050 deg  p* = (88.8753, 76.2895)
+  r = 7.5821 m   elevation = 80.000 deg   Q = 0.1319 /m
+  selected margin = 9.6247 m (in band [m*-0.05, m*] = [9.6246, 9.6746])   LOS clearance = 7.41 m
+  nearest vehicle V4  travel time = 2.78 s (straight path clear: True)
+  straight-line travel (LB) / feasible-path travel from all vehicles:
+    V1: 32.21/34.36s, V2: 22.10/22.10s, V3: 25.17/25.17s, V4: 2.78/2.78s, V5: 14.10/14.10s
+sensitivity: dr*/dH = 0.1763 m/m ; dr*/d(eps_max) = -0.7738 m/deg
+area scan base (midpoint 0.25 m) = 5614.9 m^2
+area vs B2 height: [(20, 6300.4), (24, 6026.4), (28, 5614.9), (32, 4913.2), (36, 4069.7), (40, 3557.7), (45, 3447.9)]
+area vs vehicle radius: [(1.0, 5821.9), (1.5, 5614.9), (2.0, 5397.0), (2.5, 5176.7)]
+alt metric Q2: station (92.2, 69.4), r = 7.583 m, elev = 80.00 deg (only verifies r* invariance: Q2 is still decreasing in r)

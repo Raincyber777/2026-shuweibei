@@ -1,0 +1,25 @@
+{
+  "target": "T1",
+  "r_min_m": 7.582060170463998,
+  "estimators": {
+    "h=0.25": {
+      "midpoint_area_m2": 5614.9375,
+      "midpoint_cells": 130329,
+      "node_count_area_m2": 5652.3125,
+      "node_cells": 131573
+    },
+    "h=0.1": {
+      "midpoint_area_m2": 5610.400000000001,
+      "midpoint_cells": 814475,
+      "node_count_area_m2": 5628.68,
+      "node_cells": 817642
+    },
+    "h=0.05": {
+      "midpoint_area_m2": 5608.5275,
+      "midpoint_cells": 3258087,
+      "node_count_area_m2": 5619.6125,
+      "node_cells": 3264319
+    }
+  },
+  "note": "area = count * h^2; midpoint vs node-count"
+}

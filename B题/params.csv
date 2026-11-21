@@ -1,0 +1,46 @@
+﻿category,id,parameter,value,unit,note
+field,-,field_size,100,m,"[0,100] x [0,100]"
+field,-,dispatch_center_O,"(50, 50)",m,"alerts given in (theta,R) about O"
+vehicle,-,equivalent_disk_radius,1.5,m,
+vehicle,-,camera_height,2.0,m,above ground
+vehicle,-,speed,3.0,m/s,"constant, no acceleration"
+gimbal,-,pan_rate,30,deg/s,
+gimbal,-,tilt_rate,30,deg/s,both axes move together
+gimbal,-,elevation_min,-10.0,deg,closed interval
+gimbal,-,elevation_max,80.0,deg,closed interval
+gimbal,-,observation_duration,5,s,synchronized two-vehicle dwell
+building,B1,x_range,"[22, 34]",m,
+building,B1,y_range,"[16, 26]",m,
+building,B1,height,20,m,axis-aligned cuboid
+building,B2,x_range,"[63, 79]",m,
+building,B2,y_range,"[59, 71]",m,
+building,B2,height,28,m,axis-aligned cuboid
+building,B3,x_range,"[10, 24]",m,
+building,B3,y_range,"[65, 76]",m,
+building,B3,height,12,m,axis-aligned cuboid
+building,B4,x_range,"[72, 86]",m,
+building,B4,y_range,"[22, 34]",m,
+building,B4,height,24,m,axis-aligned cuboid
+building,B5,x_range,"[41, 51]",m,
+building,B5,y_range,"[38, 46]",m,
+building,B5,height,32,m,axis-aligned cuboid
+vehicle,V1,initial_position,"(15, 14)",m,
+vehicle,V2,initial_position,"(88, 10)",m,
+vehicle,V3,initial_position,"(14, 86)",m,
+vehicle,V4,initial_position,"(88, 68)",m,
+vehicle,V5,initial_position,"(50, 93)",m,
+alert,T1,azimuth_theta,30,deg,counter-clockwise from +x
+alert,T1,horizontal_range_R,40,m,from dispatch center O
+alert,T1,height_H,45,m,
+alert,T1,horizontal_projection,"(84.6410, 70.0000)",m,"exact x,y projection"
+alert,T1,r_min_geom,7.5821,m,(H-h_cam)/tan(elev_max)
+alert,T2,azimuth_theta,150,deg,counter-clockwise from +x
+alert,T2,horizontal_range_R,45,m,from dispatch center O
+alert,T2,height_H,35,m,
+alert,T2,horizontal_projection,"(11.0289, 72.5000)",m,"exact x,y projection"
+alert,T2,r_min_geom,5.8188,m,(H-h_cam)/tan(elev_max)
+alert,T3,azimuth_theta,285,deg,counter-clockwise from +x
+alert,T3,horizontal_range_R,38,m,from dispatch center O
+alert,T3,height_H,55,m,
+alert,T3,horizontal_projection,"(59.8351, 13.2948)",m,"exact x,y projection"
+alert,T3,r_min_geom,9.3453,m,(H-h_cam)/tan(elev_max)

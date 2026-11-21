@@ -1,0 +1,87 @@
+baseline replay OK: {'T1': 1.607, 'T2': 6.994, 'T3': 10.355}
+base clouds ready {'T2': 6413.1, 'T3': 5459.8}
+A th0_R30: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.77 starts={'T2': np.float64(6.994), 'T1': 1.607, 'T3': np.float64(16.772), 'T4': 11.085}
+A th0_R40: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.66 starts={'T2': 15.399, 'T1': 1.607, 'T3': 16.658, 'T4': 8.881}
+A th0_R50: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.97 starts={'T2': 11.168, 'T1': 1.607, 'T3': 15.975, 'T4': 8.346}
+A th45_R30: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.45 starts={'T2': np.float64(16.449), 'T1': 1.607, 'T3': 6.671, 'T4': 10.063}
+A th45_R40: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.77 starts={'T2': np.float64(6.994), 'T1': 1.607, 'T3': np.float64(16.772), 'T4': 10.02}
+A th45_R50: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.74 starts={'T2': 15.399, 'T1': 1.607, 'T3': 16.745, 'T4': 8.623}
+A th90_R30: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.29 starts={'T2': 13.221, 'T1': 1.607, 'T3': np.float64(15.287), 'T4': np.float64(6.572)}
+A th90_R40: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=14.94 starts={'T2': 13.221, 'T1': 1.607, 'T3': np.float64(14.945), 'T4': np.float64(6.122)}
+A th90_R50: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=14.91 starts={'T2': 13.221, 'T1': 1.607, 'T3': 14.909, 'T4': 5.999}
+A th135_R30: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.87 starts={'T2': 11.168, 'T1': 1.607, 'T3': 6.671, 'T4': np.float64(15.865)}
+A th135_R40: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.12 starts={'T2': 11.168, 'T1': 1.607, 'T3': 6.671, 'T4': np.float64(16.12)}
+A th135_R50: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.32 starts={'T2': 15.399, 'T1': 1.607, 'T3': np.float64(16.316), 'T4': np.float64(6.657)}
+A th180_R30: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.16 starts={'T2': 11.168, 'T1': 1.607, 'T3': 15.164, 'T4': 5.786}
+A th180_R40: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.70 starts={'T2': 11.168, 'T1': 1.607, 'T3': 15.697, 'T4': 5.787}
+A th180_R50: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.26 starts={'T2': 11.168, 'T1': 1.607, 'T3': 16.257, 'T4': 5.852}
+A th225_R30: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.49 starts={'T2': 11.168, 'T1': 1.607, 'T3': np.float64(15.486), 'T4': np.float64(6.59)}
+A th225_R40: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.88 starts={'T2': 11.168, 'T1': 1.607, 'T3': 15.876, 'T4': 6.619}
+A th225_R50: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=16.45 starts={'T2': np.float64(16.449), 'T1': 1.607, 'T3': 6.671, 'T4': 12.712}
+A th270_R30: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.39 starts={'T2': 11.168, 'T1': 1.607, 'T3': 6.994, 'T4': 15.394}
+A th270_R40: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.11 starts={'T2': 11.168, 'T1': 1.607, 'T3': 6.671, 'T4': 15.11}
+A th270_R50: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.05 starts={'T2': 11.168, 'T1': 1.607, 'T3': 6.671, 'T4': 15.047}
+A th315_R30: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=15.86 starts={'T2': 11.168, 'T1': 1.607, 'T3': 15.859, 'T4': 7.902}
+A th315_R40: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=14.39 starts={'T2': 11.168, 'T1': 1.607, 'T3': 14.391, 'T4': 6.497}
+A th315_R50: keep eta=0.75 tlast=60.0 | resched eta=1.00 tlast=14.47 starts={'T2': 11.168, 'T1': 1.607, 'T3': 6.671, 'T4': 14.466}
+representative T4 positions: {'best': 'th315_R40', 'mid': 'th135_R30', 'worst': 'th45_R40'}
+B fail V1: keep eta=0.667 tlast=60.0 | resched eta=1.000 tlast=11.17
+B fail V2: keep eta=0.667 tlast=60.0 | resched eta=1.000 tlast=10.90
+B fail V3: keep eta=0.667 tlast=60.0 | resched eta=1.000 tlast=10.90
+B fail V4: keep eta=0.667 tlast=60.0 | resched eta=1.000 tlast=11.17
+B fail V5: keep eta=1.000 tlast=10.4 | resched eta=1.000 tlast=10.35
+C outage t_rec=10: keep eta=1.00 | resched eta=1.00 tlast=10.35
+C outage t_rec=20: keep eta=1.00 | resched eta=1.00 tlast=10.35
+C outage t_rec=30: keep eta=1.00 | resched eta=1.00 tlast=10.35
+D fail V1 out10: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=21.01
+D fail V1 out20: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=25.08
+D fail V1 out30: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=35.08
+D fail V2 out10: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=12.77
+D fail V2 out20: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=22.77
+D fail V2 out30: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=32.77
+D fail V3 out10: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=12.77
+D fail V3 out20: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=22.77
+D fail V3 out30: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=32.77
+D fail V4 out10: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=16.77
+D fail V4 out20: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=23.41
+D fail V4 out30: keep eta=0.667 tlast=60 | resched eta=1.000 tlast=33.41
+D fail V5 out10: keep eta=1.000 tlast=10 | resched eta=1.000 tlast=10.35
+D fail V5 out20: keep eta=1.000 tlast=10 | resched eta=1.000 tlast=10.35
+D fail V5 out30: keep eta=1.000 tlast=10 | resched eta=1.000 tlast=10.35
+E th315_R40+V2: keep eta=0.500 | resched eta=1.000 tlast=18.43
+E th315_R40+V4: keep eta=0.500 | resched eta=1.000 tlast=18.43
+E th135_R30+V2: keep eta=0.500 | resched eta=1.000 tlast=19.57
+E th135_R30+V4: keep eta=0.500 | resched eta=1.000 tlast=19.57
+E th45_R40+V2: keep eta=0.500 | resched eta=1.000 tlast=17.82
+E th45_R40+V4: keep eta=0.500 | resched eta=1.000 tlast=17.82
+F th315_R40+out10: keep eta=0.750 | resched eta=1.000 tlast=16.60
+F th315_R40+out20: keep eta=0.750 | resched eta=1.000 tlast=21.50
+F th315_R40+out30: keep eta=0.750 | resched eta=1.000 tlast=31.50
+F th135_R30+out10: keep eta=0.750 | resched eta=1.000 tlast=16.77
+F th135_R30+out20: keep eta=0.750 | resched eta=1.000 tlast=22.55
+F th135_R30+out30: keep eta=0.750 | resched eta=1.000 tlast=32.55
+F th45_R40+out10: keep eta=0.750 | resched eta=1.000 tlast=16.77
+F th45_R40+out20: keep eta=0.750 | resched eta=1.000 tlast=21.88
+F th45_R40+out30: keep eta=0.750 | resched eta=1.000 tlast=31.88
+G th315_R40+V2+out10: keep eta=0.500 | resched eta=1.000 tlast=21.14
+G th315_R40+V2+out30: keep eta=0.500 | resched eta=1.000 tlast=33.40
+G th315_R40+V4+out10: keep eta=0.500 | resched eta=1.000 tlast=22.59
+G th315_R40+V4+out30: keep eta=0.500 | resched eta=1.000 tlast=34.32
+G th135_R30+V2+out10: keep eta=0.500 | resched eta=1.000 tlast=21.79
+G th135_R30+V2+out30: keep eta=0.500 | resched eta=1.000 tlast=33.91
+G th135_R30+V4+out10: keep eta=0.500 | resched eta=1.000 tlast=25.01
+G th135_R30+V4+out30: keep eta=0.500 | resched eta=1.000 tlast=36.46
+G th45_R40+V2+out10: keep eta=0.500 | resched eta=1.000 tlast=20.14
+G th45_R40+V2+out30: keep eta=0.500 | resched eta=1.000 tlast=33.91
+G th45_R40+V4+out10: keep eta=0.500 | resched eta=1.000 tlast=21.53
+G th45_R40+V4+out30: keep eta=0.500 | resched eta=1.000 tlast=34.05
+timeline audit: 70 scenario timelines, 0 negative/overlapping segments
+==== Problem 4 numeric summary ====
+baseline starts: {'T1': 1.607, 'T2': 6.994, 'T3': 10.355}
+A_new: n=24  resched gains eta in 24, gains t_last in 0
+B_fail: n=5  resched gains eta in 4, gains t_last in 0
+C_out: n=3  resched gains eta in 0, gains t_last in 0
+D_fail_out: n=15  resched gains eta in 12, gains t_last in 0
+E_new_fail: n=6  resched gains eta in 6, gains t_last in 0
+F_new_out: n=9  resched gains eta in 9, gains t_last in 0
+G_triple: n=12  resched gains eta in 12, gains t_last in 0

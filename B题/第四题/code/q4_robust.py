@@ -89,7 +89,8 @@ def run_resched(recs_base, base_st, t_plan, failed=None, with_new=None,
     """Re-optimization from the snapshot of recs_base at t_plan (shared by all
     robustness checks). base_st = the baseline's alert start times."""
     snap = L.snapshot(recs_base, t_plan)
-    init = {v: dict(t_avail=s["t_avail"], pos=s["pos"], att=s["att"])
+    init = {v: dict(t_avail=s["t_avail"], pos=s["pos"], att=s["att"],
+                    unobserved=s["unobserved"])
             for v, s in snap.items() if v != failed}
     started = [a for a in ("T2", "T3") if base_st[a] < t_plan
                and (failed is None or failed not in CUR_ASG[a])]

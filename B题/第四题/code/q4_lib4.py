@@ -161,7 +161,7 @@ def snapshot(recs, t):
         rs = recs[v]
         if not rs:
             snap[v] = dict(t_avail=t, pos=tuple(VEHICLES[v]), att=(0.0, 0.0),
-                           locked_until=0.0)
+                           locked_until=0.0, unobserved=True)
             continue
         state = ("idle", None)
         for r in rs:
@@ -186,85 +186,106 @@ def snapshot(recs, t):
         kind, r = state
         if kind == "idle":
             snap[v] = dict(t_avail=t, pos=tuple(VEHICLES[v]), att=(0.0, 0.0),
-                           locked_until=0.0)
+                           locked_until=0.0, unobserved=True)
         elif kind == "waiting":
             snap[v] = dict(t_avail=t, pos=tuple(r["st"]),
-                           att=(r["az"], r["el"]), locked_until=0.0)
+                           att=(r["az"], r["el"]), locked_until=0.0,
+                           unobserved=True)
         elif kind == "enroute":
             f = (t - r["depart"]) / max(r["travel"], 1e-12)
             p = (r["from"][0] + (r["st"][0] - r["from"][0]) * f,
                  r["from"][1] + (r["st"][1] - r["from"][1]) * f)
-            snap[v] = dict(t_avail=t, pos=p, att=(0.0, 0.0), locked_until=0.0)
+            snap[v] = dict(t_avail=t, pos=p, att=(0.0, 0.0), locked_until=0.0,
+                           unobserved=True)
         elif kind == "slewing":
             f = (t - r["arrive"]) / max(r["slew"], 1e-12)
             snap[v] = dict(t_avail=t, pos=tuple(r["st"]),
-                           att=(f * r["az"], f * r["el"]), locked_until=0.0)
+                           att=(f * r["az"], f * r["el"]), locked_until=0.0,
+                           unobserved=True)
         elif kind == "observing":
+            # locked alert already observed -> next dispatch resets to east
             snap[v] = dict(t_avail=r["reset_done"], pos=tuple(r["st"]),
-                           att=(0.0, 0.0), locked_until=r["end"])
+                           att=(0.0, 0.0), locked_until=r["end"],
+                           unobserved=False)
         elif kind == "resetting":
             snap[v] = dict(t_avail=r["reset_done"], pos=tuple(r["st"]),
-                           att=(0.0, 0.0), locked_until=r["reset_done"])
+                           att=(0.0, 0.0), locked_until=r["reset_done"],
+                           unobserved=False)
         else:  # after the last task's reset
             snap[v] = dict(t_avail=max(t, r["reset_done"]),
                            pos=tuple(r["st"]), att=(0.0, 0.0),
-                           locked_until=0.0)
+                           locked_until=0.0, unobserved=False)
     return snap
 
 
 # ---------------- attitude-aware simulator -----------------------------------
-def simulate_init(asg, orders, stations, init, pending):
+def _same_vals(d1, d2, tol=1e-9):
+    if d1.keys() != d2.keys():
+        return False
+    return all(abs(d1[k] - d2[k]) <= tol for k in d1)
+
+
+def simulate_init(asg, orders, stations, init, pending, max_sweeps=100):
     """Fixed-point simulation from the snapshot state.
 
-    init: {v: (t_avail, pos, att)}; pending: alert keys to evaluate.
+    init: {v: (t_avail, pos, att, unobserved)}; pending: alert keys to evaluate.
     Returns (obj, starts, ready, feasible).
-    Slew rule: any positive travel leg forces the due-east attitude (problem
-    rule), so the slew starts from (0,0) unless travel == 0.
+
+    The whole chain is re-walked every sweep until every ready time and alert
+    start stops changing (true fixed point).  A per-vehicle done-pointer is NOT
+    enough: the first vehicle in the sweep would freeze start times computed
+    from a partner's stale ready time, yielding start < ready (negative waits).
+    Sweeps are monotone non-decreasing; a cycle (mutual dependency) never
+    converges and is reported as infeasible after max_sweeps.
+
+    Slew rule (adjudicated): "continue from the current attitude" applies only
+    to an unobserved reassignment whose new station coincides with the current
+    one (no travel leg).  Any travel leg forces the due-east attitude during
+    driving (problem rule), hence a full slew from (0,0).
     """
-    ready = {}
-    alert_start = {}
-    chain = {v: (init[v]["t_avail"], init[v]["pos"], init[v]["att"])
-             for v in init}
-    done = {v: 0 for v in init}
-    total = sum(len(orders.get(v, [])) for v in init)
-    rounds = 0
-    while sum(done.values()) < total and rounds < 12:
-        rounds += 1
-        progress = False
-        for v in init:
+    vehicles = sorted(init)
+    prev_ready, prev_start = {}, {}
+    converged = False
+    for _sweep in range(max_sweeps):
+        ready, alert_start = {}, {}
+        complete = True
+        chain = {v: (init[v]["t_avail"], init[v]["pos"], init[v]["att"])
+                 for v in vehicles}
+        for v in vehicles:
             t_free, pos, att = chain[v]
-            walked = []
-            for a in orders.get(v, [])[done[v]:]:
+            for a in orders.get(v, []):
                 st = stations.get((v, a))
                 if st is None:
                     return (np.inf, {}, {}, False)
                 az, el, _ = station_times(st, TARGETS[a] if a in ALERT_KEYS
                                           else ALERTS4[a][0], ALERTS4[a][1])
                 travel = travel_time(pos, st)
-                if travel * SPEED > EPS_TRAVEL_M:   # <= 5 cm repositioning counts as no-travel
+                unobs = init[v].get("unobserved", True)
+                if travel * SPEED > EPS_TRAVEL_M or not unobs:
+                    # travel (or a finished observation) => reset to due east
                     slew = max(abs(az), abs(el)) / OMEGA
                 else:
+                    # unobserved, same-station reassignment: continue slew
                     slew = max(abs(wrap180(az - att[0])),
                                abs(el - att[1])) / OMEGA
                 rd = t_free + travel + slew
                 ready[(v, a)] = rd
-                v2 = asg[a][0] if asg[a][1] == v else asg[a][1]
-                if (v2, a) in ready:
-                    start = max(rd, ready[(v2, a)])
-                else:
+                v2 = _partner(asg, v, a)
+                pr = ready.get((v2, a), prev_ready.get((v2, a)))
+                if pr is None:
+                    complete = False
                     break
+                start = max(rd, pr)
                 alert_start[a] = start
                 t_free = start + OBS_LEN + max(abs(az), abs(el)) / OMEGA
                 pos = st
                 att = (0.0, 0.0)
-                walked.append(a)
-            if walked:
-                done[v] += len(walked)
-                chain[v] = (t_free, pos, att)
-                progress = True
-        if not progress:
+        if complete and _same_vals(ready, prev_ready) \
+                and _same_vals(alert_start, prev_start):
+            converged = True
             break
-    if set(pending) - set(alert_start):
+        prev_ready, prev_start = ready, alert_start
+    if not converged or set(pending) - set(alert_start):
         return (np.inf, {}, {}, False)
     obj = max(alert_start[a] for a in pending)
     return (obj, alert_start, ready, True)
@@ -439,23 +460,36 @@ def _partner(asg, v, a):
 ALERT_KEYS3 = ["T1", "T2", "T3"]   # replaced dynamically by the caller
 
 
-def gantt_init(asg, orders, stations, init, starts, targets):
-    """Timeline segments from the snapshot state (for representative plots)."""
+def gantt_init(asg, orders, stations, init, starts, targets, ready):
+    """Timeline segments from the snapshot state (for representative plots).
+
+    ready is the converged dict returned by simulate_init.  The slew end and
+    the observation start are taken from that same state, so ``wait`` is
+    non-negative by construction: start = max(ready[(v,a)], ready[(v2,a)]).
+    """
     segs = {v: [] for v in range(5)}
     for v in init:
         t_free, pos, att = init[v]["t_avail"], init[v]["pos"], init[v]["att"]
+        first = True
         for a in orders.get(v, []):
             st = stations[(v, a)]
             az, el, _ = station_times(st, *targets[a])
             travel = travel_time(pos, st)
-            arrive = t_free + travel
-            if travel * SPEED > EPS_TRAVEL_M:   # <= 5 cm repositioning counts as no-travel
+            # the snapshot attitude (continue-slew) only applies to the first
+            # task; after any completed task the gimbal resets to due east
+            unobs = init[v].get("unobserved", True) and first
+            if travel * SPEED > EPS_TRAVEL_M or not unobs:
                 slew = max(abs(az), abs(el)) / OMEGA
             else:
                 slew = max(abs(wrap180(az - att[0])),
                            abs(el - att[1])) / OMEGA
-            rd = arrive + slew
-            start = starts[a]
+            rd = ready[(v, a)]
+            arrive = rd - slew
+            start = max(rd, ready[(_partner(asg, v, a), a)])
+            if start < rd - 1e-9 or abs(start - starts[a]) > 1e-6:
+                raise RuntimeError(
+                    f"timeline inconsistency on V{v+1}/{a}: "
+                    f"rd={rd:.6f} start={start:.6f} stored={starts[a]:.6f}")
             end = start + OBS_LEN
             reset_done = end + max(abs(az), abs(el)) / OMEGA
             if travel * SPEED > EPS_TRAVEL_M:   # <= 5 cm repositioning counts as no-travel
@@ -464,4 +498,6 @@ def gantt_init(asg, orders, stations, init, starts, targets):
                         ["obs", start, end], ["reset", end, reset_done]]
             t_free = reset_done
             pos = st
+            att = (0.0, 0.0)
+            first = False
     return segs

@@ -337,6 +337,20 @@ ax.add_patch(Rectangle((0, 0), 100, 100, fill=False, ec="k", lw=1.2))
 ax.set_xlim(0, 100); ax.set_ylim(0, 100)
 ax.set_xticks(range(0, 101, 20)); ax.set_yticks(range(0, 101, 20))
 ax.set_aspect("equal")
+from matplotlib.lines import Line2D
+ax.legend(handles=[
+    Line2D([], [], marker="*", color=COL_TGT, linestyle="none", ms=11,
+           label="target"),
+    Line2D([], [], marker="o", color="k", linestyle="none", ms=5,
+           label="dispatch centre O"),
+    Line2D([], [], marker="s", color=COL_VEH, mec="k", linestyle="none",
+           ms=7, label="vehicle initial position"),
+    Line2D([], [], marker="p", color=COL_VEH, mec="k", linestyle="none",
+           ms=9, label="observation station"),
+    Line2D([], [], color=COL_VEH, lw=1.4, label="route"),
+    Line2D([], [], color=COL_TGT, lw=0.8, ls="--", alpha=0.6,
+           label="O-alert line")],
+    loc="upper left", bbox_to_anchor=(1.02, 1.0), frameon=False, fontsize=8)
 _clean(ax)
 save(fig, "fig9_routes_map")
 

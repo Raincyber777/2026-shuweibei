@@ -168,10 +168,18 @@ for v in range(5):
 for ax in (a5a, a5b):
     ax.set_ylim(-0.7, 4.7)
     ax.set_yticks(range(5))
-    ax.set_yticklabels([str(i + 1) for i in range(5)])
+    ax.set_yticklabels([f"V{i + 1}" for i in range(5)])
     ax.set_xlim(0, 60)
     ax.set_xticks(range(0, 61, 10))
     _clean(ax)
+from matplotlib.patches import Patch
+fig.legend(handles=[
+    Patch(facecolor=STYLE[k][0], edgecolor=COL_EDGE,
+          label=lbl) for k, lbl in
+    (("travel", "travel"), ("slew", "slew"), ("wait", "wait"),
+     ("obs", "observation (5 s)"), ("reset", "reset"))],
+    loc="lower center", ncol=5, frameon=False, fontsize=9)
+fig.subplots_adjust(bottom=0.2)
 save(fig, "fig5_gantt_failV4")
 
 # --- fig6: all-scenarios scatter -----------------------------------------

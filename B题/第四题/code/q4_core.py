@@ -99,7 +99,8 @@ def keep_original(failed=None, with_new=None):
 def reschedule(t_plan, failed=None, with_new=None, tag=""):
     """One-shot re-optimization at t_plan from the disturbance snapshot."""
     snap = L.snapshot(recs, t_plan)
-    init = {v: dict(t_avail=s["t_avail"], pos=s["pos"], att=s["att"])
+    init = {v: dict(t_avail=s["t_avail"], pos=s["pos"], att=s["att"],
+                    unobserved=s["unobserved"])
             for v, s in snap.items() if v != failed}
     started = [a for a in ("T2", "T3") if base_starts[a] < t_plan
                and (failed is None or failed not in BASE_ASG[a])]
@@ -131,8 +132,8 @@ def reschedule(t_plan, failed=None, with_new=None, tag=""):
                                              else 0), "eta": None,
                 "t_last": 60.0, "feasible": False}
     obj, asg_r, orders_r, st_r = best
-    obj, starts, _r, ok = L.simulate_init(asg_r, orders_r, st_r, init,
-                                          pending)
+    obj, starts, ready_r, ok = L.simulate_init(asg_r, orders_r, st_r, init,
+                                               pending)
     assert ok
     N = 3 + (1 if with_new is not None else 0)
     # count ALL alerts that start inside the window: T1 (already completed at
@@ -143,7 +144,7 @@ def reschedule(t_plan, failed=None, with_new=None, tag=""):
     all_starts.update(starts)
     t_last = float(max(all_starts.values())) if k == N else 60.0
     segs = L.gantt_init(asg_r, orders_r, st_r, init, starts,
-                        {a: L.ALERTS4[a] for a in pending})
+                        {a: L.ALERTS4[a] for a in pending}, ready_r)
     return {"k": k, "N": N, "eta": eta, "t_last": t_last,
             "feasible": True, "n_comb": n_comb,
             "starts": {a: round(v, 3) for a, v in all_starts.items()},
@@ -283,6 +284,32 @@ results = {
                        "keep_failV4": keep_g["failV4"],
                        "keep_triple": keep_g["triple"]},
 }
+# ------------------------------------------------ timeline audit (must pass)
+def audit_segs(segs):
+    bad = 0
+    for _v, ss in segs.items():
+        prev_end = -1.0
+        for typ, t0, t1 in [(x[0], float(x[1]), float(x[2])) for x in ss]:
+            if t1 < t0 - 1e-9 or t0 < prev_end - 1e-9:
+                bad += 1
+            prev_end = max(prev_end, t1)
+    return bad
+
+
+n_bad, n_checked = 0, 0
+for _b in ("scen_new", "scen_fail", "scen_out", "scen_fail_out",
+           "scen_new_fail", "scen_new_out", "scen_triple"):
+    for _s in results[_b]:
+        _segs = _s["resched"].get("segs") or {}
+        if _segs:
+            n_checked += 1
+            n_bad += audit_segs(_segs)
+for _k in ("resched_failV4", "resched_triple"):
+    n_bad += audit_segs(results["representative"][_k]["segs"])
+print(f"timeline audit: {n_checked} scenario timelines, "
+      f"{n_bad} negative/overlapping segments")
+assert n_bad == 0, "timeline audit failed"
+
 with open(os.path.join(RES_DIR, "q4_results.json"), "w", encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False, indent=2, default=float)
 

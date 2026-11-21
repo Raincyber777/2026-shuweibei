@@ -418,9 +418,11 @@ _clean_axes(ax)
 save(fig, "fig1_observable_region")
 
 # --- Fig 2: three constraint layers ------------------------------------------
-fig, axs = plt.subplots(1, 3, figsize=(13.2, 4.6))
-layers = [(c1, "C1"), (c1 & c2, "C1&C2"), (mask, "C1&C2&C3")]
-for k, (m, _) in enumerate(layers):
+fig, axs = plt.subplots(1, 3, figsize=(13.2, 4.9))
+layers = [(c1, "(a) C1: vehicle geometry"),
+          (c1 & c2, "(b) C1 + C2: elevation bound"),
+          (mask, "(c) C1 + C2 + C3: line of sight")]
+for k, (m, lbl) in enumerate(layers):
     axs[k].imshow(m, extent=(0, 100, 0, 100), origin="lower",
                   cmap=matplotlib.colors.ListedColormap([COL_INFEAS, COL_FEAS]),
                   interpolation="nearest", aspect="equal")
@@ -429,8 +431,18 @@ for k, (m, _) in enumerate(layers):
     axs[k].add_patch(Rectangle((0, 0), 100, 100, fill=False, ec="k", lw=1.0))
     axs[k].set_xlim(0, 100); axs[k].set_ylim(0, 100)
     axs[k].set_xticks(range(0, 101, 20)); axs[k].set_yticks(range(0, 101, 20))
+    axs[k].set_title(lbl, fontsize=11)
     _clean_axes(axs[k])
-fig.subplots_adjust(wspace=0.12)
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
+fig.legend(handles=[
+    Patch(facecolor=COL_FEAS, edgecolor=COL_EDGE, label="feasible"),
+    Patch(facecolor=COL_INFEAS, edgecolor=COL_EDGE, label="infeasible"),
+    Patch(facecolor=COL_BLD, edgecolor=COL_EDGE, label="building"),
+    Line2D([], [], marker="*", color=COL_TGT, linestyle="none",
+           ms=11, label="target T1")],
+    loc="lower center", ncol=4, frameon=False, fontsize=10)
+fig.subplots_adjust(wspace=0.12, bottom=0.16)
 save(fig, "fig2_constraint_layers")
 
 # --- Fig 3: zoom on the optimal circle + margin profile ----------------------
@@ -466,7 +478,11 @@ axm.set_xticks(range(70, 101, 10)); axm.set_yticks(range(55, 86, 10))
 axm.set_aspect("equal")
 _clean_axes(axm)
 
-mplot = np.where(arc_feasible, margins - m_star, np.nan)
+# margin profile relative to the arc maximum; the polyline is broken wherever
+# the margin is not competitive (m - m* < -1 m) instead of diving off the axis
+MPLOT_FLOOR = -1.0
+mplot = np.where(arc_feasible & (margins - m_star >= MPLOT_FLOOR),
+                 margins - m_star, np.nan)
 axp.plot(phi_deg, mplot, color=COL_ARC_OK, lw=1.6)
 axp.axhspan(-0.05, 0.0, color="#d6e8fa", alpha=0.8, zorder=0)
 axp.plot([m_star_phi], [0.0], marker="o", ms=11, mfc="none",
@@ -476,11 +492,21 @@ axp.plot([opt_phi], [opt_margin - m_star], marker="p", ms=9, mfc=COL_OPT,
 for a, b in blocked_runs:
     axp.axvspan(a, b, color=COL_INFEAS, zorder=0)
 axp.set_xlim(0, 360)
-axp.set_ylim(-4.2, 0.4)
-axp.set_yticks([-4, -3, -2, -1, 0])
+axp.set_ylim(MPLOT_FLOOR - 0.05, 0.08)
+axp.set_yticks([-1, -0.8, -0.6, -0.4, -0.2, 0])
 axp.set_xticks(range(0, 361, 60))
 axp.set_xlabel(" ")
 axp.tick_params(labelsize=10)
+from matplotlib.patches import Patch as _Patch
+from matplotlib.lines import Line2D as _Line2D
+axp.legend(handles=[
+    _Line2D([], [], color=COL_ARC_OK, lw=1.8,
+            label=r"$(m-m^\ast)$ on feasible arc"),
+    _Patch(facecolor=COL_INFEAS, edgecolor=COL_EDGE,
+           label="blocked arc"),
+    _Patch(facecolor="#d6e8fa", edgecolor="none",
+           label="0.05 m tie band")],
+    loc="lower left", frameon=False, fontsize=8)
 for s in ("top", "right"):
     axp.spines[s].set_visible(False)
 save(fig, "fig3_optimal_arc_zoom")
@@ -531,6 +557,9 @@ ax3.scatter([T1[0]], [T1[1]], [H1], color=COL_TGT, marker="*", s=120,
             depthshade=False)
 ax3.set_xlim(0, 100); ax3.set_ylim(0, 100); ax3.set_zlim(0, 60)
 ax3.set_xticks([0, 50, 100]); ax3.set_yticks([0, 50, 100]); ax3.set_zticks([0, 20, 40, 60])
+ax3.set_xlabel("x (m)", fontsize=10, labelpad=6)
+ax3.set_ylabel("y (m)", fontsize=10, labelpad=6)
+ax3.set_zlabel("z (m)", fontsize=10, labelpad=4)
 ax3.tick_params(labelsize=8)
 ax3.xaxis.set_tick_params(pad=8)
 ax3.yaxis.set_tick_params(pad=8)

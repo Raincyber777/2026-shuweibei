@@ -1,0 +1,9 @@
+==== Problem 4 numeric summary ====
+baseline starts: {'T1': 1.607, 'T2': 6.994, 'T3': 10.355}
+A_new: n=24  resched gains eta in 24, gains t_last in 0
+B_fail: n=5  resched gains eta in 4, gains t_last in 0
+C_out: n=3  resched gains eta in 0, gains t_last in 0
+D_fail_out: n=15  resched gains eta in 12, gains t_last in 0
+E_new_fail: n=6  resched gains eta in 6, gains t_last in 0
+F_new_out: n=9  resched gains eta in 9, gains t_last in 0
+G_triple: n=12  resched gains eta in 12, gains t_last in 0
