@@ -1,0 +1,134 @@
+% =====================================================================
+% 1. Introduction
+% =====================================================================
+\section{Introduction}
+\label{sec:introduction}
+
+\subsection{Background}
+
+When a low-altitude small UAV enters the surveillance airspace, the reconnaissance system can only provide azimuth, horizontal distance, and altitude alerts, not a direct position. A single vehicle yields only one bearing line; two vehicles observing synchronously from different directions intersect two bearing lines to determine the horizontal position. The target altitude is given by the alert and does not enter the intersection, but it affects feasibility and accuracy through elevation constraints, building occlusion, and pointing errors. A baseline that is too short, or an intersection angle that is too small or too large, amplifies the error; station geometry is therefore the key to accuracy.
+
+\subsection{Problems to Be Solved}
+
+\begin{enumerate}[label=(\arabic*)]
+\item \textbf{Single-target observable region and optimal station.} For T1, determine and plot the observable region under the three constraints of vehicle geometry, LOS occlusion, and gimbal pitch. Using $Q=1/r$ as the quality measure, find the optimal station, horizontal distance, and elevation angle, and specify the optimality criterion and tie-breaking rules.
+
+\item \textbf{Two-station intersection accuracy and multi-target assignment.} Under independent azimuth errors $\mathcal{N}(0,(1^\circ)^2)$, establish the analytical relation between accuracy and baseline, intersection angle, and station--target distance, and define an accuracy index. Under a per-vehicle travel limit of 30~s, select two of five vehicles for T2 and analyze the degeneracy as $\gamma\to0^\circ/180^\circ$ and at boundary stations. With three alerts released simultaneously and six slots shared by five vehicles, minimize the latest observation start time; give the assignment, stations, and complete timeline for each vehicle, and independently define a nearest-assignment baseline for comparison.
+
+\item \textbf{Localization and pointing error propagation.} The localization error is $\sigma(s)=0.3+0.02s$~m (independent and identically distributed in $x$ and $y$), the gimbal bias is $0.8^\circ$, and the control error is $0.6^\circ$, independent; the target position is exact and the vehicle--target distance is 40~m. Build the propagation model for $\Delta\psi$ and find the maximum travel distance satisfying $P(|\Delta\psi|\le5^\circ)\ge0.95$. Derive the constraints on $a,b\ge0$ in $\sigma(s)=a+bs$ required to still satisfy the criterion at 80~m; justify the approximation, compare the contributions of the three error sources, and give deployment implications.
+
+\item \textbf{Rescheduling under disturbances.} Taking the 2(2) plan as the baseline, at $t=5$~s consider a new alert ($\theta\in[0^\circ,360^\circ)$, $\rho\in[30,50]$~m, $H=50$~m), exactly one vehicle failure, a communication outage $[5,t_{\mathrm{rec}}]$ ($t_{\mathrm{rec}}\in(5,30]$), and their combinations. Build a rescheduling model and compare it with keeping the original plan; lock observations that have started and allow redispatch of dispatched-but-unobserved vehicles; design a representative scenario set; report results within $[0,60]$~s with $\eta$ as the primary and $t_{\mathrm{last}}$ as the secondary index, and analyze the mechanism.
+\end{enumerate}
+
+% =====================================================================
+% 2. Problem Analysis
+% =====================================================================
+\section{Problem Analysis}
+\label{sec:analysis}
+
+The four problems progress along the chain ``geometric feasibility---intersection accuracy---error propagation---disturbance response'': Q1 answers where observation is possible and where it is best; Q2 extends single-station geometry to two-station intersection and multi-alert scheduling; Q3 advances deterministic geometry to error probability; Q4 advances static scheduling to disturbance response. The feasible region, accuracy conclusions, and timeline of earlier problems form the input baselines of later ones. Figure~\ref{fig:framework} shows the input--output relations and the modeling chain.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\figwidth]{fig0_framework.png}
+  \caption{Framework of the four problems and the overall modeling chain}
+  \label{fig:framework}
+\end{figure}
+
+\subsection{Geometry and Parameters}
+
+The site is a $100~\mathrm{m}\times100~\mathrm{m}$ plane with the southwest corner as the origin, the $x$-axis east and the $y$-axis north; the dispatch center is $O=(50,50)$. The site contains five axis-aligned cuboid buildings and five standby observation vehicles; their geometry and initial positions are listed in Table~\ref{tab:2-1}. A vehicle is modeled as a disk of radius $1.5$~m, travels at a constant $3$~m/s, carries a camera $2$~m above the ground, and has a gimbal pitch range of $[-10^\circ,80^\circ]$ with horizontal and pitch angular rates of $30^\circ$/s; the slew time is the longer axis. During travel the gimbal remains level facing east, and it may turn toward the target only after arrival. A task consists of travel, slew, synchronized $5$~s observation by two vehicles, and reset; all phases are counted on the timeline. A line of sight tangent to a building is judged occluded. An alert is given as $(\theta,R,H)$, and the target's horizontal position is $(50+R\cos\theta,50+R\sin\theta)$; the baseline alerts are T1$(30^\circ,40~\mathrm{m},45~\mathrm{m})$, T2$(150^\circ,45~\mathrm{m},35~\mathrm{m})$, and T3$(285^\circ,38~\mathrm{m},55~\mathrm{m})$ (see~\cite{swmcm}); Problem~4 adds T4$(\theta\in[0^\circ,360^\circ),R\in[30,50]~\mathrm{m},H=50~\mathrm{m})$.
+
+{\small
+\renewcommand{\arraystretch}{1.08}
+\begin{longtable}{@{}p{20mm}p{12mm}p{40mm}p{42mm}p{18mm}@{}}
+  \caption{Building geometry and initial positions of the observation vehicles}
+  \label{tab:2-1}\\
+  \toprule
+  Category & ID & Planar range (m) & Initial position $(x,y)$ (m) & Height (m) \\
+  \midrule
+  \endfirsthead
+  \multicolumn{5}{@{}l}{\small Table~\ref{tab:2-1} (continued)}\\
+  \toprule
+  Category & ID & Planar range (m) & Initial position $(x,y)$ (m) & Height (m) \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  Building & B1 & $[22,34]\times[16,26]$ & --- & 20 \\
+  Building & B2 & $[63,79]\times[59,71]$ & --- & 28 \\
+  Building & B3 & $[10,24]\times[65,76]$ & --- & 12 \\
+  Building & B4 & $[72,86]\times[22,34]$ & --- & 24 \\
+  Building & B5 & $[41,51]\times[38,46]$ & --- & 32 \\
+  Vehicle & V1 & --- & $(15,14)$ & --- \\
+  Vehicle & V2 & --- & $(88,10)$ & --- \\
+  Vehicle & V3 & --- & $(14,86)$ & --- \\
+  Vehicle & V4 & --- & $(88,68)$ & --- \\
+  Vehicle & V5 & --- & $(50,93)$ & --- \\
+\end{longtable}
+}
+
+\noindent{\footnotesize Note: All buildings are axis-aligned cuboids standing on $z=0$; a vehicle is an equivalent disk of radius $1.5$~m, and the tabulated position is the initial coordinate of its center (the ground projection of the camera). The three baseline alerts are given in Section~2.1; the complete parameter table is provided in \texttt{params\_table.md} in the supporting materials.}
+
+\subsection{Analysis of Problem 1}
+
+Problem~1 asks where observation is possible, where it is best, what ``best'' means, and how to break ties: the observable region gives the feasible set, the optimal station is the optimizer within it, and the criterion and tie-breaking rule guarantee uniqueness. The difficulty is that the three constraint types are heterogeneous and the optimal solution may be a one-dimensional continuum; this paper therefore adopts an ``analytics first, numerics as evidence'' route.
+
+\subsection{Analysis of Problem 2}
+
+Part~2(1) requires a two-station intersection accuracy model, an accuracy index, selection of vehicles and stations for T2 under the 30~s limit, and a discussion of degeneracy. Part~2(2) requires minimizing the latest observation start time with three alerts, six slots, and five vehicles, outputting the complete timeline and comparing with a nearest-assignment baseline. The two parts share geometry and the timeline but have different objectives: 2(1) targets accuracy and 2(2) targets timeliness, so the stations in 2(2) are independently re-optimized for timeliness and cannot simply reuse the accuracy-optimal stations of 2(1).
+
+\subsection{Analysis of Problem 3}
+
+Problem~3 requires a propagation model for $\Delta\psi$, the value of $s_{\max}$, the $(a,b)$ constraints at 80~m, justification of the approximation, comparison of three error sources, and deployment implications. The difficulties are that the three error sources have different dimensions, $\operatorname{atan2}$ is nonlinear, the criterion is two-sided, and the $(a,b)$ constraints rely on the monotonicity of $\sigma(s)$.
+
+\subsection{Analysis of Problem 4}
+
+Problem~4 uses the 10.355~s plan of Problem~2(2) as the baseline and considers, at $t=5$~s, new alerts, a single vehicle failure, communication outages, and their combinations. The difficulty is that disturbances occur mid-execution: a state snapshot must decide what is locked and what can be redispatched; no new commands can be received during an outage, so rescheduling should be triggered at $t_{\mathrm{rec}}$; new-alert parameters are continuous, so a representative scenario set must be designed; and the evaluation index is the lexicographic pair $(\eta,t_{\mathrm{last}})$.
+
+\subsection{Algorithm Routes and Selection}
+
+The algorithms for the four problems follow three criteria---provable, reproducible, and scale-matched: a closed-form certificate is used for the optimal value whenever possible instead of iterative search; deterministic complete enumeration is used instead of randomized heuristics when the scale permits; and numerical experiments serve only as verification. Table~\ref{tab:2-2} gives an overview; details are in Sections~4.2.5, 4.3.7, 4.4.4, and 4.5.4.
+
+{\footnotesize
+\renewcommand{\arraystretch}{1.08}
+\begin{longtable}{@{}p{11mm}p{46mm}p{40mm}p{28mm}p{35mm}@{}}
+  \caption{Algorithm routes and selection rationale for the four problems}
+  \label{tab:2-2}\\
+  \toprule
+  Problem & Algorithm (key steps) & Rationale & Scale / complexity & Comparison with alternatives \\
+  \midrule
+  \endfirsthead
+  \multicolumn{5}{@{}l}{\footnotesize Table~\ref{tab:2-2} (continued)}\\
+  \toprule
+  Problem & Algorithm (key steps) & Rationale & Scale / complexity & Comparison with alternatives \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  Q1 & Closed-form lower bound (C2 $\Rightarrow r\ge\rmin$); 200,000-point sampling on the $\rmin$ circle; 3-D slab intersection; visibility graph + Dijkstra; three-level lexicographic rule &
+  $Q=1/r$ is strictly monotone, so the optimal value is fixed in closed form by the active constraint; the optimal set is a one-dimensional arc, and sampling only describes the set, not a 2-D search &
+  Closed form $O(1)$; arc sampling $O(2\times10^5)$; one grid verification $O(10^6)$ &
+  A 0.1~m grid only gives the best grid value 7.5828~m; the closed form also gives the global certificate 7.5821~m \\
+  \midrule
+  Q2(1) & Covariance propagation $\Sigma=A^{-1}DA^{-T}$; QM--AM lower-bound certificate; enumeration of $C(5,2)=10$ pairs; polar candidate stations + Nelder--Mead &
+  The equality condition reduces optimality verification to a one-dimensional $90^\circ$ pairing test on the $\rmin$ circle; with only five vehicles, pairs can be exhaustively enumerated &
+  10 pairs; 4-D NM $\le300$ iterations per pair &
+  Direct 4-D search has no optimality proof and easily falls into local optima; the certificate gives $G^*=5.8188$~m \\
+  \midrule
+  Q2(2) & 1,000 assignment structures expanded through reuse-chain orderings into 5,880 combinations; fixed-point timeline simulation; greedy initialization $\to$ Gauss--Seidel coordinate descent $\to$ Nelder--Mead; top-12 re-refinement; deadlock detection &
+  With only 5 vehicles and 6 slots, complete enumeration exhausts the structures and is deterministic and reproducible; continuous station positions are handled by local refinement &
+  5,880 simulations; at most 2 tasks per vehicle; $\le160$ NM iterations per call &
+  10.355~s vs.\ 20.968~s for nearest assignment ($-50.6\%$); randomized searches such as GA cannot guarantee the same solution \\
+  \midrule
+  Q3 & Closed-form first-order propagation; two-sided quantile criterion; bisection; $256\times256$ Gauss--Hermite quadrature; $10^6$ MC verification &
+  $\sigma_\psi(s)$ is monotone, so the $P$ criterion can be inverted in closed form; Hermite quadrature has no sampling error and uses $1/15$ of the MC nodes &
+  Closed form $O(1)$; 65,536 quadrature nodes; $10^6$ MC for verification only &
+  Closed form 66.92~m vs.\ exact 66.84~m (0.13\%); direct MC root search requires multiple rounds of $10^6$ samples \\
+  \midrule
+  Q4 & Event-triggered snapshot; reuse of the Q2(2) solver; deterministic enumeration of 74 scenarios; analytical keep-original evaluation &
+  After a disturbance, available resources and pending alerts are of the same order as Q2(2); reusing the solver keeps the conventions consistent; the scenario set is small, so no online stochastic optimization is needed &
+  74 scenarios $\times$ one re-optimization each; timeline audit finds 0 negative durations/overlaps &
+  $\eta$ improved in 67/74, tied in 7, degraded in 0; scenario-by-scenario comparison with keep-original \\
+\end{longtable}
+}

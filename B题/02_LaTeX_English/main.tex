@@ -1,0 +1,94 @@
+% !TeX program = pdflatex
+% !TeX encoding = utf-8
+% ------------------------------------------------------------------
+%  2026 ShuWei Cup, Problem B
+%  Fast UAV Localization and Scheduling with Multiple Cooperative
+%  Mobile Observation Vehicles
+%
+%  English LaTeX version built on the official swmcmthesis template.
+%  Compile with pdfLaTeX (two passes, so the TOC and page refs settle):
+%      pdflatex main
+%      pdflatex main
+% ------------------------------------------------------------------
+\documentclass{swmcmthesis}
+
+\usepackage{tabularx}
+\usepackage{amsmath,amssymb}
+
+% ---- page geometry: A4, compact margins to respect the 25-page limit
+\geometry{top=20mm,bottom=20mm,left=20mm,right=20mm,headsep=6mm}
+
+% ---- body typography
+\linespread{1.0}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\setcounter{tocdepth}{2}
+
+% ---- chapter-based figure/table numbering (Figure 2-1, Table 4-3, ...)
+\makeatletter
+\@addtoreset{figure}{section}
+\@addtoreset{table}{section}
+\makeatother
+\renewcommand{\thefigure}{\arabic{section}-\arabic{figure}}
+\renewcommand{\thetable}{\arabic{section}-\arabic{table}}
+
+% ---- notation shortcuts
+\newcommand{\rmin}{r_{\min}}
+\newcommand{\wrap}{\operatorname{wrap180}}
+\newcommand{\distpath}{\operatorname{dist}_{\mathrm{path}}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\trace}{\operatorname{trace}}
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\figwidth}{10.4cm}
+
+% ---- summary sheet -------------------------------------------------
+\title{Fast UAV Localization and Scheduling with Multiple Cooperative Mobile Observation Vehicles}
+
+% Team control number (ASCII; the template is compiled with pdfLaTeX).
+\baominghao{SWBMCM2611718}
+
+\zubie{B}
+\date{2026}
+
+\abstract{%
+{\linespread{0.98}\selectfont\footnotesize
+Low-altitude small UAVs provide only azimuth, horizontal range and altitude alerts and cannot be localized directly. Following the chain ``geometric feasibility---intersection accuracy---error propagation---disturbance response'', this paper builds four models---observable-region determination, two-station intersection accuracy, pointing-error propagation and event-triggered rescheduling---and follows the route of certifying the optimal value in closed form, enumerating the optimal solution deterministically, and using numerical experiments only for verification.
+
+For Problem~1 (observable region and optimal station for one target), the three constraints---vehicle geometry, gimbal pitch and line-of-sight (LOS) occlusion---are intersected, and the reciprocal of the horizontal distance is used as the quality measure, giving an observable-region model and a quality-optimization model. The minimum horizontal distance is about $7.58$~m with the elevation at the $80^\circ$ pitch limit, so the optimum is attained with the pitch constraint active and is independent of the building layout, and the optimal set is a continuous arc of $283.85^\circ$. A representative station $(88.88,76.29)$~m is then selected by the three-level rule (maximum safety-margin band, shortest reachable point within the band, coordinate lexicographic order). The observable area is $5610$~m$^2$ ($56.1\%$ of the site), and the grid recomputation differs from the closed-form bound by only $0.0007$~m.
+
+For Problem~2 (two-station intersection accuracy and multi-alert scheduling), the error propagation relation is derived from the LOS equations, the geometric dilution of precision $G$ characterizes the accuracy, and the mean inequality proves the lower bound, giving a two-station accuracy model and a six-slot five-vehicle scheduling model. The accuracy bound is $5.8188$~m, attained when the two stations are equidistant and the lines of sight are orthogonal, with DRMS $0.1016$~m and a $95\%$ radius of $0.2486$~m. The latest observation start is $10.355$~s, $50.6\%$ shorter than the nearest-assignment baseline of $20.968$~s, and the robust plan gives $10.837$~s. Substituting the plan back into the accuracy model shows that the first alert has an intersection angle of only $19.34^\circ$ and degraded accuracy; requiring $\gamma\ge30^\circ$ raises the latest start to $12.983$~s, so timeliness and accuracy are not interchangeable.
+
+For Problem~3 (localization and pointing errors versus horizontal azimuth accuracy), the localization error is projected onto the cross-range direction and linearized for small angles, and the three error sources are combined into a normal distribution, giving a pointing-error propagation model. The maximum reliable observation distance is $66.92$~m (a conservative $66.84$~m from high-accuracy quadrature), and the dominant error source switches at a vehicle--target distance of about $19.9$~m. At $80$~m the probability of meeting the criterion falls to $0.915$, so the distance-error coefficient must be reduced by about $16.3\%$; localization then contributes $88.1\%$ of the variance.
+
+For Problem~4 (plan failure under vehicle failure, communication outage and new alerts), event-triggered snapshots are combined with rescheduling, giving a rescheduling model under disturbance. Among 74 scenarios the completion rate improves in 67, ties in 7 and never degrades, and for a single vehicle failure the latest observation start drops from 60~s to $11.17$~s. The mechanism is that structural loss is converted into temporal loss.
+
+Sensitivity analysis shows that the pitch limit, the angular rate, the vehicle--target distance and the communication recovery time are the core parameters of the four problems: a 1~m rise in target height increases the minimum horizontal distance by $0.176$~m, a $1^\circ$ relaxation of the pitch limit reduces it by $0.774$~m, and the elasticity of the angular rate is about four times that of the travel speed; no qualitative conclusion changes under reasonable perturbations. The paper thus gives provable results for station selection and accuracy bounds, and reliable plans for scheduling and disturbances in the sense of structural exactness and station-wise local optimality, providing a quantitative basis for station placement and cooperative scheduling in low-altitude surveillance.%
+\par}
+}
+
+\keywords{UAV localization; two-station intersection; geometric dilution of precision; observable region; vehicle scheduling; event-triggered rescheduling}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ---------------- body: pages 1..25 -------------------------------
+\setcounter{page}{1}
+\rhead{\small Page \thepage\ of 25}
+
+\input{sections/01_intro_analysis}
+\input{sections/02_symbols}
+\input{sections/03_model_q1q2}
+\input{sections/04_model_q3q4}
+\input{sections/05_results_conclusion}
+
+% ---------------- appendix: separate numbering A, B, C ------------
+\clearpage
+\pagenumbering{Alph}
+\rhead{\small Appendix Page \thepage}
+\input{sections/06_appendix}
+
+\end{document}

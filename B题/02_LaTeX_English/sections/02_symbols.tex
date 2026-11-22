@@ -1,0 +1,68 @@
+% =====================================================================
+% 3. Symbols and Assumptions
+% =====================================================================
+\section{Symbols and Assumptions}
+\label{sec:symbols}
+
+\subsection{Symbols}
+
+{\small
+\renewcommand{\arraystretch}{1.08}
+\begin{longtable}{@{}p{38mm}p{92mm}p{30mm}@{}}
+  \caption{Main symbols}
+  \label{tab:3-1}\\
+  \toprule
+  Symbol & Meaning & Unit / value \\
+  \midrule
+  \endfirsthead
+  \multicolumn{3}{@{}l}{\small Table~\ref{tab:3-1} (continued)}\\
+  \toprule
+  Symbol & Meaning & Unit / value \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  $O$ & Dispatch center & $(50,50)$~m \\
+  $B_i$ & Building $i$ ($i=1,\dots,5$), planar range $[x_i^0,x_i^1]\times[y_i^0,y_i^1]$, height $h_i$ & m \\
+  $T_a$; $\theta_a,\rho_a,H_a$; $T'_a$ & Alert $a$ and its target; azimuth (counterclockwise from east), horizontal distance, height; horizontal projection & $^\circ$, m, m; m \\
+  $h_{\mathrm{cam}}$; $\Delta z_a$ & Camera height above ground; camera--target height difference $\Delta z_a=H_a-h_{\mathrm{cam}}$ & 2~m; m \\
+  $p=(x,y)$; $r(p)$; $\varepsilon(p)$ & Center of the observation station; horizontal distance from camera to target projection; LOS elevation $\arctan(\Delta z_a/r)$ & m; m; $^\circ$ \\
+  $[\varepsilon_{\min},\varepsilon_{\max}]$ & Feasible gimbal pitch range & $[-10^\circ,80^\circ]$ \\
+  C1, C2, C3; $\Omega_a$ & Vehicle geometry, gimbal pitch, and LOS occlusion constraints; observable region $\Omega_a=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$ & ---; m$^2$ \\
+  $Q(p)$; $p^*,r^*,\varepsilon^*,Q^*$ & Observation quality $1/r$; optimal station, horizontal distance, elevation, and quality in Problem~1 & m$^{-1}$; m, m, $^\circ$, m$^{-1}$ \\
+  $m(p)$; $\varphi$ & Geometric safety margin; polar angle parameter of the optimal arc & m; $^\circ$ \\
+  $V_j$; $V_j^0$ & Observation vehicle $j$ and its initial position ($j=1,\dots,5$) & m \\
+  $R_{\mathrm{veh}}$; $v$; $\omega$ & Equivalent vehicle disk radius; travel speed; maximum gimbal single-axis angular rate & 1.5~m; 3~m/s; $30^\circ$/s \\
+  $\alpha$ & Azimuth from station to target (pan command angle) & $^\circ$ \\
+  $t_{\mathrm{tr}},t_{\mathrm{sl}},t_{\mathrm{obs}},t_{\mathrm{rs}}$ & Travel, slew, synchronized observation, and reset times & s ($t_{\mathrm{obs}}=5$) \\
+  $d_i$; $d$ & Horizontal distance from station $i$ to target; single-station shorthand in Problem~3 (nominal 40~m) & m \\
+  $\sigma_\alpha$; $\gamma$; $\beta$ & Single-station azimuth standard deviation; intersection angle of the two LOS; two-station baseline length & $1^\circ$ (rad in computation); $^\circ$; m \\
+  $\Sigma$; $G$ & Covariance of the intersection-point position error; geometric dilution of precision $\sqrt{(d_1^2+d_2^2)/2}/|\sin\gamma|$ & m$^2$; m \\
+  DRMS; $R_{95}$ & Root-mean-square position error $\sigma_\alpha G$; 95\% error-circle radius $2.4477\,\mathrm{DRMS}$ & m; m \\
+  $\pi_j$; $p_{j,a}$; $M_a$ & Task order of vehicle $j$; station of vehicle $j$ for alert $a$; vehicle pair observing alert $a$ & ---; m; --- \\
+  $t^{\mathrm{rd}}_{v,k}$; $t_a^{\mathrm{start}}$ & Ready time of the $k$-th task of vehicle $v$; observation start time of alert $a$ & s \\
+  $P,\hat P,\delta$; $s$; $\sigma(s)=a+bs$ & True position, estimated position, and localization error; cumulative travel distance; single-axis localization standard deviation ($a,b\ge0$) & m; m; m, m/m \\
+  $\varepsilon_0,\varepsilon_c$; $\Delta\psi$; $\sigma_\psi$; $s_{\max}$ & Gimbal bias/control error; difference between commanded and true azimuth (\wrap); combined standard deviation of $\Delta\psi$; maximum travel distance satisfying $P(|\Delta\psi|\le5^\circ)\ge0.95$ & $0.8^\circ/0.6^\circ$; $^\circ$; $^\circ$; m \\
+  $t_p,t_{\mathrm{rec}}$; $N,k,\eta$; $t_{\mathrm{last}}$ & Rescheduling trigger/communication recovery time; total alerts, successful starts, $\eta=k/N$; latest observation start time (60~s if not started) & s; ---; s \\
+\end{longtable}
+}
+
+\subsection{Assumptions}
+
+\begin{enumerate}[label=(A\arabic*)]
+\item \textbf{Site and building geometry.} The site is level; the five buildings are axis-aligned cuboids standing on the ground, with the given planar outlines and heights. The coordinate system and building geometry are collected in Section~4.1. Terrain, vegetation, and other obstacles are ignored.
+
+\item \textbf{Vehicle geometry and motion.} An observation vehicle is a disk of radius $1.5$~m; its center must lie at least $1.5$~m inside the site boundary and at least $1.5$~m from each building footprint (Minkowski expansion, Section~4.1). Vehicles travel at a constant $3$~m/s; acceleration, braking, turning, and collision avoidance are ignored. Paths are shortest obstacle-avoiding paths, and straight-line distance is only a lower bound.
+
+\item \textbf{Gimbal kinematics.} The pitch range $[-10^\circ,80^\circ]$ is closed. Both axes rotate at $30^\circ$/s and can rotate simultaneously; the slew time is the longer axis, and start/stop transients and control delay are ignored. During travel the gimbal remains level facing east; it may turn toward the target only after the vehicle stops.
+
+\item \textbf{Line of sight and occlusion.} The LOS is the straight segment from the camera to the target; buildings are opaque. Tangency or contact counts as occlusion; the 3-D slab test is given in Section~4.1. Atmospheric refraction and rain/fog are ignored.
+
+\item \textbf{Targets and alerts.} Targets are stationary during deployment. An alert $(\theta,R,H)$ is treated as the true horizontal position and height, without measurement error. Height is used only for elevation and occlusion tests; it does not enter the intersection solution.
+
+\item \textbf{Observation timing and information.} Two vehicles begin a $5$~s synchronized observation after arriving and completing the slew; they then reset and travel to the next station, with all phases counted on the timeline. During travel the gimbal remains east; after arrival it performs a full-angle slew. Only when a dispatched-but-unobserved vehicle is redispatched and the new station coincides with its current position (no travel segment) does the first post-snapshot task continue from the current attitude; all later tasks start from east. Except during a communication outage, commands, feedback, and computation have no delay.
+
+\item \textbf{Error statistics.} In Problem~2, the two stations' azimuth errors are independent $\mathcal{N}(0,(1^\circ)^2)$. In Problem~3, the vehicle's horizontal coordinate errors are independent, identically distributed normal in $x$ and $y$; the gimbal bias $0.8^\circ$ and control error $0.6^\circ$ are independent of each other and of the localization error. All sources have zero mean.
+
+\item \textbf{Decision information and disturbances.} At $t=0$, when the baseline plan is made, no disturbance is known in advance; rescheduling is triggered only after a disturbance occurs, using real-time information. No random events other than the specified disturbances are considered. A failed vehicle exits immediately and does not block traffic.
+\end{enumerate}

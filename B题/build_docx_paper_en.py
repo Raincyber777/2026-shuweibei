@@ -19,7 +19,8 @@ import re
 
 from docx import Document
 from docx.shared import Cm, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+from docx.enum.text import (WD_ALIGN_PARAGRAPH, WD_LINE_SPACING,
+                            WD_TAB_ALIGNMENT)
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.enum.section import WD_SECTION
 from docx.enum.style import WD_STYLE_TYPE
@@ -40,7 +41,7 @@ TEMPLATE = os.environ.get(
 MD = os.environ.get("PAPER_MD", os.path.join(BASE, "数维杯B题_英文稿.md"))
 OUT = os.environ.get("PAPER_OUT", os.path.join(BASE, "数维杯B题_英文稿.docx"))
 
-TEAM_ID = os.environ.get("PAPER_TEAM_ID", "<队伍号>")
+TEAM_ID = os.environ.get("PAPER_TEAM_ID", "SWBMCM2611718")
 TITLE = "Fast UAV Localization and Scheduling with Multiple Cooperative Mobile Observation Vehicles"
 SUBTITLE = ("2026 12th ShuWei Cup National College Mathematical Modeling Challenge "
             "(Autumn) — Problem B")
@@ -49,13 +50,13 @@ BODY_FONT = "Times New Roman"
 BODY_SIZE = 12
 SUMMARY_SIZE = float(os.environ.get("PAPER_SUMMARY_SIZE", "12"))
 CAPTION_SIZE = 10.5
-TABLE_SIZE_SMALL = 8.5
+TABLE_SIZE_SMALL = 8.8
 TABLE_SIZE = 9.5
 REF_SIZE = 10.5
 TABLE_WIDTH_CM = 16.8
 BODY_MARGIN_CM = float(os.environ.get("PAPER_MARGIN", "2.0"))
-FIG_WIDTH_CM = float(os.environ.get("PAPER_FIG_WIDTH", "10.4"))
-FIG_MAX_H_CM = float(os.environ.get("PAPER_FIG_MAX_H", "13.6"))
+FIG_WIDTH_CM = float(os.environ.get("PAPER_FIG_WIDTH", "10.9"))
+FIG_MAX_H_CM = float(os.environ.get("PAPER_FIG_MAX_H", "14.5"))
 BODY_LINE_SPACING = float(os.environ.get("PAPER_LINE_SPACING", "1.0"))
 
 A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
@@ -143,6 +144,20 @@ def clear_para_borders(paragraph):
         pPr.remove(pBdr)
 
 
+def remove_header_style_border(doc):
+    """Remove the template Header style's bottom rule (shows on the summary page)."""
+    try:
+        st = doc.styles['Header']
+    except KeyError:
+        return
+    pPr = st.element.find(qn('w:pPr'))
+    if pPr is None:
+        return
+    pBdr = pPr.find(qn('w:pBdr'))
+    if pBdr is not None:
+        pPr.remove(pBdr)
+
+
 def set_cell_margins(table, top=15, bottom=15, left=40, right=40):
     tblPr = table._tbl.tblPr
     mar = OxmlElement('w:tblCellMar')
@@ -216,7 +231,7 @@ def enable_update_fields(doc):
     if uf is None:
         uf = OxmlElement('w:updateFields')
         settings.append(uf)
-    uf.set(qn('w:val'), 'true')
+    uf.set(qn('w:val'), 'false')
 
 
 def set_page(sec, margins=(2.54, 2.54, 2.54, 2.54)):
@@ -458,7 +473,7 @@ def table_widths(rows, ncol):
         widths = [5.6, 11.2]
     elif ncol == 3:
         if head == "symbol":
-            widths = [3.0, 11.0, 2.8]
+            widths = [4.4, 9.6, 3.4]
         elif head in ("scenario class", "scenario"):
             widths = [6.6, 5.1, 5.1]
         else:
@@ -475,6 +490,10 @@ def table_widths(rows, ncol):
             widths = [1.5, 5.6, 4.2, 2.6, 2.9]
         else:
             widths = [3.2, 3.4, 3.4, 3.4, 3.4]
+    elif ncol == 7:
+        widths = [2.2, 3.8, 1.7, 1.9, 1.9, 2.6, 3.0]
+    elif ncol == 9:
+        widths = [1.6, 1.3, 3.4, 1.5, 1.5, 1.5, 1.8, 1.8, 1.9]
     elif ncol == 6:
         widths = [2.6, 2.8, 2.8, 2.8, 2.8, 3.0]
     else:
@@ -522,6 +541,12 @@ def add_table(doc, rows, size=None):
             for cell in row.cells:
                 for p in cell.paragraphs:
                     p.paragraph_format.keep_with_next = True
+
+    # the symbol table reads better with a left-aligned meaning column
+    if rows[0][0].strip().lower() == "symbol":
+        for row in table.rows:
+            for p in row.cells[1].paragraphs:
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
     trPr = table.rows[0]._tr.get_or_add_trPr()
     tblHeader = OxmlElement('w:tblHeader')
@@ -605,8 +630,10 @@ def style_headings(doc):
         level = int(p.style.name[-1])
         size = {1: 16, 2: 13.5, 3: 12}[level]
         p.paragraph_format.first_line_indent = Cm(0)
+        p.paragraph_format.line_spacing = 1.0
         p.paragraph_format.space_before = Pt({1: 6, 2: 4, 3: 2}[level])
         p.paragraph_format.space_after = Pt({1: 3, 2: 2, 3: 1}[level])
+        p.paragraph_format.keep_with_next = True
         for r in p.runs:
             set_run_font(r, size=size, bold=True, color=RGBColor(0, 0, 0))
 
@@ -664,17 +691,32 @@ def build_body(doc, lines, start_idx):
             i += 1
             continue
 
-        # display formula
-        if s.startswith("$$") and s.endswith("$$") and len(s) > 4:
-            formula = s[2:-2].strip()
+        # display formula (optionally with a right-aligned equation number)
+        m_eq = re.fullmatch(r"\$\$(.+)\$\$\s*\((\d+)\)", s)
+        if m_eq or (s.startswith("$$") and s.endswith("$$") and len(s) > 4):
+            if m_eq:
+                formula, eqno = m_eq.group(1).strip(), m_eq.group(2)
+            else:
+                formula, eqno = s[2:-2].strip(), None
             p = doc.add_paragraph()
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
             p.paragraph_format.first_line_indent = Cm(0)
             p.paragraph_format.space_before = Pt(1)
             p.paragraph_format.space_after = Pt(1)
             p.paragraph_format.line_spacing = 1.0
-            add_runs(p, formula,
-                     size=10 if len(formula) <= 70 else 9)
+            size = 10 if len(formula) <= 70 else 9
+            if eqno:
+                p.paragraph_format.tab_stops.add_tab_stop(
+                    Cm(TABLE_WIDTH_CM / 2), WD_TAB_ALIGNMENT.CENTER)
+                p.paragraph_format.tab_stops.add_tab_stop(
+                    Cm(TABLE_WIDTH_CM), WD_TAB_ALIGNMENT.RIGHT)
+                p.add_run("\t")
+                add_runs(p, formula, size=size)
+                r = p.add_run("\t(" + eqno + ")")
+                set_run_font(r, size=9)
+            else:
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                add_runs(p, formula, size=size)
             i += 1
             continue
 
@@ -712,7 +754,8 @@ def build_body(doc, lines, start_idx):
         if in_refs:
             p.alignment = WD_ALIGN_PARAGRAPH.LEFT
             p.paragraph_format.line_spacing = 1.0
-            p.paragraph_format.first_line_indent = Cm(0)
+            p.paragraph_format.left_indent = Cm(0.75)
+            p.paragraph_format.first_line_indent = Cm(-0.75)
             add_runs(p, s, size=REF_SIZE)
         else:
             p.paragraph_format.line_spacing = BODY_LINE_SPACING
@@ -789,6 +832,7 @@ def main():
                                 BODY_MARGIN_CM, BODY_MARGIN_CM))
     setup_appendix_header(secs[3])
     set_page_start(secs[3], 1, 'upperLetter')
+    remove_header_style_border(doc)
 
     doc.core_properties.title = TITLE + " (English draft)"
     doc.core_properties.subject = ("2026 12th ShuWei Cup National College "

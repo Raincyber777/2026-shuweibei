@@ -1,0 +1,160 @@
+% =====================================================================
+% 4.4 Problem 3 and 4.5 Problem 4
+% =====================================================================
+\subsection{Problem 3: Localization and Pointing Error Propagation}
+\label{sec:q3}
+
+\subsubsection{Error Propagation Model}
+
+Take the true position $P$ as the origin and the true LOS as the $x'$ axis, with the target at $(d,0)$, $d=40$~m. Decompose the localization error into cross-range $\delta_\perp$ and along-range $\delta_\parallel$; under isotropy, $\delta_\perp\sim\mathcal{N}(0,\sigma(s)^2)$. The exact deviation from the estimated position to the target is $\Delta\alpha=\operatorname{atan2}(-\delta_\perp,d-\delta_\parallel)\approx-\delta_\perp/d$ (residual analysis in Appendix~A.3). Adding the gimbal bias $\varepsilon_0\sim\mathcal{N}(0,0.8^2)$ and control error $\varepsilon_c\sim\mathcal{N}(0,0.6^2)$,
+\begin{equation*}
+  \Delta\psi=\wrap\bigl(\Delta\alpha\cdot180/\pi+\varepsilon_0+\varepsilon_c\bigr),
+\end{equation*}
+where $\wrap(\cdot)$ folds angles into $(-180^\circ,180^\circ]$. The three terms are independent zero-mean normals, and $\wrap$ is not triggered at this problem's scale, so
+\begin{equation*}
+  \Delta\psi\sim\mathcal{N}\bigl(0,\sigma_\psi^2(s)\bigr),\qquad
+  \sigma_\psi^2(s)=\left(\frac{\sigma(s)}{40}\cdot\frac{180}{\pi}\right)^2+0.8^2+0.6^2
+  =(1.432394\sigma(s))^2+1.0.
+\end{equation*}
+
+\subsubsection{$s_{\max}$ and $(a,b)$ Constraints}
+
+From $P(|\Delta\psi|\le5^\circ)=2\Phi(5/\sigma_\psi)-1\ge0.95$, we obtain $\sigma_\psi\le5/z_{0.975}=2.551067^\circ$. Substituting into the expression above,
+\begin{equation*}
+  \sigma(s)\le\frac{\sqrt{2.551067^2-1.0}}{1.432394}=1.638446~\mathrm{m},
+\end{equation*}
+\begin{equation*}
+  s_{\max}=\frac{1.638446-0.3}{0.02}=66.9223~\mathrm{m}\approx66.92~\mathrm{m}.
+\end{equation*}
+At $s=80$~m, $\sigma(80)=1.9$~m, $\sigma_\psi=2.89945^\circ$, and $P=0.91538<0.95$. If the criterion must still hold at 80~m, then $a+80b\le1.638446$~m, which together with $a,b\ge0$ forms a triangular feasible region ($b=0$ gives $a\le1.6384$~m; $a=0$ gives $b\le0.0204806$~m/m). The nominal point $(0.3,0.02)$ lies outside; one must reduce $b$ to $0.0167306$~m/m ($-16.3\%$) or reduce $a$ to $0.0384$~m.
+
+\subsubsection{Contribution Decomposition and Exact Verification}
+
+Let $\mathrm{var}_{\mathrm{loc}}=(1.432394\sigma(s))^2$, $\mathrm{var}_{\mathrm{bias}}=0.64$, and $\mathrm{var}_{\mathrm{ctrl}}=0.36$. At $s=0$ the three shares are $15.6\%/54.0\%/30.4\%$; at $s=40$ they are $71.3\%/18.4\%/10.3\%$; at $s=80$ they are $88.1\%/7.6\%/4.3\%$; the bias:control ratio is always $64:36$. The dominant-factor switch point is obtained from $\mathrm{var}_{\mathrm{loc}}=\mathrm{var}_{\mathrm{bias}}+\mathrm{var}_{\mathrm{ctrl}}$ as $s=19.907$~m (shares $50.0\%/32.0\%/18.0\%$), after which localization becomes the first source. The linearization residual RMS is $\sigma(s)^2/d^2$, which at $s=80$~m is $0.1293^\circ$, only $4.46\%$ of $\sigma_\psi$ and about $0.2\%$ of the variance. A $256\times256$ Hermite quadrature gives the exact $s_{\max}=66.84$~m, $P(66.92)=0.94980$, and $a+80b\le1.6367$~m; the recommended practice is to use $66.84$~m as the conservative design value and $66.92$~m as the closed-form primary answer. The $P$ deviation of $10^6$ Monte Carlo runs \cite{hammersley} is $\le3\times10^{-4}$, validating the linearization and the normal composition.
+
+\noindent\textbf{Deployment implications.} (i) The travel budget should be capped near the conservative $66.84$~m rather than $66.92$~m, because the closed form slightly understates the risk at the boundary. (ii) If the sensing budget is limited, reducing the slope $b$ of the localization error is far more effective than reducing the offset $a$: at 80~m one unit of $b$ saves 80 units of $\sigma$, whereas $a$ enters one-to-one. (iii) Improving the gimbal (bias plus control, $1.0^\circ$ combined) helps mainly at short travel; beyond about 100~m the localization term dominates and gimbal upgrades saturate (Section~6.2).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Monte Carlo verification for Problem~3 ($10^6$ samples)}
+  \label{tab:4-5}
+  \begin{tabular}{@{}p{16mm}p{22mm}p{25mm}p{25mm}p{30mm}p{30mm}@{}}
+    \toprule
+    $s$ (m) & $\sigma(s)$ (m) & $P$ empirical & $P$ analytical & $\sigma$ empirical ($^\circ$) & $\sigma$ analytical ($^\circ$) \\
+    \midrule
+    0 & 0.30 & 0.999996 & 0.999996 & 1.0875 & 1.0884 \\
+    20 & 0.70 & 0.999584 & 0.999586 & 1.4163 & 1.4161 \\
+    40 & 1.10 & 0.992694 & 0.992622 & 1.8651 & 1.8662 \\
+    66.92 & 1.6384 & 0.949730 & 0.950000 & 2.5528 & 2.5511 \\
+    80 & 1.90 & 0.915229 & 0.915376 & 2.9006 & 2.8995 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\figwidth]{fig4-8_variance.png}
+  \caption{Variance components and shares of $\sigma_\psi$ ((a) component curves; (b) stacked shares)}
+  \label{fig:4-8}
+\end{figure}
+
+In Figure~\ref{fig:4-8}(a), the localization term rises linearly with $s$, and its intersection with the allowable line $2.551^\circ$ is $s_{\max}=66.92$~m; (b) shows that after $s\approx19.9$~m the localization share exceeds the sum of the gimbal bias and control shares, reaching $88.1\%$ at $s=80$~m.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\figwidth]{fig4-9_probability_ab.png}
+  \caption{$P(|\Delta\psi|\le5^\circ)$ curve and the $(a,b)$ feasible region ((a) $P$--$s$; (b) $(a,b)$ region)}
+  \label{fig:4-9}
+\end{figure}
+
+Figure~\ref{fig:4-9}(a) gives the decreasing curve of $P(|\Delta\psi|\le5^\circ)$ versus $s$; its intersection with the $0.95$ line is $s_{\max}=66.92$~m (exact $66.84$~m), and the Monte Carlo points coincide with the analytical curve. In (b), the shaded area is the $(a,b)$ feasible region where $P\ge0.95$ at 80~m; the nominal point $(0.3,0.02)$ lies outside.
+
+\subsubsection{Algorithm and Efficiency}
+
+This problem uses ``closed-form first-order propagation + monotone criterion + exact quadrature verification.'' The steps are: (i) linearize the lateral projection to obtain $\Delta\psi\sim\mathcal{N}(0,(1.432394\sigma(s))^2+1.0)$; (ii) from the two-sided criterion $P(|\Delta\psi|\le5^\circ)\ge0.95$, obtain $\sigma_\psi\le2.5511^\circ$ and invert for $\sigma(s)$ and $s_{\max}$; (iii) evaluate the exact $\operatorname{atan2}$ geometry by a $256\times256$ Gauss--Hermite quadrature over the two-dimensional expectation and find $s_{\max}$ by bisection; (iv) independently verify with $10^6$ Monte Carlo runs. The closed form is chosen because $\sigma_\psi(s)$ is monotone in $s$, so the criterion can be inverted directly and gives the primary answer in $O(1)$; Hermite quadrature is chosen because 65,536 nodes already reach $10^{-3}$ accuracy, at about $1/15$ of the cost of $10^6$ MC runs and without sampling error. The results are $66.92$~m in closed form and $66.84$~m exact ($0.13\%$ difference), with an MC $P$ deviation no larger than $3\times10^{-4}$.
+
+% ---------------------------------------------------------------------
+\subsection{Problem 4: Rescheduling under Disturbances}
+\label{sec:q4}
+
+\subsubsection{State Snapshot and Locking Rules}
+
+At $t_p$ (5~s without an outage, $t_{\mathrm{rec}}$ with an outage), record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle. Traveling: position is interpolated linearly, attitude is east, and the vehicle can be redispatched immediately. Slewing: the vehicle is at its station, attitude is interpolated, and it can be redispatched. Synchronized waiting: the vehicle is at its station, attitude points at the target, and it can be redispatched. Observing/resetting: the alert is locked and counted as served---it is not rescheduled even though its 5~s observation may still be in progress---and the vehicle remains locked until its reset finishes.
+
+Rules: alerts that started before $t_p$ cannot be rescheduled; dispatched-but-unobserved vehicles can be redispatched; a failed vehicle is removed and its pending alerts become orphans; no new commands are received during an outage, and rescheduling is triggered after $t_{\mathrm{rec}}$. \textbf{``Continue-slew'' applies only to the first task of an unobserved redispatch}: only if the vehicle has not started observing and the new station coincides with its current position (distance $\le5$~cm), the first post-snapshot task continues from the current attitude, with
+\begin{equation*}
+  \mathrm{slew}=\max\bigl(|\wrap(\alpha_{\mathrm{new}}-\alpha_{\mathrm{cur}})|,\ |\varepsilon_{\mathrm{new}}-\varepsilon_{\mathrm{cur}}|\bigr)/30;
+\end{equation*}
+after that task resets, all subsequent tasks perform a full-angle slew from east. Other redispatches (new station more than 5~cm from the current position) follow A3/A6: return to east during travel and perform a full slew after arrival. For example, in the $(\theta=0^\circ,\rho=30~\mathrm{m})$ scenario (internal id \texttt{th0\_R30}), V1's redispatch chain is T2$\to$T3: T2 has a $0$~s continue-slew; after T2 observation and reset, T3 slews from east for $1.655$~s, so T3 starts at $16.772$~s. Continue-slew is the continuation of the same pointing phase, not a new ``arrival--pointing'' process.
+
+\subsubsection{Rescheduling Model and Benchmark Strategy}
+
+The pending alert set $A_p$ is the union of alerts whose baseline start is $\ge t_p$, orphan alerts, and the new alert T4; the available vehicle set $V_p$ contains all non-failed vehicles. The decisions are $M_a$, $\pi_v$, and $p_{v,k}$; the objective is lexicographic: maximize $k$, then minimize $t_{\mathrm{last}}$; the constraints are two distinct available vehicles per pending alert, stations in the corresponding $\Omega_a$, timeline propagation from the snapshot state, and exclusion of locked alerts and vehicles. The solution reuses the structural enumeration, coordinate descent, Nelder--Mead, and deadlock detection of Problem~2(2), changing only the initial conditions.
+
+Keep-original: no new commands are issued. If a failed vehicle belongs to the pair of a pending alert, that alert never starts, so $k$ decreases by 1 and $t_{\mathrm{last}}=60$; the new alert has no assignment, so $N$ increases by 1 while $k$ is unchanged; with an outage only, the two strategies are equivalent.
+
+\subsubsection{Scenario Set and Results}
+
+The scenario set has 74 scenarios: A, new alert, $8$ azimuths $\times$ $3$ distances $=24$; B, single vehicle failure, 5; C, single outage, 3; D, failure $\times$ outage, 15; E, new alert $\times$ failure, 6; F, new alert $\times$ outage, 9; G, triple combination, 12. New alerts use 8 azimuths at $45^\circ$ and $\rho\in\{30,40,50\}$~m, covering the shadow directions of all buildings and both ends of the distance range; a subsequent $22.5^\circ$ refinement moves $t_{\mathrm{last}}$ smoothly within $14.57$--$16.45$~s, which confirms that $45^\circ$ sampling suffices. The failure class runs all 5 vehicles; the combination class uses V2 and V4 as representatives, because V1 and V4 are the two members of T2's pair and V2, V3 are the two members of T3's pair, so a failure within a pair leaves an isomorphic orphan structure (V3's only other task, T1, is locked at $t_p$), while V5's only task T1 is already locked and loses nothing. Failure $\times$ outage covers all three $t_{\mathrm{rec}}$, while the triple class uses only $t_{\mathrm{rec}}=10/30$~s: $t_{\mathrm{last}}$ responds in two stages (chain-limited, then unit slope), the middle value 20~s is already covered by D, and the secant slope ($\approx0.6$) makes the missing points predictable. The set covers azimuth, distance, failure role, outage length and combination, and its representativeness is supported by the $22.5^\circ$ refinement and the $0.5$~m margin/tolerance/robust-baseline checks.
+
+Results: rescheduling strictly improves $\eta$ in 67 of 74 scenarios, ties in 7, and degrades none (reported at $0.01$~s precision); Table~\ref{tab:4-6} summarizes the outcome by scenario class and Table~\ref{tab:4-7} lists three representative scenarios. Representative values: V4 failure, keep $(0.667,60)\to$ resched $(1.000,11.17)$; new alert $\theta=0^\circ$, $\rho=30$~m, keep $(0.750,60)\to(1.000,16.77)$; triple combination (median new alert + V4 failure + $t_{\mathrm{rec}}=10$~s), keep $(0.500,60)\to(1.000,25.01)$. By failed vehicle, the rescheduled $t_{\mathrm{last}}$ for V1/V4, V2/V3, and V5 is $11.17$, $10.90$, and $10.35$~s, respectively, all with $\eta=1$. For a V1 failure, failure $\times$ outage with $t_{\mathrm{rec}}=10/20/30$ gives $t_{\mathrm{last}}=21.01/25.08/35.08$~s (increments $4.07/10.00$~s), showing the two-stage behavior. The mechanism is ``structural loss $\to$ temporal loss''; its upper limit is jointly constrained by the azimuth of idle vehicles, the slew + travel recovery delay, and the outage duration.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Summary by scenario class}
+  \label{tab:4-6}
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    Scenario class & Scenarios & $\eta$ improved & Tied \\
+    \midrule
+    A New alert & 24 & 24 & 0 \\
+    B Single vehicle failure & 5 & 4 & 1 \\
+    C Single outage & 3 & 0 & 3 \\
+    D Failure $\times$ outage & 15 & 12 & 3 \\
+    E New alert $\times$ failure & 6 & 6 & 0 \\
+    F New alert $\times$ outage & 9 & 9 & 0 \\
+    G Triple combination & 12 & 12 & 0 \\
+    Total & 74 & 67 & 7 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{2pt}
+  {\footnotesize Note: G uses 3 representatives $\times$ 2 failed vehicles $\times$ 2 recovery times ($t_{\mathrm{rec}}=10/30$~s only); the intermediate value $t_{\mathrm{rec}}=20$~s is covered by D.}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Comparison of representative scenarios}
+  \label{tab:4-7}
+  \begin{tabular}{@{}p{55mm}p{50mm}p{50mm}@{}}
+    \toprule
+    Scenario & Keep original $(\eta,t_{\mathrm{last}})$ & Reschedule $(\eta,t_{\mathrm{last}})$ \\
+    \midrule
+    V4 failure & $(0.667,60)$ & $(1.000,11.17)$ \\
+    New alert $\theta=0^\circ$, $\rho=30$~m & $(0.750,60)$ & $(1.000,16.77)$ \\
+    Triple (median + V4 + $t_{\mathrm{rec}}=10$~s) & $(0.500,60)$ & $(1.000,25.01)$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\figwidth]{fig4-10_tlast_response.png}
+  \caption{Two-stage response of $t_{\mathrm{last}}$ to $t_{\mathrm{rec}}$ ((a) $t_{\mathrm{last}}$--$\theta$; (b) $t_{\mathrm{last}}$--$t_{\mathrm{rec}}$)}
+  \label{fig:4-10}
+\end{figure}
+
+Figure~\ref{fig:4-10}(a) shows that the new alert's azimuth has little effect on $t_{\mathrm{last}}$ (about $15$--$17$~s), far below the 60~s of keeping the original plan; (b) shows that $t_{\mathrm{last}}$ rises piecewise with the recovery time $t_{\mathrm{rec}}$, that V5 stays at $10.36$~s because T1 is already locked and completed, and that the other failed vehicles exhibit the ``chain-limited---unit-slope'' two-stage behavior.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\figwidth]{fig4-11_resched_compare.png}
+  \caption{Rescheduling Gantt chart and 74-scenario comparison ((a) V4 failure Gantt chart; (b) keep/resched scatter)}
+  \label{fig:4-11}
+\end{figure}
+
+Figure~\ref{fig:4-11}(a) shows that after V4 fails at $t=5$~s, rescheduling still starts T2 and T3 at about $7$~s and $10$~s and keeps $\eta=1.00$; in (b), among the 74 scenarios, all green hollow points lie at $\eta=1.00$, the red crosses are distributed between $0.50$ and $1.00$, and the arrows show that rescheduling trades a larger $t_{\mathrm{last}}$ for a restored completion rate.
+
+\subsubsection{Algorithm and Efficiency}
+
+This problem uses ``event-triggered snapshot + reuse of the 2(2) solver + deterministic scenario enumeration.'' The steps are: (i) at $t_p$, record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle and classify states as redispatchable or locked; (ii) using the snapshot as the initial condition, re-optimize the pending alerts with the structural enumeration, fixed-point simulation, coordinate descent, and Nelder--Mead of 2(2); (iii) compute $(\eta,t_{\mathrm{last}})$ for keep-original and reschedule in each of the 74 representative scenarios. This approach is chosen because the post-disturbance scale is the same order as 2(2) and reusing the same solver keeps the conventions consistent; with only 74 scenarios, deterministic enumeration completes in one run without online stochastic optimization. Keep-original is evaluated analytically and serves as a comparison with per-scenario simulation. The result is a strict $\eta$ improvement in 67/74 scenarios, 7 ties, and 0 degradations.
