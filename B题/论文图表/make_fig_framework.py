@@ -158,8 +158,13 @@ for coll in (ax.patches, ax.texts, ax.lines):
         ys0.append(dy0)
         ys1.append(dy1)
 PAD = 2.5
-x_lo, x_hi = min(xs0) - PAD, max(xs1) + PAD
 y_lo, y_hi = min(ys0) - PAD, max(ys1) + PAD
+# horizontal balance: centre the MAIN BLOCK COLUMN in the canvas; the
+# right-side bypass protrusion is mirrored by equal empty space on the left,
+# so the figure reads symmetric when centred in the document
+bc = (BX + BX + BW) / 2
+x_hi = max(max(xs1), BX + BW) + PAD
+x_lo = min(min(xs0), 2 * bc - x_hi)
 ax.set_xlim(x_lo, x_hi)
 ax.set_ylim(y_lo, y_hi)
 UNIT_IN = 0.063                      # inches per data unit, same for x and y

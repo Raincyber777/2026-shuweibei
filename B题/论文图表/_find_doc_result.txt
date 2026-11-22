@@ -1,0 +1,33 @@
+== repo root: E:\2026数维杯\2026-shuweibei
+== B题 root listing ==
+[D] 00_赛题与规范
+[D] 01_论文
+[D] 99_归档
+[F] README_文件结构.md
+[F] _tmp_make11.py
+[F] _tmp_md_11fig.md
+[F] build_docx_paper_cn.py
+[F] build_numbers.py
+[F] check_consistency.py
+[F] numbers.md
+[F] params.csv
+[F] params_table.md
+[F] 数维杯B题_中文初稿.md
+[D] 第一题
+[D] 第三题
+[D] 第二题
+[D] 第四题
+[D] 论文图表
+== search 'AI交接' under repo ==
+FOUND: E:\2026数维杯\2026-shuweibei\B题\01_论文\过程文档\AI交接文档_当前进度.md
+FOUND: E:\2026数维杯\2026-shuweibei\B题\99_归档\备份\AI交接文档_当前进度.md.bak
+== search '交接' under desktop package ==
+FOUND: C:\Users\ASUS\Desktop\shuwei材料包\shuwei材料包\B题\AI交接文档_当前进度.md
+== git status (porcelain) ==
+ M "B\351\242\230/\350\256\272\346\226\207\345\233\276\350\241\250/fig0_framework.png"
+ M "B\351\242\230/\350\256\272\346\226\207\345\233\276\350\241\250/fig0_framework.svg"
+ M "B\351\242\230/\350\256\272\346\226\207\345\233\276\350\241\250/make_fig_framework.py"
+ M "B\351\242\230/\350\256\272\346\226\207\345\233\276\350\241\250/\345\233\276\345\217\267\345\257\271\347\205\247\344\270\216\350\257\264\346\230\216.md"
+?? "B\351\242\230/\350\256\272\346\226\207\345\233\276\350\241\250/_find_doc.py"
+
+git stderr: 
