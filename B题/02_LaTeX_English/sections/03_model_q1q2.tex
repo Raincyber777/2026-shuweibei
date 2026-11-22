@@ -249,7 +249,7 @@ Lower bound: $\mathrm{LB}(v,a)=\min_p[\distpath(V_v^0,p)/3+\max(|\alpha|,|\varep
 
 In the order T1$\to$T2$\to$T3, fill two slots for each alert. For each slot, among vehicles not already serving this alert, choose the one with the smallest ``travel time from the current chain end to its minimum-ready station for this alert'' (ties: smaller vehicle number), and use that minimum-ready station; if the vehicle already has tasks, append to its chain. The same timeline simulation computes the start times. This baseline considers only ``who is nearest'' and ignores synchronized pairing, reuse-chain order, and slew angle.
 
-Optimized plan: T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V4), T3$\leftarrow$(V2,V3), with the V3 reuse chain T1$\to$T3; the start times are $1.607/6.994/10.355$~s and the objective is $10.355$~s. Baseline: T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V1,V5), with reuse chains for V1, V3, and V5; the start times are $1.607/11.140/20.968$~s and the objective is $20.968$~s. The latest start is reduced by $10.613$~s ($-50.6\%$).
+Optimized plan: T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V4), T3$\leftarrow$(V2,V3), with the V3 reuse chain T1$\to$T3; the start times are $1.607\bsl6.994\bsl10.355$~s and the objective is $10.355$~s. Baseline: T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V1,V5), with reuse chains for V1, V3, and V5; the start times are $1.607\bsl11.140\bsl20.968$~s and the objective is $20.968$~s. The latest start is reduced by $10.613$~s ($-50.6\%$).
 
 The difference has three sources. (i) Synchronized-pairing loss: the baseline places T2 as the second task in V3's reuse chain, so V3 must first finish T1 and reset, forcing V1 on the other side of T2 to wait; the optimized plan instead pairs V1 with the dedicated V4. (ii) Reuse-chain order: the baseline's three two-task chains serialize slow tasks after fast alerts and block T3's early window; the optimized plan has only one T1$\to$T3 chain. (iii) Azimuth-driven station selection: ready time is highly sensitive to the pan angle ($30^\circ$/s), while the baseline selects stations by distance and ignores the turn angle; the optimization model minimizes ready time.
 
@@ -257,7 +257,7 @@ Note that the T2 pair of 2(1) is accuracy-optimal, whereas 2(2) re-optimizes the
 
 \subsubsection{Results and Robust Deployment}
 
-The $10.355$~s optimum has knife-edge station clearances of only $1.3\times10^{-3}$~m (V3 at T3) and $6.7\times10^{-2}$~m (V4 at T2); the full stations and timings are listed in Table~\ref{tab:D-2}. Re-optimizing with $0.5$~m clearance yields a robust variant of $10.837$~s ($+4.7\%$), with assignment T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V4,V5) and start times $1.54/10.804/10.837$~s; the robust variant is recommended for deployment. The sensitivities to speed and angular rate are given in Section~6.2; the elasticity of $\omega$ is about four times that of $v$.
+The $10.355$~s optimum has knife-edge station clearances of only $1.3\times10^{-3}$~m (V3 at T3) and $6.7\times10^{-2}$~m (V4 at T2); the full stations and timings are listed in Table~\ref{tab:D-2}. Re-optimizing with $0.5$~m clearance yields a robust variant of $10.837$~s ($+4.7\%$), with assignment T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V4,V5) and start times $1.54\bsl10.804\bsl10.837$~s; the robust variant is recommended for deployment. The sensitivities to speed and angular rate are given in Section~6.2; the elasticity of $\omega$ is about four times that of $v$.
 
 \begin{table}[htbp]
   \centering
@@ -308,7 +308,7 @@ The stations of 2(2) are re-optimized independently for timeliness and must be s
   \end{tabular}
 
   \vspace{2pt}
-  {\footnotesize Note: $\mathrm{DRMS}=\sigma G$, $\sigma=1^\circ=0.017453$~rad; T1* is the constrained re-solution with $\gamma_{\mathrm{T1}}\ge30^\circ$ under the same assignment/order and does not constitute a global optimality claim. None of the four station pairs is isotropic (the eigenvalue ratio of T1 is about $46:1$); exact $95\%$ coverage should use the ellipse semi-axes $\sqrt{5.991\lambda_i}$, which are $(10.56,1.55)/(3.27,2.48)/(4.77,1.19)/(6.87,1.58)$~m for T1/T2/T3/T1*, respectively.}
+  {\footnotesize Note: $\mathrm{DRMS}=\sigma G$, $\sigma=1^\circ=0.017453$~rad; T1* is the constrained re-solution with $\gamma_{\mathrm{T1}}\ge30^\circ$ under the same assignment/order and does not constitute a global optimality claim. None of the four station pairs is isotropic (the eigenvalue ratio of T1 is about $46:1$); exact $95\%$ coverage should use the ellipse semi-axes $\sqrt{5.991\lambda_i}$, which are $(10.56,1.55)\bsl(3.27,2.48)\bsl(4.77,1.19)\bsl(6.87,1.58)$~m for T1/T2/T3/T1*, respectively.}
 \end{table}
 
 \subsubsection{Algorithm and Efficiency}

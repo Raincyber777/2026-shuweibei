@@ -511,7 +511,7 @@
 % 文档开始导入默认配置
 \AtBeginDocument{\makeatletter\input{swmcmthesis.cfg}\makeatother}
 
-\renewcommand{\thesection}{\arabic{section}.}
-\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
 
 \endinput
