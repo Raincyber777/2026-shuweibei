@@ -196,7 +196,8 @@ a10a.set_ylim(0, 65)
 a10a.set_yticks(range(0, 61, 10))
 a10a.set_xlabel("New-alert azimuth θ (deg)")
 a10a.set_ylabel("t$_{last}$ (s)")
-a10a.legend(fontsize=5.5, loc="upper left", ncol=2, framealpha=0.92)
+a10a.legend(fontsize=6, loc="upper center", bbox_to_anchor=(0.5, -0.30),
+            ncol=3, frameon=False)
 panel(a10a, "(a) Rescheduled t$_{last}$ vs. azimuth")
 
 fo = {(s["failed"], s["t_rec"]): s["resched"]["t_last"]

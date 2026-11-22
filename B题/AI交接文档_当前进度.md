@@ -521,3 +521,13 @@ B题\
 - **修复**：`git branch backup-before-svg-fix`（保险）→ `git reset --soft origin/main` → 重新提交为单一干净提交（大 blob 从可达历史中彻底消失，工作区文件本就是修复后的小文件）→ 清理误入库的微信截图与临时脚本 → `.gitignore` 补 `微信图片_*.jpg`。
 - **网络**：直连被重置 → 走本机代理 127.0.0.1:7897 完成 `git push`（284ec41..3c9fde0）✓；远端 main 与本地一致，0 未推送。
 - 注：命令行 git 若需常态走代理，可 `git config --global http.proxy http://127.0.0.1:7897`（代理关闭时需取消，属可选项，未默认启用）。
+
+### XIV.11 四问关系框架图 fig0_framework（同日；后按复核建议重排为纵向链式）
+- 新增 `论文图表/make_fig_framework.py` → **fig0_framework.svg/png**（论文 §2 问题分析/建模总览用）。
+- **布局（终版，纵向）**：输入条（场地/建筑/车辆/告警/σ_α=1°）→ Q1 → Q2（单块内含 (1)(2) 两行）→ Q3 → Q4 四个彩色圆角块纵向堆叠；主链箭头按复核要求**标具体量不标动词**：feasible stations Ω_a (5610.4 m²) → deployed geometry & driving legs s (Q2 max 3.10 m) → driving budget s ≤ 66.92 m (Q4 max leg 18.14 m)；右侧旁路箭头 Q2→Q4 "optimized timeline = rescheduling baseline"（三条必画关系：Ω 作选站可行域、G/DRMS 回代校核、时刻表=基线，全部落实）。
+- **回代校核数字核实**：γ(T1)=19.34° 出自 q2b_precision.json（σ=1° 时 G=176.67、DRMS=3.08 m；γ≥30° 窗口同结构代价 12.983 s 即 +25.4%）——注意这是 Q2(2) 时间最优站位的实际交会角，与 Q2(1) 理想下界配置（γ=90°、G=5.8188、DRMS=0.1016 m）是两回事，图中已分列；ε*=80°（证书点仰角 79.999°）、最优弧 283.85°（feasible_fraction 0.78848×360）均与 q1_results.json 一致。
+- **新增一致性校验** `第二题/code/_check_legs.py`：Q2(2) 交付方案最大行驶腿 **3.10 m**（V4），Q4 全部 74 场景最大 travel 段 **18.14 m**，均 ≪ s_max=66.92 m——Q3 指向预算对两问交付方案自动满足，可作论文一句支撑（Q2↔Q3 联动）。
+- **脚本内置文字溢出断言**：绘制后用 renderer 实测每条文本 bbox 是否越出所在块（先输入条超宽被断言拦下拆两行），杜绝此前"文字穿过边框"问题复发。
+- 字体：三份 make_fig 脚本均显式 `font.family: Times New Roman` + STIX 数学字体（style.use 之后覆盖生效），findfont 解析 C:\Windows\Fonts\times.ttf ✓。
+- **Algorithm 1 交付**：`第二题/Algorithm1_伪代码框.md`——按复核建议用算法框（伪代码 9 行）替代方框箭头流程图，不新增图号；中文正文版 + LaTeX algorithmic 版，与 q2b_core.py 逐步对齐（1000 结构乐观界剪枝枚举 → 复用顺序枚举 → 贪心初始化 → 坐标下降 → NM → 时序仿真/死锁剔除 → top-12 复精修 → (S, Σstarts) 字典序 top-5 唯一化）。
+- 已同步桌面材料包；复现命令 `python -I make_fig_framework.py`。
