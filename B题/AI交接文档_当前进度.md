@@ -531,3 +531,11 @@ B题\
 - 字体：三份 make_fig 脚本均显式 `font.family: Times New Roman` + STIX 数学字体（style.use 之后覆盖生效），findfont 解析 C:\Windows\Fonts\times.ttf ✓。
 - **Algorithm 1 交付**：`第二题/Algorithm1_伪代码框.md`——按复核建议用算法框（伪代码 9 行）替代方框箭头流程图，不新增图号；中文正文版 + LaTeX algorithmic 版，与 q2b_core.py 逐步对齐（1000 结构乐观界剪枝枚举 → 复用顺序枚举 → 贪心初始化 → 坐标下降 → NM → 时序仿真/死锁剔除 → top-12 复精修 → (S, Σstarts) 字典序 top-5 唯一化）。
 - 已同步桌面材料包；复现命令 `python -I make_fig_framework.py`。
+
+### XIV.12 框架图终版打磨与 34 项全量数据核对（2026-11-22）
+- **对称留白**：改用 `fig.add_axes([0,0,1,1])` + 实测内容包围盒四边等宽 PAD=2.5 u 裁边出图（不再 bbox_inches="tight"），插入文档居中不偏左。
+- **核对抓出 1 处图面错误并修复**：箭头标签原写 "feasible stations Ω_a (5610.4 m²)"——5610.4 是 **T1** 的区域面积，Q2 选站针对 T2（可行域 6413.09 m²，q2a_results.region.area_m2 / q2b_results.region_areas）。已改为 "Ω_a(T2): 6413.1 m²"，Q1 块同步标注 Ω(T1)。三个告警区域面积：T1 5610.40 / T2 6413.09 / T3 5459.84。
+- **γ 窗口写全**：plug-back 行改 "γ ∈ [30°, 150°] window costs +25.4%"（原写单侧 γ≥30°）。
+- **34 项逐一对源核对全过**（新脚本 `论文图表/_verify_fig0.py`，可复跑）：覆盖输入条 5 项、Q1 6 项、Q2(1) 5 项、Q2(2) 6 项、Q3 6 项、Q4 及箭头 6 项，全部对 results/*.json 原始字段取值并按图中舍入位数比对；η 统计从 74 场景 keep/resched eta 现场重算（67 提升/7 持平/0 劣化）✓；Q2 最大腿长 3.10 m、Q4 最大腿长 18.14 m 现场重算 ✓；Q4 基线指派与 q2b 优化解逐告警一致 ✓。
+- **核对报告**：桌面 `fig0_framework_数据核对.md`（逐项出处+原始值+结果、修正记录、口径备注）。自洽亮点：(1.6384−0.3)/0.02 反演 = s_max_m 精确吻合；(180/π)/40 = 1.432394 = K_LOC。
+- 新增辅助脚本：`_verify_fig0.py`（审计+生成报告）、`_insp_q4.py`（结构探查）、`_make_alg_preview.py`（算法框示意渲染，`_preview_算法框示意.png`，仅示意不入论文）。
