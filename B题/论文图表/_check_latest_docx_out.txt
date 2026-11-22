@@ -1,0 +1,18 @@
+== mtime ==
+2026-11-22 19:20:54  1960606 bytes
+== git ==
+HEAD: a2dbbc7 检查（2026.11.22.19；20）
+status of file: []  (empty = 与 HEAD 一致)
+last commit touching file: de066eb 按照老师要求检查
+== content: five fixes ==
+[OK] 修正1 Q2(1) NM≤300: 含[300 次迭代]=有
+[OK] 修正2 最优性验证: 含[最优性验证]=有 / 残留[四维搜索降为]=无
+[OK] 修正3 摘要口径: 含[可证性]=有 / 残留[保证最优性]=无
+[OK] 修正4a 术语: 含[复用链次序]=有 / 残留[复用次序]=无
+[OK] 修正4c 术语: 含[每车至多 2 个任务]=有 / 残留[O(5×2)]=无
+[OK] 5880 组合数: 含[5880]=有
+[OK] makespan 10.355: 含[10.355]=有
+[OK] Ω(T1) 5610.4: 含[5610.4]=有
+[OK] s_max 66.92: 含[66.92]=有
+== embedded media ==
+media total: 22  by type: .png×11, .svg×11
