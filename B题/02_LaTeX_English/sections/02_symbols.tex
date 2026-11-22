@@ -6,22 +6,16 @@
 
 \subsection{Symbols}
 
+\begin{table}[htbp]
+\centering
+\caption{Main symbols}
+\label{tab:3-1}
 {\small
 \renewcommand{\arraystretch}{1.08}
-\begin{longtable}{@{}p{38mm}p{92mm}p{30mm}@{}}
-  \caption{Main symbols}
-  \label{tab:3-1}\\
+\begin{tabularnb}{@{}p{38mm}p{92mm}p{30mm}@{}}
   \toprule
   Symbol & Meaning & Unit / value \\
   \midrule
-  \endfirsthead
-  \multicolumn{3}{@{}l}{\small Table~\ref{tab:3-1} (continued)}\\
-  \toprule
-  Symbol & Meaning & Unit / value \\
-  \midrule
-  \endhead
-  \bottomrule
-  \endlastfoot
   $O$ & Dispatch center & $(50,50)$~m \\
   $B_i$ & Building $i$ ($i=1,\dots,5$), planar range $[x_i^0,x_i^1]\times[y_i^0,y_i^1]$, height $h_i$ & m \\
   $T_a$; $\theta_a,\rho_a,H_a$; $T'_a$ & Alert $a$ and its target; azimuth (counterclockwise from east), horizontal distance, height; horizontal projection & $^\circ$, m, m; m \\
@@ -44,8 +38,10 @@
   $P,\hat P,\delta$; $s$; $\sigma(s)=a+bs$ & True position, estimated position, and localization error; cumulative travel distance; single-axis localization standard deviation ($a,b\ge0$) & m; m; m, m/m \\
   $\varepsilon_0,\varepsilon_c$; $\Delta\psi$; $\sigma_\psi$; $s_{\max}$ & Gimbal bias/control error; difference between commanded and true azimuth ($\wrap$); combined standard deviation of $\Delta\psi$; maximum travel distance satisfying $P(|\Delta\psi|\le5^\circ)\ge0.95$ & $0.8^\circ/0.6^\circ$; $^\circ$; $^\circ$; m \\
   $t_p,t_{\mathrm{rec}}$; $N,k,\eta$; $t_{\mathrm{last}}$ & Rescheduling trigger/communication recovery time; total alerts, successful starts, $\eta=k/N$; latest observation start time (60~s if not started) & s; ---; s \\
-\end{longtable}
+  \bottomrule
+\end{tabularnb}
 }
+\end{table}
 
 \subsection{Assumptions}
 

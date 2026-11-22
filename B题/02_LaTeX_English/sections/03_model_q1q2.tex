@@ -11,19 +11,19 @@ All four problems share the same site geometry and observation model. This secti
 \noindent (a) \textbf{Coordinate system and site.} The southwest corner is the origin, the $x$-axis points east, and the $y$-axis points north; the site is $[0,100]^2$, and the dispatch center is $O=(50,50)$. A building is the axis-aligned cuboid $[x_i^0,x_i^1]\times[y_i^0,y_i^1]\times[0,h_i]$ standing on $z=0$; the camera height is $h_{\mathrm{cam}}=2$~m. The horizontal projection of an alert $(\theta,R,H)$ is $T'=(50+R\cos\theta,50+R\sin\theta)$, and its height is $H$.
 
 \noindent (b) \textbf{Vehicle geometry and Minkowski expansion.} A vehicle is a disk of radius $R_{\mathrm{veh}}=1.5$~m centered at $p=(x,y)$. The vehicle geometry constraint is
-\begin{equation*}
+\begin{equation}
   \mathrm{C1}=\{p:\ 1.5\le x\le98.5,\ 1.5\le y\le98.5,\ d(p,B_i)\ge1.5,\ i=1,\dots,5\},
-\end{equation*}
+\end{equation}
 where
-\begin{equation*}
+\begin{equation}
   d(p,B)=\sqrt{[\max(x_0-x,0,x-x_1)]^2+[\max(y_0-y,0,y-y_1)]^2};
-\end{equation*}
+\end{equation}
 this is equivalent to expanding each building footprint by $1.5$~m (Minkowski dilation).
 
 \noindent (c) \textbf{Slab test for LOS occlusion.} The LOS is the 3-D segment from the camera $(p,2)$ to the target $T=(T',H)$. For the $k$-th axis interval $[\mathrm{lo}_k,\mathrm{hi}_k]$, compute the parameter interval $[t_k^-,t_k^+]$ and set $t_{\mathrm{enter}}=\max_k t_k^-$, $t_{\mathrm{exit}}=\min_k t_k^+$. The segment intersects the cuboid (including tangency) if and only if $\max(t_{\mathrm{enter}},0)\le\min(t_{\mathrm{exit}},1)$. Tangency counts as occlusion, and numerical intersection tests use a tolerance of $10^{-9}$~\cite{preparata}. The LOS occlusion constraint is
-\begin{equation*}
+\begin{equation}
   \mathrm{C3}=\bigcap_{i=1}^{5}\{p:\ L(p)\cap B_i=\varnothing\}.
-\end{equation*}
+\end{equation}
 The observable region is $\Omega=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$, where the gimbal pitch constraint C2 is given by $\varepsilon(p)=\arctan(\Delta z/r(p))\in[-10^\circ,80^\circ]$; for a given target, $\Delta z=H-h_{\mathrm{cam}}$, which is equivalent to $r\ge\Delta z/\tan80^\circ$, with $\Delta z$ evaluated per problem. The gimbal timing and the rule ``return to east during travel, turn after arrival'' follow A3/A6 and are not repeated below.
 
 % ---------------------------------------------------------------------
@@ -33,20 +33,20 @@ The observable region is $\Omega=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$, whe
 \subsubsection{Constraint Formalization and Optimization Model}
 
 The horizontal projection and 3-D position of T1 are
-\begin{equation*}
+\begin{equation}
   T'=(50+40\cos30^\circ,\ 50+40\sin30^\circ)=(84.6410,70.0000)~\mathrm{m},
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   T=(84.6410,70.0000,45)~\mathrm{m},\qquad \Delta z=45-2=43~\mathrm{m}.
-\end{equation*}
+\end{equation}
 From C1/C3 in Section~4.1, the gimbal pitch constraint for T1 ($\Delta z=43$~m) is equivalent to
-\begin{equation*}
+\begin{equation}
   \mathrm{C2}=\{p:\ r(p)\ge\rmin\},\qquad \rmin=\Delta z/\tan80^\circ=43/5.6712818=7.5821~\mathrm{m}.
-\end{equation*}
+\end{equation}
 The observable region is $\Omega=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$. With $Q(p)=1/r(p)$ as the observation quality, the optimal station is
-\begin{equation*}
+\begin{equation}
   p^*=\argmax_{p\in\Omega}Q(p)=\argmin_{p\in\Omega}r(p).
-\end{equation*}
+\end{equation}
 The criterion is chosen for four reasons. (i) A single-station angle error $\delta\alpha$ translates into a lateral position error $r\,\delta\alpha$ at the target, so $1/r$ has the same direction as single-station accuracy. (ii) C2 itself is $r\ge\rmin$, so $Q$ is aligned with the active constraint, and maximizing $Q$ is equivalent to pushing the pitch to its upper bound. (iii) In the two-station accuracy model of 2(1), DRMS increases monotonically with the station--target distances $d_i$ (Section~4.3.1), so a smaller $r$ is necessary for two-station accuracy. (iv) $Q$ is coordinate-independent, dimensionally simple, and strictly monotone, which facilitates tie-breaking. $Q$ is not the only admissible criterion; the alternative $Q_2=(1/r)\cos^2(\varepsilon-45^\circ)$ was also tested, and both criteria have the same optimal set.
 
 \subsubsection{Global Lower Bound and Optimality Theorem}
@@ -72,9 +72,9 @@ The distance from $T'$ to the east face $x=79$ of B2 is only $5.6410$~m, less th
 The optimal arc is made unique by a three-level lexicographic tie-break:
 \begin{enumerate}[label=(T\arabic*)]
 \item Maximum-safety-margin band:
-\begin{equation*}
+\begin{equation}
   m(p)=\min\bigl\{\min_i[d(p,B_i)-1.5],\ x-1.5,\ 98.5-x,\ y-1.5,\ 98.5-y\bigr\},
-\end{equation*}
+\end{equation}
 keep the tie band $m(p)\ge m^*-0.05$~m, where $m^*=9.6746$~m ($\varphi=56.5038^\circ$).
 \item Shortest reachable within the band: choose the point with the shortest obstacle-avoiding travel time from the nearest standby vehicle.
 \item Coordinate lexicographic order: if still tied, choose the smallest $(x,y)$ in lexicographic order.
@@ -144,35 +144,35 @@ This problem uses ``closed-form lower bound + arc parameterization + three-level
 \subsubsection{Two-Station Intersection Accuracy Model}
 
 Let the two stations be $p_i$, with station--target distances $d_i$, LOS azimuths $\alpha_i$, unit directions $u_i=(\cos\alpha_i,\sin\alpha_i)$, and unit normals $n_i=(-\sin\alpha_i,\cos\alpha_i)$. The azimuth errors $\delta\alpha_i\sim\mathcal{N}(0,\sigma^2)$ are independent. The intersection-point error satisfies the first-order propagation \cite{torrieri,foy}
-\begin{equation*}
+\begin{equation}
   A\,\Delta p=\delta,\qquad A=\begin{bmatrix}n_1^T\\ n_2^T\end{bmatrix},\qquad
   \delta=(d_1\delta\alpha_1,d_2\delta\alpha_2)^T,
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   \Sigma=A^{-1}DA^{-T},\qquad D=\diag(d_1^2\sigma^2,d_2^2\sigma^2).
-\end{equation*}
+\end{equation}
 Hence $\trace\Sigma=\sigma^2(d_1^2+d_2^2)/\sin^2\gamma$ and $\det\Sigma=\sigma^4d_1^2d_2^2/\sin^2\gamma$ (full algebra in Appendix~A.2).
 
 Define
-\begin{equation*}
+\begin{equation}
   G=\frac{\sqrt{(d_1^2+d_2^2)/2}}{|\sin\gamma|},\qquad
   \mathrm{DRMS}=\sigma G=\sqrt{\trace\Sigma/2};
-\end{equation*}
+\end{equation}
 the 2-D radial RMSE is $\sqrt2\,\mathrm{DRMS}$, and the $95\%$ circle radius is $R_{95}=2.4477\,\mathrm{DRMS}$ (exact when isotropic).
 
 \subsubsection{Global Lower Bound and Vehicle/Station Selection}
 
 From $|\sin\gamma|\le1$, the QM--AM (quadratic-mean--arithmetic-mean) inequality, and $d_i\ge\rmin$ from C2,
-\begin{equation*}
+\begin{equation}
   G\ge\sqrt{\frac{d_1^2+d_2^2}{2}}\ge\frac{d_1+d_2}{2}\ge\rmin=\frac{35-2}{\tan80^\circ}=5.8188~\mathrm{m}.
-\end{equation*}
+\end{equation}
 Equality requires $\gamma=90^\circ$ and $d_1=d_2=\rmin$. For T2, the geometrically feasible arc on the $\rmin$ circle is $[59.66^\circ,244.24^\circ]$; with a $0.5$~m LOS/geometric margin, the robust feasible arc is $[70.95^\circ,238.63^\circ]$, of length $167.68^\circ>90^\circ$, so a $90^\circ$ pair exists. Under the 30~s limit, the V2-related combinations have $G=8.9678$~m, but the V2-side travel alone is $30.29$~s (V1+V2) or $34.75$~s (V2+V3, V2+V4, V2+V5), which already exceeds 30~s, so all four are infeasible (V1+V2 is the thinnest, $30.29$~s, against a straight-line lower bound of $30.00$~s); paths are computed on the visibility graph with Dijkstra~\cite{dijkstra}. In the stricter $0.75$~m robust inner domain, V3+V5 is selected by ``minimum total travel time---minimum maximum single-vehicle time---lexicographic order'':
-\begin{equation*}
+\begin{equation}
   p_1=(5.2787,73.3912)~\mathrm{m},\quad p_2=(11.9201,78.2501)~\mathrm{m},
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   d_1=d_2=5.8188~\mathrm{m},\quad \gamma=90.000^\circ,\quad \beta=8.2290~\mathrm{m},
-\end{equation*}
+\end{equation}
 with travel times $5.11/13.61$~s (sum $18.72$~s), $\mathrm{DRMS}=0.1016$~m, and $R_{95}=0.2486$~m.
 
 \begin{table}[htbp]
@@ -227,20 +227,20 @@ Degeneracy analysis: as $\gamma\to0^\circ/180^\circ$, $G\to\infty$ and the condi
 \subsubsection{Six-Slot, Five-Vehicle Scheduling Model}
 
 Let the alert set be $A=\{\mathrm{T1},\mathrm{T2},\mathrm{T3}\}$ and the vehicle set be $V=\{\mathrm{V1},\dots,\mathrm{V5}\}$. Each alert $a$ is assigned two distinct vehicles $M_a$; the task sequence of vehicle $v$ is $\pi_v$, and the station of task $k$ is $p_{v,k}\in\Omega_a$. For task $k$, let $D_{v,k-1}$ be the previous task's departure time and $\mathrm{pos}_{v,k-1}$ the previous position. Then
-\begin{equation*}
+\begin{equation}
   \tau_{\mathrm{tr}}=\distpath(\mathrm{pos},p)/3,\qquad
   \tau_{\mathrm{sl}}=\max(|\alpha|,|\varepsilon|)/30,
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   t^{\mathrm{rd}}_{v,k}=D_{v,k-1}+\tau_{\mathrm{tr}}+\tau_{\mathrm{sl}},
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   S_a=\max(t^{\mathrm{rd}}_{v,k},t^{\mathrm{rd}}_{v',k'}) \quad\text{(the later of the two vehicles' ready times)},
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   D_{v,k}=S_a+5+\tau_{\mathrm{rs}},\qquad
   \tau_{\mathrm{rs}}=\max(|\alpha|,|\varepsilon|)/30.
-\end{equation*}
+\end{equation}
 The objective is $\min\max_a S_a$. Each alert has 10 vehicle pairs, so the three alerts give $10^3=1000$ assignment structures. For each structure, reuse orders are enumerated; stations are initialized greedily, refined by Gauss--Seidel coordinate descent and Nelder--Mead~\cite{nelder}; if two reused vehicles wait for each other and the fixed-point iteration makes no progress, the structure is declared deadlocked and removed.
 
 Lower bound: $\mathrm{LB}(v,a)=\min_p[\distpath(V_v^0,p)/3+\max(|\alpha|,|\varepsilon|)/30]$, $S_a\ge$ the second-smallest $\mathrm{LB}(v,a)$, and the global $\mathrm{LB}=\max_a$ second-smallest $=3.414$~s. This bound ignores reuse and synchronization, so it is loose.

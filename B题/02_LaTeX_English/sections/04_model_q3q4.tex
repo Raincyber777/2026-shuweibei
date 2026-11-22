@@ -7,25 +7,25 @@
 \subsubsection{Error Propagation Model}
 
 Take the true position $P$ as the origin and the true LOS as the $x'$ axis, with the target at $(d,0)$, $d=40$~m. Decompose the localization error into cross-range $\delta_\perp$ and along-range $\delta_\parallel$; under isotropy, $\delta_\perp\sim\mathcal{N}(0,\sigma(s)^2)$. The exact deviation from the estimated position to the target is $\Delta\alpha=\operatorname{atan2}(-\delta_\perp,d-\delta_\parallel)\approx-\delta_\perp/d$ (residual analysis in Appendix~A.3). Adding the gimbal bias $\varepsilon_0\sim\mathcal{N}(0,0.8^2)$ and control error $\varepsilon_c\sim\mathcal{N}(0,0.6^2)$,
-\begin{equation*}
+\begin{equation}
   \Delta\psi=\wrap\bigl(\Delta\alpha\cdot180/\pi+\varepsilon_0+\varepsilon_c\bigr),
-\end{equation*}
+\end{equation}
 where $\wrap(\cdot)$ folds angles into $(-180^\circ,180^\circ]$. The three terms are independent zero-mean normals, and $\wrap$ is not triggered at this problem's scale, so
-\begin{equation*}
+\begin{equation}
   \Delta\psi\sim\mathcal{N}\bigl(0,\sigma_\psi^2(s)\bigr),\qquad
   \sigma_\psi^2(s)=\left(\frac{\sigma(s)}{40}\cdot\frac{180}{\pi}\right)^2+0.8^2+0.6^2
   =(1.432394\sigma(s))^2+1.0.
-\end{equation*}
+\end{equation}
 
 \subsubsection{$s_{\max}$ and $(a,b)$ Constraints}
 
 From $P(|\Delta\psi|\le5^\circ)=2\Phi(5/\sigma_\psi)-1\ge0.95$, we obtain $\sigma_\psi\le5/z_{0.975}=2.551067^\circ$. Substituting into the expression above,
-\begin{equation*}
+\begin{equation}
   \sigma(s)\le\frac{\sqrt{2.551067^2-1.0}}{1.432394}=1.638446~\mathrm{m},
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   s_{\max}=\frac{1.638446-0.3}{0.02}=66.9223~\mathrm{m}\approx66.92~\mathrm{m}.
-\end{equation*}
+\end{equation}
 At $s=80$~m, $\sigma(80)=1.9$~m, $\sigma_\psi=2.89945^\circ$, and $P=0.91538<0.95$. If the criterion must still hold at 80~m, then $a+80b\le1.638446$~m, which together with $a,b\ge0$ forms a triangular feasible region ($b=0$ gives $a\le1.6384$~m; $a=0$ gives $b\le0.0204806$~m/m). The nominal point $(0.3,0.02)$ lies outside; one must reduce $b$ to $0.0167306$~m/m ($-16.3\%$) or reduce $a$ to $0.0384$~m.
 
 \subsubsection{Contribution Decomposition and Exact Verification}
@@ -82,9 +82,9 @@ This problem uses ``closed-form first-order propagation + monotone criterion + e
 At $t_p$ (5~s without an outage, $t_{\mathrm{rec}}$ with an outage), record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle. Traveling: position is interpolated linearly, attitude is east, and the vehicle can be redispatched immediately. Slewing: the vehicle is at its station, attitude is interpolated, and it can be redispatched. Synchronized waiting: the vehicle is at its station, attitude points at the target, and it can be redispatched. Observing/resetting: the alert is locked and counted as served---it is not rescheduled even though its 5~s observation may still be in progress---and the vehicle remains locked until its reset finishes.
 
 Rules: alerts that started before $t_p$ cannot be rescheduled; dispatched-but-unobserved vehicles can be redispatched; a failed vehicle is removed and its pending alerts become orphans; no new commands are received during an outage, and rescheduling is triggered after $t_{\mathrm{rec}}$. \textbf{``Continue-slew'' applies only to the first task of an unobserved redispatch}: only if the vehicle has not started observing and the new station coincides with its current position (distance $\le5$~cm), the first post-snapshot task continues from the current attitude, with
-\begin{equation*}
+\begin{equation}
   \mathrm{slew}=\max\bigl(|\wrap(\alpha_{\mathrm{new}}-\alpha_{\mathrm{cur}})|,\ |\varepsilon_{\mathrm{new}}-\varepsilon_{\mathrm{cur}}|\bigr)/30;
-\end{equation*}
+\end{equation}
 after that task resets, all subsequent tasks perform a full-angle slew from east. Other redispatches (new station more than 5~cm from the current position) follow A3/A6: return to east during travel and perform a full slew after arrival. For example, in the $(\theta=0^\circ,\rho=30~\mathrm{m})$ scenario (internal id \texttt{th0\_R30}), V1's redispatch chain is T2$\to$T3: T2 has a $0$~s continue-slew; after T2 observation and reset, T3 slews from east for $1.655$~s, so T3 starts at $16.772$~s. Continue-slew is the continuation of the same pointing phase, not a new ``arrival--pointing'' process.
 
 \subsubsection{Rescheduling Model and Benchmark Strategy}

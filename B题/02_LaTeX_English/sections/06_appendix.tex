@@ -8,11 +8,11 @@
 \addcontentsline{toc}{subsection}{A.1 Problem 1: Intersection of the optimal arc and C3}
 
 \noindent\textbf{(a) Derivation of the blocked arc.} Let $T'=(84.6410,70.0000)$ and $\rmin=7.5821$~m. The $1.5$~m expanded rectangle of B2 is $[61.5,80.5]\times[57.5,72.5]$; a point on the circle, $(84.6410+7.5821\cos\varphi,\ 70+7.5821\sin\varphi)$, falls inside this rectangle if and only if
-\begin{equation*}
+\begin{equation}
   \cos\varphi\le\frac{80.5-84.6410}{7.5821}=-0.54616,
   \qquad
   \sin\varphi\le\frac{72.5-70}{7.5821}=0.32972.
-\end{equation*}
+\end{equation}
 The first inequality gives $\varphi\in[123.11^\circ,236.89^\circ]$, and the second gives $\varphi\in[0^\circ,19.25^\circ]\cup[160.75^\circ,360^\circ]$ ($x\ge61.5$ and $y\ge57.5$ hold automatically on the circle because $x\ge77.06$ and $y\ge62.42$ there). Their intersection is $\varphi\in[160.75^\circ,236.89^\circ]$, i.e., a blocked arc of $76.15^\circ$. Hence C1 leaves the continuous arc $[236.89^\circ,360^\circ)\cup(0^\circ,160.75^\circ]$ on the circle, of total length $283.85^\circ$.
 
 \noindent\textbf{(b) C3 adds no occlusion on the feasible arc.} Basis: the segment $pT'$ is contained in the disk centered at $T'$ with radius $\rmin$ (convexity of the disk); the distances from the other buildings to $T'$ are $67.09$, $60.64$, $36.00$, and $41.32$~m, all greater than $\rmin+1.5=9.0821$~m (see Section~4.2.3), so only B2 needs to be excluded. For $p$ on the feasible arc, consider two cases.
@@ -20,80 +20,80 @@ The first inequality gives $\varphi\in[123.11^\circ,236.89^\circ]$, and the seco
 \noindent (i) $x(p)\ge79$: the $x$-coordinate of the horizontal projection of the LOS lies between $x(p)$ and $84.6410$, hence is always $\ge79$ and outside the east face of B2.
 
 \noindent (ii) $x(p)<79$: by the C1 test in (a), $p$ must satisfy $y(p)>72.5$. Let $p=(x_0,y_0)$, $t=y_0-70\in(2.5,7.5821]$, and $x_0=84.6410-\sqrt{\rmin^2-t^2}$. The ordinate of the intersection of $pT'$ with the line $x=79$ reduces to
-\begin{equation*}
+\begin{equation}
   y(79)=70+\frac{5.6410\,t}{\sqrt{\rmin^2-t^2}}.
-\end{equation*}
+\end{equation}
 This expression is strictly increasing on $t\in(2.5,7.5821]$, so $y(79)\ge y(79)|_{t=2.5}=71.97>71$; that is, the LOS passes north of the north face of B2 ($y=71$) and does not enter the B2 footprint. Therefore C3 produces no additional occlusion on the feasible arc.
 
 \subsection*{A.2 Problem 2(1): Algebraic Expansion of $\Sigma=A^{-1}DA^{-T}$}
 \addcontentsline{toc}{subsection}{A.2 Problem 2(1): Algebraic expansion of the covariance}
 
 Let the LOS azimuths of stations $p_1$ and $p_2$ be $\alpha_i$, with unit directions $u_i=(\cos\alpha_i,\sin\alpha_i)$ and unit normals $n_i=(-\sin\alpha_i,\cos\alpha_i)$ ($n_i^Tu_i=0$). A first-order azimuth error $\delta\alpha_i$ makes the signed distance from the true target to the perturbed bearing line approximately $d_i\delta\alpha_i$, so
-\begin{equation*}
+\begin{equation}
   n_i^T\Delta p=d_i\delta\alpha_i,\qquad i=1,2,
-\end{equation*}
+\end{equation}
 which in matrix form is $A\Delta p=\delta$ with
-\begin{equation*}
+\begin{equation}
   A=\begin{bmatrix}n_1^T\\ n_2^T\end{bmatrix}
   =\begin{bmatrix}n_{1x}&n_{1y}\\ n_{2x}&n_{2y}\end{bmatrix},
   \qquad
   \delta=(d_1\delta\alpha_1,d_2\delta\alpha_2)^T.
-\end{equation*}
+\end{equation}
 Since $\delta\alpha_1$ and $\delta\alpha_2$ are independent and identically distributed $\mathcal{N}(0,\sigma^2)$, $\mathbb{E}[\delta\delta^T]=D=\diag(d_1^2\sigma^2,d_2^2\sigma^2)$, and
-\begin{equation*}
+\begin{equation}
   \Sigma=\mathbb{E}[\Delta p\Delta p^T]
   =A^{-1}\mathbb{E}[\delta\delta^T]A^{-T}=A^{-1}DA^{-T}.
-\end{equation*}
+\end{equation}
 
 \noindent\textbf{(a) Inverse and columns.} $\det A=n_{1x}n_{2y}-n_{1y}n_{2x}=n_1\times n_2=\sin\gamma$ ($\gamma$ is the angle between the two LOS; the signed area is $\pm\sin\gamma$, and its absolute value enters the variance). The $2\times2$ adjugate is
-\begin{equation*}
+\begin{equation}
   \operatorname{adj}A=\begin{bmatrix}n_{2y}&-n_{1y}\\ -n_{2x}&n_{1x}\end{bmatrix},
-\end{equation*}
+\end{equation}
 so
-\begin{equation*}
+\begin{equation}
   A^{-1}=\frac{1}{\det A}\begin{bmatrix}n_{2y}&-n_{1y}\\ -n_{2x}&n_{1x}\end{bmatrix}.
-\end{equation*}
+\end{equation}
 Its two columns are
-\begin{equation*}
+\begin{equation}
   \mathrm{col}_1(A^{-1})=\frac{1}{\det A}(n_{2y},-n_{2x})^T=\frac{1}{\det A}u_2,
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   \mathrm{col}_2(A^{-1})=\frac{1}{\det A}(-n_{1y},n_{1x})^T=-\frac{1}{\det A}u_1,
-\end{equation*}
+\end{equation}
 using the $90^\circ$ rotation relation between $u_i=(\cos\alpha_i,\sin\alpha_i)$ and $n_i=(-\sin\alpha_i,\cos\alpha_i)$.
 
 \noindent\textbf{(b) Outer-product expansion.}
-\begin{equation*}
+\begin{equation}
   \Sigma=A^{-1}DA^{-T}
   =\sum_{i=1}^{2}D_{ii}\,\mathrm{col}_i(A^{-1})\,\mathrm{col}_i(A^{-1})^T
   =\frac{\sigma^2}{\det^2A}\left[d_1^2u_2u_2^T+d_2^2u_1u_1^T\right].
-\end{equation*}
+\end{equation}
 No cross term appears because $D$ is diagonal; if $u_i$ were mistakenly written as the normal $n_i$, the expression would be rotated by $90^\circ$ (trace and determinant unchanged, but the matrix itself different). The main text consistently uses the LOS direction $u_i$.
 
 \noindent\textbf{(c) Trace and determinant.}
-\begin{equation*}
+\begin{equation}
   \trace\Sigma=\frac{\sigma^2}{\det^2A}\left[d_1^2\|u_2\|^2+d_2^2\|u_1\|^2\right]
   =\frac{\sigma^2(d_1^2+d_2^2)}{\sin^2\gamma},
-\end{equation*}
-\begin{equation*}
+\end{equation}
+\begin{equation}
   \det\Sigma=\frac{\det D}{\det^2A}=\frac{\sigma^4d_1^2d_2^2}{\sin^2\gamma}.
-\end{equation*}
+\end{equation}
 These correspond respectively to
-\begin{equation*}
+\begin{equation}
   \mathrm{DRMS}^2=\frac{\trace\Sigma}{2}
   =\frac{\sigma^2(d_1^2+d_2^2)}{2\sin^2\gamma}
   \ \Longrightarrow\
   \mathrm{DRMS}=\frac{\sigma\sqrt{(d_1^2+d_2^2)/2}}{|\sin\gamma|}=\sigma G.
-\end{equation*}
+\end{equation}
 
 \noindent\textbf{(d) $1\sigma$ ellipse and $95\%$ radius.} From $\det\Sigma$, the area of the $1\sigma$ error ellipse is
-\begin{equation*}
+\begin{equation}
   S_{1\sigma}=\pi\sqrt{\det\Sigma}=\frac{\pi\sigma^2d_1d_2}{|\sin\gamma|}.
-\end{equation*}
+\end{equation}
 When $d_1=d_2=d$, $S_{1\sigma}=\pi\sigma^2dG$, so the two are of the same order; in general, both $G$ and $S_{1\sigma}$ vary monotonically and inversely with $|\sin\gamma|$, so $G$ is a monotone representative of ``area-type'' accuracy indices. The $95\%$ confidence ellipse is
-\begin{equation*}
+\begin{equation}
   (\Delta p)^T\Sigma^{-1}(\Delta p)\le\chi^2_2(0.95)=5.991,
-\end{equation*}
+\end{equation}
 with semi-axes $\sqrt{5.991\lambda_i}$, where $\lambda_i$ are the eigenvalues of $\Sigma$. When $\Sigma$ is isotropic ($\lambda_1=\lambda_2=\mathrm{DRMS}^2$), the ellipse degenerates to a circle of radius $2.4477\,\mathrm{DRMS}$; in general, $2.4477\,\mathrm{DRMS}$ is the nominal circle radius, and exact $95\%$ coverage should use the ellipse semi-axes. The main text reports $R_{95}=2.4477\,\mathrm{DRMS}$ and notes ``exact when isotropic.''
 
 \noindent\textbf{(e) Degeneracy and condition number.} As $\gamma\to0^\circ$ or $180^\circ$, $\det A=\pm\sin\gamma\to0$, $A$ becomes singular, and the entries of $A^{-1}$ diverge as $1/|\sin\gamma|$; by (c), $\trace\Sigma$ and $\det\Sigma$ both diverge as $1/\sin^2\gamma$. $\det A=n_1\times n_2=\pm\sin\gamma$ measures the singularity of $A$; using $1/|\det A|=1/|\sin\gamma|$ as the condition-number indicator (same order as the 2-norm condition number $\cot(\gamma/2)$, both diverging as $1/\gamma$ as $\gamma\to0$) gives the quantitative basis for the operating window $[30^\circ,150^\circ]$: at $\gamma=30^\circ$, $G=2G(90^\circ)$, i.e., the accuracy cost doubles.
@@ -102,57 +102,57 @@ with semi-axes $\sqrt{5.991\lambda_i}$, where $\lambda_i$ are the eigenvalues of
 \addcontentsline{toc}{subsection}{A.3 Problem 3: Linearization residual and Hermite quadrature}
 
 \noindent\textbf{(a) Exact angle and first-order approximation.} Take the true position as the origin and the true LOS as the $x'$ axis, with the target at $(d,0)$, $d=40$~m. Decompose the localization error into along-range $\delta_\parallel$ and cross-range $\delta_\perp$, isotropic and independent, $\delta_\parallel,\delta_\perp\sim\mathcal{N}(0,\sigma(s)^2)$. The exact azimuth deviation from the estimated position to the target is
-\begin{equation*}
+\begin{equation}
   \Delta\alpha=\operatorname{atan2}(-\delta_\perp,d-\delta_\parallel).
-\end{equation*}
+\end{equation}
 Let $u=\delta_\parallel/d$ and $v=\delta_\perp/d$; then $d-\delta_\parallel=d(1-u)$, and
-\begin{equation*}
+\begin{equation}
   \Delta\alpha=-\arctan\frac{v}{1-u}.
-\end{equation*}
+\end{equation}
 Expanding $v/(1-u)=v(1+u+u^2+O(u^3))$ for $|u|<1$ and using $\arctan z=z-z^3/3+O(z^5)$,
-\begin{equation*}
+\begin{equation}
   \Delta\alpha=-\left[v+uv+u^2v-\frac{v^3}{3}+O(\|(u,v)\|^4)\right].
-\end{equation*}
+\end{equation}
 The first-order (linearized) model takes $\Delta\alpha\approx-v=-\delta_\perp/d$.
 
 \noindent\textbf{(b) Residual and RMS.} The residual is
-\begin{equation*}
+\begin{equation}
   R=\Delta\alpha-(-v)=-uv-u^2v+\frac{v^3}{3}+O(\|(u,v)\|^4).
-\end{equation*}
+\end{equation}
 The leading term is $-uv$. Since $\delta_\parallel$ and $\delta_\perp$ are independent, zero-mean, and have variance $\sigma^2$,
-\begin{equation*}
+\begin{equation}
   \mathbb{E}[R^2]=\mathbb{E}[u^2v^2]+O(\sigma^6/d^6)
   =\frac{\mathbb{E}[\delta_\parallel^2]\,\mathbb{E}[\delta_\perp^2]}{d^4}+O(\sigma^6/d^6)
   =\frac{\sigma^4}{d^4}+O(\sigma^6/d^6).
-\end{equation*}
+\end{equation}
 Hence the residual RMS (in radians) is
-\begin{equation*}
+\begin{equation}
   \mathrm{RMS}_R=\sqrt{\mathbb{E}[R^2]}=\frac{\sigma(s)^2}{d^2}+O(\sigma(s)^3/d^3).
-\end{equation*}
+\end{equation}
 Note that $\sigma^2/d^2$ is dimensionless; under the small-angle approximation its numerical value is the RMS in radians, and conversion to degrees multiplies by $180/\pi$. At $s=80$~m, $\sigma=1.9$~m, and $d=40$~m:
-\begin{equation*}
+\begin{equation}
   \mathrm{RMS}_R=\left(\frac{1.9}{40}\right)^2=2.256\times10^{-3}~\mathrm{rad}=0.1293^\circ.
-\end{equation*}
+\end{equation}
 Relative to $\sigma_\psi(80)=2.8995^\circ$ at the same point, the standard-deviation share is $0.1293/2.8995=4.46\%$, and the variance share is $(0.1293/2.8995)^2=0.199\%\approx0.2\%$. Higher-order terms are $O(\sigma^3/d^3)$, and at $\sigma/d\le1.9/40=0.0475$ they are at most about $5\%$ of the leading term, so the first-order residual estimate is consistent within the parameter range of this paper.
 
 \noindent\textbf{(c) Normal composition and the $P$ criterion.} The gimbal bias $\varepsilon_0\sim\mathcal{N}(0,0.8^2)$, the control error $\varepsilon_c\sim\mathcal{N}(0,0.6^2)$, and the localization error are independent, so $S=\varepsilon_0+\varepsilon_c\sim\mathcal{N}(0,1.0^2)$ (in degrees). Given $(\delta_\parallel,\delta_\perp)$, $\Delta\alpha$ is deterministic, and the conditional probability is
-\begin{equation*}
+\begin{equation}
   P(|\Delta\alpha+S|\le5^\circ\mid\delta_\parallel,\delta_\perp)
   =\Phi\!\left(\frac{5^\circ-\Delta\alpha}{1^\circ}\right)
   -\Phi\!\left(\frac{-5^\circ-\Delta\alpha}{1^\circ}\right),
-\end{equation*}
+\end{equation}
 where $\Phi$ is the standard normal CDF. Therefore
-\begin{equation*}
+\begin{equation}
   P(s)=\mathbb{E}_{\delta\parallel,\delta\perp}\!\left[
   \Phi\!\left(\frac{5^\circ-\Delta\alpha(\delta_\parallel,\delta_\perp)}{1^\circ}\right)
   -\Phi\!\left(\frac{-5^\circ-\Delta\alpha(\delta_\parallel,\delta_\perp)}{1^\circ}\right)\right].
-\end{equation*}
+\end{equation}
 Since $\delta_\parallel$ and $\delta_\perp$ are independent and have equal variance, the two-dimensional expectation can be evaluated by tensor-product Gauss--Hermite quadrature:
-\begin{equation*}
+\begin{equation}
   P(s)\approx\frac{1}{\pi}\sum_{i=1}^{256}\sum_{j=1}^{256}w_iw_j
   \left[\Phi\!\left(\frac{5^\circ-\Delta\alpha(\sqrt2\sigma(s)x_i,\sqrt2\sigma(s)x_j)}{1^\circ}\right)
   -\Phi\!\left(\frac{-5^\circ-\Delta\alpha(\cdot)}{1^\circ}\right)\right],
-\end{equation*}
+\end{equation}
 where $x_i$ and $w_i$ are the 256-point probabilistic Hermite nodes and weights ($\int e^{-x^2}f(x)\,dx\approx\sum w_if(x_i)$, $\sum w_i=\sqrt\pi$). $P(s)$ decreases monotonically with $s$ ($\sigma(s)=a+bs$ is increasing, and the distribution of $\Delta\alpha$ widens with $\sigma$); bisection/root finding on $P(s)=0.95$ gives $s_{\max}=66.84$~m. The closed-form linearization gives $66.92$~m, a $0.13\%$ difference consistent with the Monte Carlo results in Table~\ref{tab:4-5}.
 
 % ---------------------------------------------------------------------
@@ -188,22 +188,16 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 \renewcommand{\thetable}{C-\arabic{table}}
 \setcounter{table}{0}
 
+\begin{table}[htbp]
+\centering
+\caption{Figure inventory}
+\label{tab:C-1}
 {\small
 \renewcommand{\arraystretch}{1.08}
-\begin{longtable}{@{}p{22mm}p{110mm}p{20mm}@{}}
-  \caption{Figure inventory}
-  \label{tab:C-1}\\
+\begin{tabularnb}{@{}p{22mm}p{110mm}p{20mm}@{}}
   \toprule
   Figure & Content & Section \\
   \midrule
-  \endfirsthead
-  \multicolumn{3}{@{}l}{\small Table~\ref{tab:C-1} (continued)}\\
-  \toprule
-  Figure & Content & Section \\
-  \midrule
-  \endhead
-  \bottomrule
-  \endlastfoot
   Figure 2-1 & Framework of the four problems and the modeling chain & 2 \\
   Figure 4-1 & Observable region of T1 and building occlusion shadows & 4.2.4 \\
   Figure 4-2 & Optimal arc and margin--azimuth curve & 4.2.3 \\
@@ -216,25 +210,21 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
   Figure 4-9 & Probability curve $P(|\Delta\psi|\le5^\circ)$ and the $(a,b)$ region & 4.4.3 \\
   Figure 4-10 & Two-stage response of $t_{\mathrm{last}}$ to $t_{\mathrm{rec}}$ & 4.5.3 \\
   Figure 4-11 & Rescheduling Gantt chart and the 74-scenario comparison & 4.5.3 \\
-\end{longtable}
+  \bottomrule
+\end{tabularnb}
 }
+\end{table}
 
+\begin{table}[htbp]
+\centering
+\caption{Table inventory}
+\label{tab:C-2}
 {\small
 \renewcommand{\arraystretch}{1.08}
-\begin{longtable}{@{}p{22mm}p{110mm}p{20mm}@{}}
-  \caption{Table inventory}
-  \label{tab:C-2}\\
+\begin{tabularnb}{@{}p{22mm}p{110mm}p{20mm}@{}}
   \toprule
   Table & Content & Section \\
   \midrule
-  \endfirsthead
-  \multicolumn{3}{@{}l}{\small Table~\ref{tab:C-2} (continued)}\\
-  \toprule
-  Table & Content & Section \\
-  \midrule
-  \endhead
-  \bottomrule
-  \endlastfoot
   Table 2-1 & Building geometry and initial vehicle positions & 2.1 \\
   Table 2-2 & Algorithm routes and selection rationale & 2.6 \\
   Table 3-1 & Main symbols & 3.1 \\
@@ -249,8 +239,10 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
   Table 6-1 & Objective time under the $v\times\omega$ full factorial & 6.2 \\
   Table D-1 & All ten vehicle pairs for T2 & Appendix D \\
   Table D-2 & Stations and per-task timeline of the 10.355~s plan & Appendix D \\
-\end{longtable}
+  \bottomrule
+\end{tabularnb}
 }
+\end{table}
 
 % ---------------------------------------------------------------------
 \section*{Appendix D: Supplementary Tables}
@@ -259,22 +251,16 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 \renewcommand{\thetable}{D-\arabic{table}}
 \setcounter{table}{0}
 
+\begin{table}[htbp]
+\centering
+\caption{All ten vehicle pairs for T2 in 2(1)}
+\label{tab:D-1}
 {\footnotesize
 \renewcommand{\arraystretch}{1.06}
-\begin{longtable}{@{}p{14mm}p{26mm}p{14mm}p{16mm}p{16mm}p{24mm}p{26mm}@{}}
-  \caption{All ten vehicle pairs for T2 in 2(1)}
-  \label{tab:D-1}\\
+\begin{tabularnb}{@{}p{14mm}p{26mm}p{14mm}p{16mm}p{16mm}p{24mm}p{26mm}@{}}
   \toprule
   Pair & $d_1/d_2$ (m) & $\gamma$ ($^\circ$) & $G$ (m) & DRMS (m) & $t_1/t_2$ (s) & Feasible within 30~s \\
   \midrule
-  \endfirsthead
-  \multicolumn{7}{@{}l}{\footnotesize Table~\ref{tab:D-1} (continued)}\\
-  \toprule
-  Pair & $d_1/d_2$ (m) & $\gamma$ ($^\circ$) & $G$ (m) & DRMS (m) & $t_1/t_2$ (s) & Feasible within 30~s \\
-  \midrule
-  \endhead
-  \bottomrule
-  \endlastfoot
   V1+V2 & 5.8188 / 11.2688 & 90.000 & 8.9678 & 0.1565 & 19.19 / 30.29 & No \\
   V1+V3 & 5.8188 / 5.8188 & 90.000 & 5.8188 & 0.1016 & 18.71 / 3.49 & Yes \\
   V1+V4 & 5.8188 / 5.8188 & 90.000 & 5.8188 & 0.1016 & 18.29 / 27.64 & Yes \\
@@ -285,34 +271,36 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
   V3+V4 & 5.8188 / 5.8188 & 90.000 & 5.8188 & 0.1016 & 6.49 / 27.64 & Yes \\
   \textbf{V3+V5} & \textbf{5.8188 / 5.8188} & \textbf{90.000} & \textbf{5.8188} & \textbf{0.1016} & \textbf{5.11 / 13.61} & \textbf{Yes (selected)} \\
   V4+V5 & 5.8188 / 5.8188 & 90.000 & 5.8188 & 0.1016 & 28.95 / 15.42 & Yes \\
-\end{longtable}
+  \bottomrule
+\end{tabularnb}
 }
+\par\smallskip
+\begin{minipage}{\linewidth}
+\footnotesize Note: $d_1,d_2$ are the station--target distances, $G$ and DRMS follow Section~4.3.1 with $\sigma=1^\circ=0.017453$~rad, and $t_1,t_2$ are the obstacle-avoiding travel times. The four V2 pairs share the same candidate station, hence their identical $G$. ``Feasible'' means both ready times are within the 30~s limit; among the six feasible pairs, V3+V5 has the smallest total travel time ($18.72$~s).
+\end{minipage}
+\end{table}
 
-\noindent{\footnotesize Note: $d_1,d_2$ are the station--target distances, $G$ and DRMS follow Section~4.3.1 with $\sigma=1^\circ=0.017453$~rad, and $t_1,t_2$ are the obstacle-avoiding travel times. The four V2 pairs share the same candidate station, hence their identical $G$. ``Feasible'' means both ready times are within the 30~s limit; among the six feasible pairs, V3+V5 has the smallest total travel time ($18.72$~s).}
-
+\begin{table}[htbp]
+\centering
+\caption{Stations and per-task timeline of the 10.355~s plan in 2(2)}
+\label{tab:D-2}
 {\footnotesize
 \renewcommand{\arraystretch}{1.06}
-\begin{longtable}{@{}p{12mm}p{10mm}p{28mm}p{13mm}p{13mm}p{12mm}p{16mm}p{14mm}p{14mm}@{}}
-  \caption{Stations and per-task timeline of the 10.355~s plan in 2(2)}
-  \label{tab:D-2}\\
+\begin{tabularnb}{@{}p{12mm}p{10mm}p{28mm}p{13mm}p{13mm}p{12mm}p{16mm}p{14mm}p{14mm}@{}}
   \toprule
   Vehicle & Task & Station $(x,y)$ (m) & $\tau_{\mathrm{tr}}$ (s) & $\tau_{\mathrm{sl}}$ (s) & Start (s) & Observation end (s) & Reset end (s) & Clearance (m) \\
   \midrule
-  \endfirsthead
-  \multicolumn{9}{@{}l}{\footnotesize Table~\ref{tab:D-2} (continued)}\\
-  \toprule
-  Vehicle & Task & Station $(x,y)$ (m) & $\tau_{\mathrm{tr}}$ (s) & $\tau_{\mathrm{sl}}$ (s) & Start (s) & Observation end (s) & Reset end (s) & Clearance (m) \\
-  \midrule
-  \endhead
-  \bottomrule
-  \endlastfoot
   V3 & T1 & (15.2004, 87.2331) & 0.57 & 1.03 & 1.607 & 6.607 & 7.641 & 5.581 \\
   V5 & T1 & (49.9000, 92.8000) & 0.07 & 1.53 & 1.607 & 6.607 & 8.140 & 7.080 \\
   V1 & T2 & (14.8000, 14.3000) & 0.12 & 3.12 & 6.994 & 11.994 & 15.117 & 7.295 \\
   V4 & T2 & (86.9000, 70.9000) & 1.03 & 5.96 & 6.994 & 11.994 & 17.953 & 0.067 \\
   V2 & T3 & (88.1000, 9.5000) & 0.17 & 5.75 & 10.355 & 15.355 & 21.100 & 10.897 \\
   V3 & T3 & (16.7656, 88.6590) & 0.71 & 2.01 & 10.355 & 15.355 & 17.363 & 0.001 \\
-\end{longtable}
+  \bottomrule
+\end{tabularnb}
 }
-
-\noindent{\footnotesize Note: the observation lasts 5~s and the reset time is the slew back to the east-facing attitude. The start time of an alert is the later of its two vehicles' ready times, so V1 waits from $3.24$~s to $6.994$~s for the longer slew of V4. V3 serves T1 and then T3 (the only reuse chain); T1 is already under way at $t_p=5$~s and is therefore locked in Problem~4. Clearance is the minimum distance from the station to the $1.5$~m-expanded building footprints; the two knife-edge values ($0.001$~m and $0.067$~m) are those discussed in Section~4.3.5.}
+\par\smallskip
+\begin{minipage}{\linewidth}
+\footnotesize Note: the observation lasts 5~s and the reset time is the slew back to the east-facing attitude. The start time of an alert is the later of its two vehicles' ready times, so V1 waits from $3.24$~s to $6.994$~s for the longer slew of V4. V3 serves T1 and then T3 (the only reuse chain); T1 is already under way at $t_p=5$~s and is therefore locked in Problem~4. Clearance is the minimum distance from the station to the $1.5$~m-expanded building footprints; the two knife-edge values ($0.001$~m and $0.067$~m) are those discussed in Section~4.3.5.
+\end{minipage}
+\end{table}
