@@ -1,0 +1,37 @@
+OK   Q1 T-prime            
+OK   Q1 r_min              
+OK   Q1 Q*                 
+OK   Q1 p*                 
+OK   Q1 m*/p* margin       
+OK   Q1 arc                
+OK   Q1 areas              
+OK   Q1 Q2 metric          
+OK   Q2(1) G*/DRMS         
+OK   Q2(1) baseline        
+OK   Q2(1) V2 pair         
+OK   Q2(1) backoff         
+OK   Q2(2) starts          
+OK   Q2(2) gap             
+OK   Q2(2) robust          
+OK   Q2(2) gamma           
+OK   Q2(2) G               
+OK   Q2(2) DRMS            
+OK   Q2(2) constrained     
+OK   Q2(2) R95 anisotropy  
+OK   Q3 k_loc              
+OK   Q3 sigma_psi          
+OK   Q3 s_max              
+OK   Q3 P80                
+OK   Q3 ab                 
+OK   Q3 shares             
+OK   Q3 residual           
+OK   Q3 exact              
+OK   Q4 baseline           
+OK   Q4 counts             
+OK   Q4 reps               
+OK   Q4 fail-out           
+OK   Q4 new range          
+OK   Q4 piecewise          
+OK   Q4 robust             
+
+ALL HEADLINE CHECKS PASSED
