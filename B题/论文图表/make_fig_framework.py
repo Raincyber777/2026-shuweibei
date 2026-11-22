@@ -35,7 +35,8 @@ C_GREEN = "#3E9B6C"
 C_PURPLE = "#7B62A8"
 C_ORANGE = "#D98E3B"
 
-fig, ax = plt.subplots(figsize=(6.30, 6.93))
+fig = plt.figure(figsize=(6.30, 6.93))
+ax = fig.add_axes([0, 0, 1, 1])
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 110)
 ax.axis("off")
@@ -71,7 +72,7 @@ ax.text(BX + BW / 2, 104.45,
 CHECKS[-1][2].append(ax.texts[-1])
 
 block(81.4, 14.5, "Problem 1 — Observable region & optimal station",
-      ["Ω = C1 ∩ C2 ∩ C3 = 5610.4 m²",
+      ["Ω(T1) = C1 ∩ C2 ∩ C3 = 5610.4 m²",
        "r* = 7.5821 m (elevation bound active, ε = 80°)",
        "optimal arc 283.85° · global optimum p* = (88.88, 76.29)"],
       "#EAF1F8", C_BLUE)
@@ -81,8 +82,8 @@ block(54.9, 18.3, "Problem 2 — Two-station accuracy & six-slot scheduling",
        "pair V3 + V5 (B = 8.23 m)",
        "(2) Algorithm 1: C(5,2)³ = 1000 structures → makespan 10.355 s "
        "(baseline 20.968 s)",
-       "plug-back: γ(T1) = 19.34°, DRMS = 3.08 m; γ ≥ 30° window costs "
-       "+25.4%"],
+       "plug-back: γ(T1) = 19.34°, DRMS = 3.08 m; γ $\in$ [30°, 150°] window "
+       "costs +25.4%"],
       "#E7F1F0", C_TEAL)
 
 block(32.2, 14.5, "Problem 3 — Error propagation & pointing accuracy",
@@ -101,7 +102,7 @@ block(9.5, 14.5, "Problem 4 — Rescheduling under disturbances",
 SPINE_X = 37.0
 arrows = [
     (101.6, 95.9, "problem data"),
-    (81.4, 73.2, "feasible stations Ω$_a$ (5610.4 m²)"),
+    (81.4, 73.2, "feasible stations Ω$_a$(T2): 6413.1 m²"),
     (54.9, 46.7, "deployed geometry & driving legs s (Q2 max 3.10 m)"),
     (32.2, 24.0, "driving budget s ≤ 66.92 m (Q4 max leg 18.14 m)"),
 ]
@@ -144,7 +145,26 @@ if bad_all:
         print("   ", row)
     sys.exit(1)
 
-fig.savefig(os.path.join(OUT, "fig0_framework.svg"), bbox_inches="tight")
-fig.savefig(os.path.join(OUT, "fig0_framework.png"), dpi=300,
-            bbox_inches="tight")
-print("saved fig0_framework (vertical chain, overflow check passed)")
+# symmetric margins: measure content bbox, then crop canvas to content plus
+# an equal pad on every side (keeps the figure centred when inserted)
+xs0, xs1, ys0, ys1 = [], [], [], []
+for coll in (ax.patches, ax.texts, ax.lines):
+    for art in coll:
+        bb = art.get_window_extent(renderer)
+        dx0, dy0 = inv.transform((bb.x0, bb.y0))
+        dx1, dy1 = inv.transform((bb.x1, bb.y1))
+        xs0.append(dx0)
+        xs1.append(dx1)
+        ys0.append(dy0)
+        ys1.append(dy1)
+PAD = 2.5
+x_lo, x_hi = min(xs0) - PAD, max(xs1) + PAD
+y_lo, y_hi = min(ys0) - PAD, max(ys1) + PAD
+ax.set_xlim(x_lo, x_hi)
+ax.set_ylim(y_lo, y_hi)
+UNIT_IN = 0.063                      # inches per data unit, same for x and y
+fig.set_size_inches((x_hi - x_lo) * UNIT_IN, (y_hi - y_lo) * UNIT_IN)
+fig.savefig(os.path.join(OUT, "fig0_framework.svg"))
+fig.savefig(os.path.join(OUT, "fig0_framework.png"), dpi=300)
+print("saved fig0_framework (vertical chain, symmetric margins, "
+      "overflow check passed)")

@@ -1,0 +1,34 @@
+输入条 | field 100 m × 100 m | q2_lib.py → FIELD | 100.000000 | 图中 100　→　✓ 一致
+输入条 | buildings B1–B5（5 栋） | q2_lib.py → BUILDINGS | 5 | 图中 5　→　✓ 一致
+输入条 | vehicles V1–V5（5 车） | q2_lib.py → VEHICLES | 5 | 图中 5　→　✓ 一致
+输入条 | alerts T1–T3（3 告警） | q2_lib.py → ALERTS | 3 | 图中 3　→　✓ 一致
+输入条 | bearing error σ$_α$ = 1° | q2b_precision.json → sigma_deg；q2_lib.py → SIGMA_AZ | 1.000000 | 图中 1　→　✓ 一致
+Q1 | Ω(T1) = 5610.4 m² | q2b_results.json → region_areas.T1（=q1_results area_m2） | 5610.400000 | 图中 5610.4　→　✓ 一致
+Q1 | r* = 7.5821 m | q1_results.json → r_min_closed_form | 7.582060 | 图中 7.5821　→　✓ 一致
+Q1 | elevation bound active, ε = 80° | q1_results.json → 证书点 elevation_deg（79.9990…） | 79.999097 | 图中 79.999　→　✓ 一致
+Q1 | optimal arc 283.85° | q1_results.json → arc.feasible_fraction × 360 | 283.852800 | 图中 283.85　→　✓ 一致
+Q1 | global optimum p* = (88.88, 76.29)（x 分量） | q1_results.json → 最优站点 x | 88.875341 | 图中 88.88　→　✓ 一致
+Q1 | global optimum p* = (88.88, 76.29)（y 分量） | q1_results.json → 最优站点 y | 76.289525 | 图中 76.29　→　✓ 一致
+Q2(1) | G ≥ 5.8188 m | q2a_results.json → certificate.lower_bound_G_m | 5.818790 | 图中 5.8188　→　✓ 一致
+Q2(1) | DRMS ≥ 0.1016 m（= σ$_α$·G 下界） | q2a_results.json → certificate.DRMS_star_m（σ=1°） | 0.101557 | 图中 0.1016　→　✓ 一致
+Q2(1)/箭头 | feasible stations Ω$_a$(T2): 6413.1 m² | q2a_results.json → region.area_m2（T2 选站可行域） | 6413.090000 | 图中 6413.1　→　✓ 一致
+Q2(1) | pair V3 + V5（B = 8.23 m） | q2a_results.json → selected.baseline_m（= V3+V5 pair_table 两站间距） | 8.229012 | 图中 8.23　→　✓ 一致
+Q2(1) | C(5,2)³ = 1000（组合数学） | math.comb(5,2)**3 | 1000 | 图中 1000　→　✓ 一致
+Q2(2) | makespan 10.355 s | q2b_results.json → optimized.objective_s | 10.354889 | 图中 10.355　→　✓ 一致
+Q2(2) | baseline 20.968 s | q2b_results.json → heuristic.objective_s（最近指派基线） | 20.967845 | 图中 20.968　→　✓ 一致
+Q2(2) | plug-back γ(T1) = 19.34° | q2b_precision.json → delivered[alert=T1].gamma_deg | 19.338720 | 图中 19.34　→　✓ 一致
+Q2(2) | plug-back DRMS = 3.08 m | q2b_precision.json → delivered[alert=T1].DRMS_m（σ=1°） | 3.083510 | 图中 3.08　→　✓ 一致
+Q2(2) | γ ∈ [30°, 150°] 窗口（边界） | q2b_precision.json → gamma_window_deg[0] | 30.000000 | 图中 30　→　✓ 一致
+Q2(2) | 窗口约束代价 +25.4% | q2b_precision.json → constrained.delta_pct | 25.380000 | 图中 25.4　→　✓ 一致
+Q3 | σ$_ψ$² = (1.432σ(s))² + 1.0（系数 1.432） | q3_solve.py → K_LOC = RAD2DEG / D_TGT（D_TGT=40 m），(180/π)/40 = 1.432394，图中取 3 位有效 | 1.432394 | 图中 1.432　→　✓ 一致
+Q3 | σ(s) = a + b·s 自洽：s_max=(1.6384−a)/b 反演 | q3_results.json → sigma_s_at_smax_m 与 s_max_m 联立（a=0.3, b=0.02，q3_solve.py 常数） | 66.922299 | 图中 66.92　→　✓ 一致
+Q3 | s$_{max}$ = 66.92 m | q3_results.json → s_max_m | 66.922299 | 图中 66.92　→　✓ 一致
+Q3 | exact 66.84 m | q3_results.json → exact_geometry.s_max_exact_m（256×256 Hermite） | 66.837258 | 图中 66.84　→　✓ 一致
+Q3 | P(|Δψ| ≤ 5°) = 0.95 判据下的 a+80b ≤ 1.6384 m | q3_results.json → sigma_s_at_smax_m | 1.638446 | 图中 1.6384　→　✓ 一致
+Q3 | （备查）精确 a+80b = 1.6367 m | q3_results.json → exact_geometry.ab_max_exact_m | 1.636745 | 图中 1.6367　→　✓ 一致
+Q4 | 74 scenarios | q4_robust.json → n_scenarios（与各 scen_* 列表长度和一致） | 74 | 图中 74　→　✓ 一致
+Q4 | η improved in 67 | q4_results.json → 各场景 keep.eta vs resched.eta（重算：提升 67/持平 7/劣化 0） | 67 | 图中 67　→　✓ 一致
+Q4 | 0 degraded | 同上（劣化场景数） | 0 | 图中 0　→　✓ 一致
+Q4/箭头 | deployed geometry & driving legs s（Q2 max 3.10 m） | q2b_results.json → optimized 站点，起点 q2_lib.VEHICLES，速度 q2_lib.SPEED，逐车累加腿长取最大 | 3.101612 | 图中 3.10 m　→　✓ 一致
+Q4/箭头 | driving budget s ≤ 66.92 m（Q4 max leg 18.14 m） | q4_results.json → 全部场景 travel 段时长 × q2_lib.SPEED 取最大（预算 66.92 来自 Q3 q3_results.s_max_m） | 18.136841 | 图中 18.14 m　→　✓ 一致
+旁路箭头 | optimized timeline = rescheduling baseline | q4_results.json → baseline.assignment 与 q2b_results.json → optimized.assignment 逐告警比对 | T1:[3,5] T2:[1,4] T3:[2,3] | ✓ 一致（Q4 基线即 Q2(2) 交付方案）
