@@ -515,3 +515,9 @@ B题\
 - **修复**：三处场图渲染改为 imshow（内嵌单一紧凑栅格影像，300 dpi 下 0.1 m 格 ≈ 1 px，视觉不变），等值线/建筑/标记仍为矢量。
 - **结果**：fig4-1 → 94.5 KB、fig4-2 → 101 KB、fig4-4 → 142 KB（缩小 ~1500 倍），全部 SVG < 240 KB；渲染质量目检无差异。
 - 规范新增：**栅格场图一律 imshow 导出，禁用 pcolormesh 出 SVG**。
+
+### XIV.10 GitHub 推送修复（同日）
+- **症状**：推送被 GitHub 拒绝——未推送提交中含超大 SVG（fig4-1 179 MB、fig4-4 193 MB，imshow 修复前的版本被提交过）。
+- **修复**：`git branch backup-before-svg-fix`（保险）→ `git reset --soft origin/main` → 重新提交为单一干净提交（大 blob 从可达历史中彻底消失，工作区文件本就是修复后的小文件）→ 清理误入库的微信截图与临时脚本 → `.gitignore` 补 `微信图片_*.jpg`。
+- **网络**：直连被重置 → 走本机代理 127.0.0.1:7897 完成 `git push`（284ec41..3c9fde0）✓；远端 main 与本地一致，0 未推送。
+- 注：命令行 git 若需常态走代理，可 `git config --global http.proxy http://127.0.0.1:7897`（代理关闭时需取消，属可选项，未默认启用）。
