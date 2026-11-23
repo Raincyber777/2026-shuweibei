@@ -3,7 +3,9 @@
 
 Part 1: for the delivered time-optimal scheme, compute for T1/T2/T3
     d1, d2 (horizontal station-target ranges), gamma (intersection angle),
-    G = sqrt((d1^2+d2^2)/2)/|sin(gamma)| (m), DRMS = sigma_rad * G.
+    G = sqrt((d1^2+d2^2)/2)/|sin(gamma)| (m), DRMS = sigma_rad * G; do the
+    same for the 0.5 m clearance-robust variant, whose accuracy is not
+    qualified.
 Part 2: re-solve the T1 station pair of the same assignment/order structure
     under gamma in [30, 150] deg and report the time cost.
 
@@ -69,6 +71,20 @@ for a in ALERTS3:
     print(f"{a} pair {vs}: d=({g['d1_m']:.3f},{g['d2_m']:.3f}) "
           f"gamma={g['gamma_deg']:.2f} G={g['G_m']:.2f} "
           f"DRMS={g['DRMS_m']:.3f} r95={g['r95_m']:.3f}")
+
+# geometry of the 0.5 m clearance-robust variant (accuracy is not qualified)
+RB = R.get("robust_05") or {}
+rb_geom = {}
+if RB.get("obj_s") is not None:
+    for a in ALERTS3:
+        vs = RB["assignment"][a]
+        sts = [RB["stations"][f"V{v}"][a] for v in vs]
+        g = pair_geometry(*sts, a)
+        g.update({"alert": a, "pair": [int(v) for v in vs],
+                  "stations": [[round(x, 4) for x in s] for s in sts]})
+        rb_geom[a] = g
+        print(f"robust {a} pair {vs}: gamma={g['gamma_deg']:.2f} "
+              f"DRMS={g['DRMS_m']:.3f}")
 
 # ------------------------------------------------ part 2: constrained T1
 # Build the feasible clouds with the same subsampling as q2b_core (the full
@@ -229,6 +245,11 @@ out = {
     "G_definition": "G=sqrt((d1^2+d2^2)/2)/|sin(gamma)| [m]; DRMS=sigma_rad*G",
     "delivered": rows,
     "gamma_window_deg": [GAMMA_LO, GAMMA_HI],
+    "robust_variant": {
+        "objective_s": float(RB["obj_s"]) if RB.get("obj_s") is not None else None,
+        "assignment": RB.get("assignment"),
+        "geometry": rb_geom,
+    },
     "constrained": {
         "structure": "same assignment/orders as delivered scheme",
         "stations": {f"V{v+1}": {a: [round(x, 4) for x in st_map[(v, a)]]
@@ -261,6 +282,15 @@ for g in rows:
                  f"{g['d1_m']:.2f} | {g['d2_m']:.2f} | {g['gamma_deg']:.2f} | "
                  f"{g['G_m']:.2f} | {g['DRMS_m']:.3f} | {g['r95_m']:.3f} |")
 c = out["constrained"]
+if rb_geom:
+    lines += ["", "## 0.5 m 净空稳健变体（仅稳健性对照，精度不达标）", "",
+              "| 告警 | γ (°) | G (m) | DRMS (m) |", "|---|---|---|---|"]
+    for a in ALERTS3:
+        gg = rb_geom[a]
+        lines.append(f"| {a} | {gg['gamma_deg']:.2f} | {gg['G_m']:.2f} | "
+                     f"{gg['DRMS_m']:.3f} |")
+    lines += ["", f"该变体 t_last = {RB['obj_s']:.3f} s；T1、T2 均落在 "
+              f"[30°,150°] 窗之外，仅用于净空稳健性对照，不作为部署推荐。", ""]
 lines += ["", "## γ∈[30°,150°] 约束重解（同一指派/次序结构，重选 T1 双站；"
           "V3 的 T3 站优选后仍为原站）", "",
           "| 告警 | γ (°) | G (m) | DRMS (m) |", "|---|---|---|---|"]

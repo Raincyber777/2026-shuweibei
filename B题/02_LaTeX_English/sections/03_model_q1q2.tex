@@ -8,7 +8,7 @@
 
 All four problems share the same site geometry and observation model. This section collects the three conventions used repeatedly below; they are not repeated in each problem.
 
-\noindent (a) \textbf{Coordinate system and site.} The southwest corner is the origin, the $x$-axis points east, and the $y$-axis points north; the site is $[0,100]^2$, and the dispatch center is $O=(50,50)$. A building is the axis-aligned cuboid $[x_i^0,x_i^1]\times[y_i^0,y_i^1]\times[0,h_i]$ standing on $z=0$; the camera height is $h_{\mathrm{cam}}=2$~m. The horizontal projection of an alert $(\theta,R,H)$ is $T'=(50+R\cos\theta,50+R\sin\theta)$, and its height is $H$.
+\noindent (a) \textbf{Coordinate system and site.} The southwest corner is the origin, the $x$-axis points east, and the $y$-axis points north; the site is $[0,100]^2$, and the dispatch center is $O=(50,50)$. A building is the axis-aligned cuboid $[x_i^0,x_i^1]\times[y_i^0,y_i^1]\times[0,h_i]$ standing on $z=0$; the camera height is $h_{\mathrm{cam}}=2$~m. The horizontal projection of an alert $(\theta,R,H)$ is $T'=(50+R\cos\theta,50+R\sin\theta)$, and its height is $H$. These nominal values are a planning datum (Section~2.1), not a measurement.
 
 \noindent (b) \textbf{Vehicle geometry and Minkowski expansion.} A vehicle is a disk of radius $R_{\mathrm{veh}}=1.5$~m centered at $p=(x,y)$. The vehicle geometry constraint is
 \begin{equation}
@@ -143,6 +143,10 @@ This problem uses ``closed-form lower bound + arc parameterization + three-level
 
 \subsubsection{Two-Station Intersection Accuracy Model}
 
+The premise of this section is stated first. Problem~2 prescribes localization by two-station synchronous bearing intersection, so the accuracy below is a conditional analysis of that process: it describes the horizontal position recovered from the two bearing lines, and its only stochastic input is the specified azimuth error $\mathcal{N}(0,(1^\circ)^2)$. The alert's nominal $(\theta,R,H)$ does not enter this computation; it only fixes the target's nominal position for planning, serving the station selection of Section~4.3.2 and the scheduling of Section~4.3.3. The alert is not treated as a measurement or as a localization result, and no alert error model is adopted because the problem specifies none. No numerical accuracy value in this section is therefore a claim about the accuracy of the alert datum.
+
+Within this model, the $1^\circ$ is the problem-specified azimuth measurement error of Q2. The stations are surveyed vantage points with known coordinates, and the vehicle is assumed to be at the nominal station coordinate, so the vehicle self-localization term $\sigma(s)/d$ of Problem~3 is not part of this budget; any residual docking error is absorbed into the $1^\circ$. Problem~3 defines that term separately at a fixed $40$~m distance, and the two budgets are not merged (see Section~7.2).
+
 Let the two stations be $p_i$, with station--target distances $d_i$, LOS azimuths $\alpha_i$, unit directions $u_i=(\cos\alpha_i,\sin\alpha_i)$, and unit normals $n_i=(-\sin\alpha_i,\cos\alpha_i)$. The azimuth errors $\delta\alpha_i\sim\mathcal{N}(0,\sigma^2)$ are independent. The intersection-point error satisfies the first-order propagation \cite{torrieri,foy}
 \begin{equation}
   A\,\Delta p=\delta,\qquad A=\begin{bmatrix}n_1^T\\ n_2^T\end{bmatrix},\qquad
@@ -173,7 +177,7 @@ Equality requires $\gamma=90^\circ$ and $d_1=d_2=\rmin$. For T2, the geometrical
 \begin{equation}
   d_1=d_2=5.8188~\mathrm{m},\quad \gamma=90.000^\circ,\quad \beta=8.2290~\mathrm{m},
 \end{equation}
-with travel times $5.11/13.61$~s (sum $18.72$~s), $\mathrm{DRMS}=0.1016$~m, and $R_{95}=0.2486$~m.
+with travel times $5.11/13.61$~s (sum $18.72$~s), $\mathrm{DRMS}=0.1016$~m (under the problem-specified $1^\circ$ budget), and $R_{95}=0.2486$~m.
 
 \begin{table}[htbp]
   \centering
@@ -243,21 +247,21 @@ Let the alert set be $A=\{\mathrm{T1},\mathrm{T2},\mathrm{T3}\}$ and the vehicle
 \end{equation}
 The objective is $\min\max_a S_a$. Each alert has 10 vehicle pairs, so the three alerts give $10^3=1000$ assignment structures. For each structure, reuse orders are enumerated; stations are initialized greedily, refined by Gauss--Seidel coordinate descent and Nelder--Mead~\cite{nelder}; if two reused vehicles wait for each other and the fixed-point iteration makes no progress, the structure is declared deadlocked and removed.
 
-Lower bound: $\mathrm{LB}(v,a)=\min_p[\distpath(V_v^0,p)/3+\max(|\alpha|,|\varepsilon|)/30]$, $S_a\ge$ the second-smallest $\mathrm{LB}(v,a)$, and the global $\mathrm{LB}=\max_a$ second-smallest $=3.414$~s. This bound ignores reuse and synchronization, so it is loose.
+A simple per-alert lower bound is $\mathrm{LB}(v,a)=\min_p[\distpath(V_v^0,p)/3+\max(|\alpha|,|\varepsilon|)/30]$, $S_a\ge$ the second-smallest $\mathrm{LB}(v,a)$, and $\mathrm{LB}=\max_a$ second-smallest $=3.414$~s. It ignores reuse and synchronization and is therefore loose; Section~4.3.7 gives a reuse-aware relaxation that raises it to $7.391$~s and certifies a gap of $28.6\%$.
 
 \subsubsection{Nearest-Assignment Baseline and Comparison}
 
 In the order T1$\to$T2$\to$T3, fill two slots for each alert. For each slot, among vehicles not already serving this alert, choose the one with the smallest ``travel time from the current chain end to its minimum-ready station for this alert'' (ties: smaller vehicle number), and use that minimum-ready station; if the vehicle already has tasks, append to its chain. The same timeline simulation computes the start times. This baseline considers only ``who is nearest'' and ignores synchronized pairing, reuse-chain order, and slew angle.
 
-Optimized plan: T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V4), T3$\leftarrow$(V2,V3), with the V3 reuse chain T1$\to$T3; the start times are $1.607\bsl6.994\bsl10.355$~s and the objective is $10.355$~s. Baseline: T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V1,V5), with reuse chains for V1, V3, and V5; the start times are $1.607\bsl11.140\bsl20.968$~s and the objective is $20.968$~s. The latest start is reduced by $10.613$~s ($-50.6\%$).
+Time-optimal plan: T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V4), T3$\leftarrow$(V2,V3), with the V3 reuse chain T1$\to$T3; the start times are $1.607\bsl6.994\bsl10.355$~s and the objective is $10.355$~s. Baseline: T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V1,V5), with reuse chains for V1, V3, and V5; the start times are $1.607\bsl11.140\bsl20.968$~s and the objective is $20.968$~s. The latest start is reduced by $10.613$~s ($-50.6\%$).
 
 The difference has three sources. (i) Synchronized-pairing loss: the baseline places T2 as the second task in V3's reuse chain, so V3 must first finish T1 and reset, forcing V1 on the other side of T2 to wait; the optimized plan instead pairs V1 with the dedicated V4. (ii) Reuse-chain order: the baseline's three two-task chains serialize slow tasks after fast alerts and block T3's early window; the optimized plan has only one T1$\to$T3 chain. (iii) Azimuth-driven station selection: ready time is highly sensitive to the pan angle ($30^\circ$/s), while the baseline selects stations by distance and ignores the turn angle; the optimization model minimizes ready time.
 
 Note that the T2 pair of 2(1) is accuracy-optimal, whereas 2(2) re-optimizes the stations for timeliness; Section~4.3.6 verifies the accuracy that this costs.
 
-\subsubsection{Results and Robust Deployment}
+\subsubsection{Results and Clearance-Robust Variant}
 
-The $10.355$~s optimum has knife-edge station clearances of only $1.3\times10^{-3}$~m (V3 at T3) and $6.7\times10^{-2}$~m (V4 at T2); the full stations and timings are listed in Table~\ref{tab:D-2}. Re-optimizing with $0.5$~m clearance yields a robust variant of $10.837$~s ($+4.7\%$), with assignment T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V4,V5) and start times $1.54\bsl10.804\bsl10.837$~s; the robust variant is recommended for deployment. The sensitivities to speed and angular rate are given in Section~6.2; the elasticity of $\omega$ is about four times that of $v$.
+The $10.355$~s optimum has knife-edge station clearances of only $1.3\times10^{-3}$~m (V3 at T3) and $6.7\times10^{-2}$~m (V4 at T2); the full stations and timings are listed in Table~\ref{tab:D-2}. Re-optimizing with $0.5$~m clearance yields a robust variant of $10.837$~s ($+4.7\%$), with assignment T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V4,V5) and start times $1.54\bsl10.804\bsl10.837$~s. This variant addresses line-of-sight clearance only and is not accuracy-qualified (its T1 and T2 intersection angles are $21.14^\circ$ and $170.54^\circ$); it is a robustness study, not a deployment recommendation. The accuracy-qualified deployment plan is given in Section~4.3.6. The sensitivities to speed and angular rate are given in Section~6.2; the elasticity of $\omega$ is about four times that of $v$.
 
 \begin{table}[htbp]
   \centering
@@ -265,7 +269,7 @@ The $10.355$~s optimum has knife-edge station clearances of only $1.3\times10^{-
   \label{tab:4-3}
   \begin{tabular}{@{}p{38mm}p{55mm}p{65mm}@{}}
     \toprule
-    Item & Optimized plan & Nearest-assignment baseline \\
+    Item & Time-optimal plan & Nearest-assignment baseline \\
     \midrule
     T1 start & $1.607$~s & $1.607$~s \\
     T2 start & $6.994$~s & $11.140$~s \\
@@ -282,19 +286,21 @@ The baseline Gantt chart is structurally the same as the optimized plan and is o
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\figwidth]{fig4-7_gantt_inset.png}
-  \caption{Vehicle Gantt chart and deployment routes of the optimized plan ((a) Gantt chart; (b) routes and stations)}
+  \caption{Vehicle Gantt chart and deployment routes of the time-optimal plan ((a) Gantt chart; (b) routes and stations)}
   \label{fig:4-7}
 \end{figure}
 
-Figure~\ref{fig:4-7}(a) gives the complete task chain of the optimized plan on the time axis: T1, T2, and T3 begin synchronized two-vehicle observation at $1.607$, $6.994$, and $10.355$~s, respectively; V3 completes T1 and, after reset and slew, continues to T3, forming the only reuse chain. The orange slew segments and gray synchronized-waiting segments explain the composition of each alert's start time. (b) shows the post-arrival deployment positions of the five vehicles and the three alert bearings: T1 is observed by V3 and V5 from the same northwest side ($\gamma$ only $19.34^\circ$), T2 is bracketed by V1 and V4 from the south and east ($\gamma=85.08^\circ$), and T3 is bracketed by V2 and V3 from the southeast and northwest ($\gamma=127.39^\circ$), providing the geometric basis for the accuracy check in Section~4.3.6.
+Figure~\ref{fig:4-7}(a) gives the complete task chain of the time-optimal plan on the time axis: T1, T2, and T3 begin synchronized two-vehicle observation at $1.607$, $6.994$, and $10.355$~s, respectively; V3 completes T1 and, after reset and slew, continues to T3, forming the only reuse chain. The orange slew segments and gray synchronized-waiting segments explain the composition of each alert's start time. (b) shows the post-arrival deployment positions of the five vehicles and the three alert bearings: T1 is observed by V3 and V5 from the same northwest side ($\gamma$ only $19.34^\circ$), T2 is bracketed by V1 and V4 from the south and east ($\gamma=85.08^\circ$), and T3 is bracketed by V2 and V3 from the southeast and northwest ($\gamma=127.39^\circ$), providing the geometric basis for the accuracy check in Section~4.3.6.
 
-\subsubsection{Accuracy Check of the Timeliness Plan}
+\subsubsection{Accuracy Check and Recommended Deployment Plan}
 
-The stations of 2(2) are re-optimized independently for timeliness and must be substituted back into the accuracy model of 2(1) to check the intersection geometry. Using $G$ and DRMS from Section~4.3.1, the three station pairs are evaluated in Table~\ref{tab:4-4}. T2 and T3 have $\gamma=85.08^\circ$ and $127.39^\circ$, inside the $[30^\circ,150^\circ]$ operating window; T1 has $\gamma=19.34^\circ$ ($\kappa=3.02$) and $\mathrm{DRMS}=3.084$~m, approaching degeneracy---the two stations are on the same side of the target and the LOS are nearly parallel. If T1 must also satisfy $\gamma\ge30^\circ$, fixing the assignment and order and reselecting T1's two stations gives $(14.90,85.60)/(53.90,98.40)$, $\gamma=30.12^\circ$, $G=116.68$~m, $\mathrm{DRMS}=2.036$~m; T1's start is delayed from $1.607$~s to $3.746$~s, and the maximum start over the three alerts rises from $10.355$~s to $12.983$~s ($+2.629$~s, $+25.38\%$). This shows that timeliness and accuracy are not interchangeable: if deployment requires T1 to satisfy $\gamma\ge30^\circ$, an intersection-angle constraint must be added to the scheduling model.
+The stations of 2(2) are re-optimized independently for timeliness and must be substituted back into the accuracy model of 2(1) to check the intersection geometry. Using $G$ and DRMS from Section~4.3.1, the three station pairs are evaluated in Table~\ref{tab:4-4}. T2 and T3 have $\gamma=85.08^\circ$ and $127.39^\circ$, inside the $[30^\circ,150^\circ]$ operating window; T1 has $\gamma=19.34^\circ$ ($\kappa=3.02$) and $\mathrm{DRMS}=3.084$~m, approaching degeneracy---the two stations are on the same side of the target and the LOS are nearly parallel, and this DRMS is about $30$ times the $0.1016$~m bound of 2(1). The $10.355$~s plan is therefore the time-optimal benchmark for the problem as posed, but it is not recommended for deployment.
+
+If T1 must also satisfy $\gamma\ge30^\circ$, fixing the assignment and order and reselecting T1's two stations gives $(14.90,85.60)/(53.90,98.40)$, $\gamma=30.12^\circ$, $G=116.68$~m, $\mathrm{DRMS}=2.036$~m; T1's start is delayed from $1.607$~s to $3.746$~s, and the maximum start over the three alerts rises from $10.355$~s to $12.983$~s ($+2.629$~s, $+25.38\%$). Relative to Table~\ref{tab:D-2}, only T1's two stations and the T1/T3 start times change; T2 is unchanged, the task orders are the same, and the affected travel/slew/reset times follow from the new T1 stations. This accuracy-qualified plan is the one recommended for deployment, while the $10.355$~s plan remains the timeliness benchmark. Because only T1's stations change, the T2/T3 knife-edge line-of-sight clearances of Section~4.3.5 persist; a plan satisfying both the accuracy window and the $0.5$~m clearance margin requires a joint re-optimization, which is left as a refinement. The $12.983$~s value is a constrained re-solution under the delivered assignment/order, not a global optimality claim; extending the structural enumeration with the $\gamma$ constraint is a further refinement. Timeliness and accuracy are thus not interchangeable: a deployment that requires $\gamma\ge30^\circ$ must add an intersection-angle constraint to the scheduling model.
 
 \begin{table}[htbp]
   \centering
-  \caption{Intersection geometry and accuracy of the timeliness plan}
+  \caption{Intersection geometry and accuracy of the time-optimal plan and the accuracy-qualified variant}
   \label{tab:4-4}
   \begin{tabular}{@{}p{18mm}p{25mm}p{25mm}p{35mm}p{35mm}@{}}
     \toprule
@@ -316,3 +322,5 @@ The stations of 2(2) are re-optimized independently for timeliness and must be s
 2(1) uses ``covariance propagation + analytical lower-bound certificate + pair enumeration.'' First, $G$ is derived from $\Sigma=A^{-1}DA^{-T}$; the QM--AM inequality and C2 then prove $G\ge\rmin$, and the equality condition is reduced to a one-dimensional test: whether a feasible pair with a $90^\circ$ intersection angle exists on the $\rmin$ circle. Then candidate stations are enumerated and refined by Nelder--Mead for all $C(5,2)=10$ vehicle pairs (4-D NM, $\le300$ iterations per call). The analytical certificate reduces the global optimality check to a one-dimensional feasibility test, avoiding local optima while keeping the computation at the scale of 10 pairs; a direct 4-D search has neither an optimality proof nor protection against local optima.
 
 2(2) uses ``complete structural enumeration + fixed-point timeline simulation + coordinate descent/Nelder--Mead.'' The three alerts each have $C(5,2)=10$ vehicle pairs, giving $10^3=1000$ assignment structures; each structure enumerates reuse-chain orders, for a total of $5{,}880$ (structure, order) combinations, each simulated deterministically and checked for deadlock. Stations are initialized greedily, refined by Gauss--Seidel coordinate descent and Nelder--Mead, and the top 12 structures are re-refined. With only 5 vehicles and 6 slots, all $5{,}880$ deterministic simulations complete in one run, exhaust the structures, and guarantee reproducibility; a randomized search such as a genetic algorithm would neither guarantee the same solution nor explain why the plan is optimal. In terms of efficiency, $10.355$~s is $50.6\%$ lower than the nearest-assignment baseline of $20.968$~s, at a cost of only a few thousand simulations, at most 2 tasks per vehicle, and at most 160 NM iterations per call.
+
+\textbf{Certified gap.} Because the station positions are continuous, the $5{,}880$ enumerated structures are not a certificate by themselves. We therefore compute a reuse-aware lower bound: for every structure and reuse order, first-task ready times are minimized over the whole field (a superset of the observable region) with Euclidean travel and the exact point-slew ($0.25$~m field grid, $0.15$~s margin), and each transition is lower-bounded by the region-to-region distance ($0.1$~m feasible clouds, $0.2$~m covering radius) plus elevation slew floors; the minimal latest start under these underestimates is the longest path of the task DAG. Because every term is a provable underestimate, this longest path is a valid lower bound for the continuous-station problem; enumerating the same $5{,}880$ structures/orders gives $\mathrm{LB}=7.391$~s, so the delivered $10.355$~s plan is within $2.964$~s ($28.6\%$) of the global optimum. This is a valid but not tight certificate; closing the remaining gap requires a continuous-station MILP/CP-SAT with polar candidate stations and time windows, which we leave as future work.

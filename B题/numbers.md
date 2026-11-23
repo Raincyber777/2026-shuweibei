@@ -85,9 +85,11 @@
 | 4.3.4/4.3.5 | 指派/次序 | {'T1': [3, 5], 'T2': [1, 4], 'T3': [2, 3]}；{'V1': ['T2'], 'V2': ['T3'], 'V3': ['T1', 'T3'], 'V4': ['T2'], 'V5': ['T1']} | `q2b_results.json → optimized.assignment/orders` |
 | 4.3.4/4.3.5 | 最近指派基线 | 1.607/11.140/20.968 s，目标 20.968 s | `q2b_results.json → heuristic.alert_starts/objective_s` |
 | 4.3.4/4.3.5 | 时间降低（相对基线） | 10.613 s（−50.6%） | `q2b_results.json → comparison.gap_s`；百分比派生 (opt−base)/base |
-| 4.3.3 | 下界 LB | 3.414 s | `q2b_results.json → LB.global` |
+| 4.3.3 | 简单下界 LB | 3.414 s | `q2b_results.json → LB.global` |
+| 4.3.7/7.2 | 复用感知下界与 gap | LB=7.391 s，gap=2.964 s（28.6%） | `q2b_lower_bound.json → lower_bound_s/certified_gap_s/certified_gap_pct` |
 | 5.2 | top-5 并列解 sum starts | 18.956 s | `q2b_results.json → top5_structures[0].sum_starts_s` |
 | 4.3.5 | 鲁棒变体目标/开始 | 10.837 s；{'T1': 1.54, 'T3': 10.837, 'T2': 10.804} | `q2b_results.json → robust_05.obj_s/starts` |
+| 4.3.5/5.2 | 净空稳健变体 γ/DRMS | T1 21.14°/2.904 m；T2 170.54°/4.496 m；T3 34.66°/2.197 m | `q2b_precision.json → robust_variant.geometry.*` |
 | 6.2 | v×ω 敏感度表 | 见表 | `q2b_results.json → sensitivity_speed_omega` |
 | 6.2 | ω/v 弹性 | −0.44 / −0.11 | 派生：对 `sensitivity_speed_omega` 做对数差分 |
 | 4.3.5 | 刀锋净空 | 最小 0.0013 m | `q2b_results.json → knife_edge.min_station_clearance_m` |
@@ -96,6 +98,8 @@
 | 4.3.6/表 4-4 | T1 的 Σ 各向异性 | 特征值比 46.3:1，线性半轴比 6.8:1；R95,iso 仅为名义圆半径 | `q2b_precision.json → delivered[T1].axis_ratio_variance/axis_ratio_linear` |
 | 4.3.6/表 4-4 | 精确 95% 椭圆半轴 | T1 (10.56,1.55)；T2 (3.27,2.48)；T3 (4.77,1.19)；约束 T1 (6.87,1.58) m | `q2b_precision.json → delivered[].r95_semi_axes_m / constrained.geometry.*.r95_semi_axes_m` |
 | 4.3.6 | γ≥30° 约束解 | γ=30.12°，DRMS=2.036 m；t_last 12.983 s（+2.629 s，+25.38%） | `q2b_precision.json → constrained.*` |
+| 4.3.6 | 精度达标部署方案 | T1 站 (14.90,85.60)/(53.90,98.40)；开始 3.746/6.994/12.983 s | `q2b_precision.json → constrained.stations/starts_s` |
+| 7.2 | Q2/Q3 误差预算合并审计 | 行程 5.11/13.61 s → σ(s)=0.607/1.117 m；σ(s)/d=6.0°/11.0°；一阶 DRMS≈0.90 m | 派生：`q2a_results.json → chosen.travel_s/d_m` + `σ(s)=0.3+0.02s` |
 
 ## 5. 第三问
 
@@ -124,7 +128,10 @@
 |---|---|---|---|
 | 4.5.1/4.5.3 | 基线开始时刻 | {'T1': 1.607, 'T2': 6.994, 'T3': 10.355} | `q4_results.json → baseline.starts` |
 | 4.5.3 | 场景计数 | {'A_new': 24, 'B_fail': 5, 'C_outage': 3, 'D_fail_out': 15, 'E_new_fail': 6, 'F_new_out': 9, 'G_triple': 12}，合计 74 | `q4_results.json → scenario_design.counts` |
-| 4.5.3 | η 提升/持平/劣化 | 67/7/0 | 逐场景比较 `q4_results.json → scen_*[].keep.eta/resched.eta`；`q4_paper_numbers.py` |
+| 4.5.3 | η 提升/持平/劣化（vs keep） | 67/7/0；简单修复同为 67/7/0 | 逐场景比较 `q4_results.json → scen_*[].keep.eta/resched.eta`；`q4_repair.json → repair_vs_keep` |
+| 4.5.3 | 重优化 vs 简单修复 | η 0/74/0；t_last 61/13/0；均值 23.15→19.57 s，平均增益 4.35 s，最大 13.10 s | `q4_repair.json → resched_vs_repair / mean_tlast` |
+| 4.5.3/表 4-7 | 简单修复代表值 | V4 故障 21.01 s；θ=0°,R=30 18.46 s；三重 31.87 s | `q4_repair.json → cases[].repair` |
+| 4.5.3 | 观测完成度敏感性 | ≥4 s 口径：8 个 V3/V5 故障场景 η=2/3；η=1 场景数 repair/resched 74→66，keep 7→3；对照计数不变 | `q4_repair.json → completion_sensitivity` |
 | 4.5.3/表 4-7 | V4 故障代表 | η=1.000，t_last=11.17 s | `q4_results.json → representative.resched_failV4` |
 | 4.5.3/表 4-7 | 三重代表 | η=1.000，t_last=25.01 s | `q4_results.json → representative.resched_triple` |
 | 4.5.3 | 新告警 θ=0°,R=30 | η=1.000，t_last=16.77 s | `q4_results.json → scen_new[key='th0_R30'].resched` |

@@ -161,18 +161,20 @@ where $x_i$ and $w_i$ are the 256-point probabilistic Hermite nodes and weights 
 
 \begin{itemize}
 \item \textbf{Problem 1} (\texttt{Q1/}): \texttt{q1\_solve.py} (domain gridding, arc sampling, tie-breaking, sensitivity); \texttt{area\_estimators.py}, \texttt{q1\_metric\_compare.py}, \texttt{export\_params.py} (three-convention area recomputation, $Q/Q_2$ comparison, export of the B1--B5/V1--V5/T1--T3 parameters).
-\item \textbf{Problem 2} (\texttt{Q2/}): \texttt{q2a\_core.py}, \texttt{q2b\_core.py}, \texttt{q2b\_gamma.py} (two-station accuracy, vehicle and station selection, six-slot five-vehicle scheduling and baseline, 2(2) intersection-geometry check).
+\item \textbf{Problem 2} (\texttt{Q2/}): \texttt{q2a\_core.py}, \texttt{q2b\_core.py}, \texttt{q2b\_gamma.py}, \texttt{q2b\_bound.py} (two-station accuracy, vehicle and station selection, six-slot five-vehicle scheduling and baseline, 2(2) intersection-geometry check, reuse-aware certified lower bound).
 \item \textbf{Problem 3} (\texttt{Q3/}): \texttt{q3\_solve.py} (error propagation, $s_{\max}$, the $(a,b)$ region, Monte Carlo, quadrature).
-\item \textbf{Problem 4} (\texttt{Q4/}): \texttt{q4\_core.py}, \texttt{q4\_robust.py}, \texttt{q4\_tlast\_diff.py}, \texttt{q4\_scenario\_list.py} (state snapshot, rescheduling, 74 scenarios, robustness checks, timeline comparison, scenario details).
+\item \textbf{Problem 4} (\texttt{Q4/}): \texttt{q4\_core.py}, \texttt{q4\_repair.py}, \texttt{q4\_robust.py}, \texttt{q4\_tlast\_diff.py}, \texttt{q4\_scenario\_list.py} (state snapshot, rescheduling, simple-repair baseline, 74 scenarios, robustness checks, timeline comparison, scenario details).
 \item \textbf{Build scripts}: \texttt{build\_numbers.py} $\to$ \texttt{numbers.md} (single data-source mapping from body numbers to JSON fields and scripts); \texttt{params.csv} / \texttt{params\_table.md} (parameter specification exported by \texttt{export\_params.py} and cross-checked with \texttt{q1\_solve.py} and \texttt{q2\_lib.py}).
 \end{itemize}
 
 \noindent The directory names \texttt{Q1/}--\texttt{Q4/} stand for the Chinese original directories in the submitted supporting materials. The correspondence between body numbers and data files is as follows:
 \begin{itemize}
 \item Section~4.2.4, three area conventions $\to$ \texttt{Q1/results/q1\_area\_estimators.json} (\texttt{area\_estimators.py}).
-\item Table~\ref{tab:4-4}, $95\%$ ellipse semi-axes $\to$ \texttt{Q2/results/q2b\_precision.json} (\texttt{q2b\_gamma.py}).
+\item Table~\ref{tab:4-4}, the clearance-robust variant geometry of Section~4.3.5, and the $95\%$ ellipse semi-axes $\to$ \texttt{Q2/results/q2b\_precision.json} (\texttt{q2b\_gamma.py}).
+\item Section~4.3.7, the certified lower bound and gap $\to$ \texttt{Q2/results/q2b\_lower\_bound.json} (\texttt{q2b\_bound.py}).
 \item Section~4.4.3 and Table~\ref{tab:4-5} $\to$ \texttt{Q3/results/q3\_summary.txt} (\texttt{q3\_solve.py}).
 \item Section~4.5.3 and Table~\ref{tab:4-6}, scenario details $\to$ \texttt{Q4/results/q4\_scenario\_list.md} (\texttt{q4\_scenario\_list.py}).
+\item Section~4.5.3, simple-repair baseline and the three-way comparison $\to$ \texttt{Q4/results/q4\_repair.json} (\texttt{q4\_repair.py}).
 \item Section~6.2, $Q/Q_2$ comparison $\to$ \texttt{Q1/results/q1\_metric\_compare.json} (\texttt{q1\_metric\_compare.py}).
 \item Tables D-1 and D-2, all ten pairs and the 2(2) timeline $\to$ \texttt{Q2/results/q2a\_results.json}, \texttt{Q2/results/q2b\_results.json}.
 \end{itemize}
@@ -205,7 +207,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
   Figure 4-4 & Observable region of T2 and 30~s reachable domains & 4.3.2 \\
   Figure 4-5 & Two-station accuracy versus $\gamma$, $d$, and baseline & 4.3.2 \\
   Figure 4-6 & Intersection error ellipses and the $95\%$ circle & 4.3.2 \\
-  Figure 4-7 & Gantt chart and deployment routes of the optimized plan & 4.3.5 \\
+  Figure 4-7 & Gantt chart and deployment routes of the time-optimal plan & 4.3.5 \\
   Figure 4-8 & Variance components and shares of $\sigma_\psi$ & 4.4.3 \\
   Figure 4-9 & Probability curve $P(|\Delta\psi|\le5^\circ)$ and the $(a,b)$ region & 4.4.3 \\
   Figure 4-10 & Two-stage response of $t_{\mathrm{last}}$ to $t_{\mathrm{rec}}$ & 4.5.3 \\
@@ -233,7 +235,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
   Table 4-3 & Scheduling plan versus the nearest-assignment baseline & 4.3.4 \\
   Table 4-4 & Intersection geometry of the timeliness plan & 4.3.6 \\
   Table 4-5 & Monte Carlo verification for Problem~3 & 4.4.3 \\
-  Table 4-6 & Summary by scenario class for Problem~4 & 4.5.3 \\
+  Table 4-6 & Three-way comparison by scenario class for Problem~4 & 4.5.3 \\
   Table 4-7 & Comparison of representative scenarios & 4.5.3 \\
   Table 5-1 & Summary of validation for the four problems & 5 \\
   Table 6-1 & Objective time under the $v\times\omega$ full factorial & 6.2 \\

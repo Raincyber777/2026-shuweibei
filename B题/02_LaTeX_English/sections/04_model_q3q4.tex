@@ -6,6 +6,8 @@
 
 \subsubsection{Error Propagation Model}
 
+Problem~3 assumes the target position to be perfectly known; in this paper the pointing reference is the nominal alert datum of Section~4.1(a), which is a planning datum rather than a measurement. The errors propagated below are the vehicle's own localization error and the gimbal pointing errors, and include no alert error. This error budget belongs to Problem~3; it is separate from the Q2 $1^\circ$ budget and is not added to it (Section~4.3.1).
+
 Take the true position $P$ as the origin and the true LOS as the $x'$ axis, with the target at $(d,0)$, $d=40$~m. Decompose the localization error into cross-range $\delta_\perp$ and along-range $\delta_\parallel$; under isotropy, $\delta_\perp\sim\mathcal{N}(0,\sigma(s)^2)$. The exact deviation from the estimated position to the target is $\Delta\alpha=\operatorname{atan2}(-\delta_\perp,d-\delta_\parallel)\approx-\delta_\perp/d$ (residual analysis in Appendix~A.3). Adding the gimbal bias $\varepsilon_0\sim\mathcal{N}(0,0.8^2)$ and control error $\varepsilon_c\sim\mathcal{N}(0,0.6^2)$,
 \begin{equation}
   \Delta\psi=\wrap\bigl(\Delta\alpha\cdot180/\pi+\varepsilon_0+\varepsilon_c\bigr),
@@ -77,9 +79,11 @@ This problem uses ``closed-form first-order propagation + monotone criterion + e
 \subsection{Problem 4: Rescheduling under Disturbances}
 \label{sec:q4}
 
+The baseline is the time-optimal $10.355$~s plan of Section~4.3.5, as the problem prescribes; the accuracy-qualified $12.983$~s plan of Section~4.3.6 is an alternative deployment plan and is not used as the rescheduling baseline, so the comparison isolates the effect of the disturbances.
+
 \subsubsection{State Snapshot and Locking Rules}
 
-At $t_p$ (5~s without an outage, $t_{\mathrm{rec}}$ with an outage), record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle. Traveling: position is interpolated linearly, attitude is east, and the vehicle can be redispatched immediately. Slewing: the vehicle is at its station, attitude is interpolated, and it can be redispatched. Synchronized waiting: the vehicle is at its station, attitude points at the target, and it can be redispatched. Observing/resetting: the alert is locked and counted as served---it is not rescheduled even though its 5~s observation may still be in progress---and the vehicle remains locked until its reset finishes.
+At $t_p$ (5~s without an outage, $t_{\mathrm{rec}}$ with an outage), record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle. Traveling: position is interpolated linearly, attitude is east, and the vehicle can be redispatched immediately. Slewing: the vehicle is at its station, attitude is interpolated, and it can be redispatched. Synchronized waiting: the vehicle is at its station, attitude points at the target, and it can be redispatched. Observing/resetting: the alert is locked and counted as served---it is not rescheduled even though its 5~s observation may still be in progress---and the vehicle remains locked until its reset finishes; this is the problem's lock rule. At $t=5$~s, T1 is in this state with $3.39$~s of its 5~s observation elapsed.
 
 Rules: alerts that started before $t_p$ cannot be rescheduled; dispatched-but-unobserved vehicles can be redispatched; a failed vehicle is removed and its pending alerts become orphans; no new commands are received during an outage, and rescheduling is triggered after $t_{\mathrm{rec}}$. \textbf{``Continue-slew'' applies only to the first task of an unobserved redispatch}: only if the vehicle has not started observing and the new station coincides with its current position (distance $\le5$~cm), the first post-snapshot task continues from the current attitude, with
 \begin{equation}
@@ -91,50 +95,56 @@ after that task resets, all subsequent tasks perform a full-angle slew from east
 
 The pending alert set $A_p$ is the union of alerts whose baseline start is $\ge t_p$, orphan alerts, and the new alert T4; the available vehicle set $V_p$ contains all non-failed vehicles. The decisions are $M_a$, $\pi_v$, and $p_{v,k}$; the objective is lexicographic: maximize $k$, then minimize $t_{\mathrm{last}}$; the constraints are two distinct available vehicles per pending alert, stations in the corresponding $\Omega_a$, timeline propagation from the snapshot state, and exclusion of locked alerts and vehicles. The solution reuses the structural enumeration, coordinate descent, Nelder--Mead, and deadlock detection of Problem~2(2), changing only the initial conditions.
 
-Keep-original: no new commands are issued. If a failed vehicle belongs to the pair of a pending alert, that alert never starts, so $k$ decreases by 1 and $t_{\mathrm{last}}=60$; the new alert has no assignment, so $N$ increases by 1 while $k$ is unchanged; with an outage only, the two strategies are equivalent.
+Three policies are compared. (i) \emph{Keep-original}: no new commands are issued; a pending alert whose pair contains the failed vehicle never starts, a new alert is never assigned, and nothing is redispatched---this is a no-reaction baseline. (ii) \emph{Simple repair}: keep every pending assignment and its original station; replace a failed vehicle by the nearest available spare for the same alert; insert a new alert at the end of the two earliest-available chains; choose a station only for a new or replacement task (the current position if feasible, otherwise the nearest feasible station); do not reorder existing tasks and do not run coordinate descent or Nelder--Mead. (iii) \emph{Re-optimization}: the model above. The simple-repair baseline separates the value of reacting at all from the incremental value of re-optimization. Because the lexicographic objective maximizes $k$ first, any pending alert that can be served will be served; the comparison with simple repair therefore separates this \emph{guaranteed} completion effect of the objective from the incremental timing effect of re-optimization.
 
 \subsubsection{Scenario Set and Results}
 
 The scenario set has 74 scenarios: A, new alert, $8$ azimuths $\times$ $3$ distances $=24$; B, single vehicle failure, 5; C, single outage, 3; D, failure $\times$ outage, 15; E, new alert $\times$ failure, 6; F, new alert $\times$ outage, 9; G, triple combination, 12. New alerts use 8 azimuths at $45^\circ$ and $\rho\in\{30,40,50\}$~m, covering the shadow directions of all buildings and both ends of the distance range; a subsequent $22.5^\circ$ refinement moves $t_{\mathrm{last}}$ smoothly within $14.57$--$16.45$~s, which confirms that $45^\circ$ sampling suffices. The failure class runs all 5 vehicles; the combination class uses V2 and V4 as representatives, because V1 and V4 are the two members of T2's pair and V2, V3 are the two members of T3's pair, so a failure within a pair leaves an isomorphic orphan structure (V3's only other task, T1, is locked at $t_p$), while V5's only task T1 is already locked and loses nothing. Failure $\times$ outage covers all three $t_{\mathrm{rec}}$, while the triple class uses only $t_{\mathrm{rec}}=10/30$~s: $t_{\mathrm{last}}$ responds in two stages (chain-limited, then unit slope), the middle value 20~s is already covered by D, and the secant slope ($\approx0.6$) makes the missing points predictable. The set covers azimuth, distance, failure role, outage length and combination, and its representativeness is supported by the $22.5^\circ$ refinement and the $0.5$~m margin/tolerance/robust-baseline checks.
 
-Results: rescheduling strictly improves $\eta$ in 67 of 74 scenarios, ties in 7, and degrades none (reported at $0.01$~s precision); Table~\ref{tab:4-6} summarizes the outcome by scenario class and Table~\ref{tab:4-7} lists three representative scenarios. Representative values: V4 failure, keep $(0.667,60)\to$ resched $(1.000,11.17)$; new alert $\theta=0^\circ$, $\rho=30$~m, keep $(0.750,60)\to(1.000,16.77)$; triple combination (median new alert + V4 failure + $t_{\mathrm{rec}}=10$~s), keep $(0.500,60)\to(1.000,25.01)$. By failed vehicle, the rescheduled $t_{\mathrm{last}}$ for V1/V4, V2/V3, and V5 is $11.17$, $10.90$, and $10.35$~s, respectively, all with $\eta=1$. For a V1 failure, failure $\times$ outage with $t_{\mathrm{rec}}=10\bsl20\bsl30$ gives $t_{\mathrm{last}}=21.01\bsl25.08\bsl35.08$~s (increments $4.07\bsl10.00$~s), showing the two-stage behavior. The mechanism is ``structural loss $\to$ temporal loss''; its upper limit is jointly constrained by the azimuth of idle vehicles, the slew + travel recovery delay, and the outage duration.
+Results: keep-original has $\eta<1$ in 67 of 74 scenarios and ties in 7. Both simple repair and re-optimization restore $\eta$ in all 67, so the \emph{completion-rate} gain is due to reacting at all, not to re-optimization; the 7 ties are the pure-outage class (3), the V5 failure (1), and the V5-failure outage pairs (3), where no pending alert is affected. Against simple repair, re-optimization leaves $\eta$ unchanged in all 74 scenarios but lowers $t_{\mathrm{last}}$ in 61, ties in 13, and degrades none ($0.01$~s precision); the mean $t_{\mathrm{last}}$ falls from $23.15$ to $19.57$~s, with a mean gain of $4.35$~s and a maximum gain of $13.10$~s among the improved cases. The gain is concentrated in failure, new$\times$failure, and triple scenarios (mean $7.86$, $9.64$, and $7.69$~s), is small for new$\times$outage ($0.67$~s), and is zero for pure outage, where no decision is available during the outage. Table~\ref{tab:4-6} summarizes the three-way comparison by class and Table~\ref{tab:4-7} lists three representative scenarios.
+
+Representative values: V4 failure, keep $(0.667,60)\to$ simple repair $(1.000,21.01)\to$ re-optimized $(1.000,11.17)$; new alert $\theta=0^\circ$, $\rho=30$~m, $(0.750,60)\to(1.000,18.46)\to(1.000,16.77)$; triple combination (median new alert + V4 failure + $t_{\mathrm{rec}}=10$~s), $(0.500,60)\to(1.000,31.87)\to(1.000,25.01)$. By failed vehicle, the re-optimized $t_{\mathrm{last}}$ for V1/V4, V2/V3, and V5 is $11.17$, $10.90$, and $10.35$~s, respectively, all with $\eta=1$. For a V1 failure, failure $\times$ outage with $t_{\mathrm{rec}}=10\bsl20\bsl30$ gives $t_{\mathrm{last}}=21.01\bsl25.08\bsl35.08$~s (increments $4.07\bsl10.00$~s), showing the two-stage behavior. The mechanism is ``structural loss $\to$ temporal loss'': simple repair recovers the structure, and re-optimization compresses the resulting temporal loss; its upper limit is jointly constrained by the azimuth of idle vehicles, the slew + travel recovery delay, and the outage duration.
+
+\textbf{Completion-rule sensitivity.} The main $\eta$ follows the problem's started-means-served rule. If completion instead requires at least $4$~s of synchronized observation (here equivalent to the full $5$~s, because T1 has only $3.39$~s elapsed at $t=5$), T1 is incomplete in the eight scenarios with a V3 or V5 failure; since it has started it cannot be rescheduled. Counting it as failed lowers the number of $\eta=1$ scenarios from $74$ to $66$ for both simple repair and re-optimization (keep: $7$ to $3$), and the affected scenarios have $\eta=2/3$ (V3 failure: keep $\eta=1/3$); $t_{\mathrm{last}}$ is set to $60$ there, following the convention that an uncompleted alert sets $t_{\mathrm{last}}=60$. The repair-vs-keep comparison remains $67/7/0$, and re-optimization vs simple repair remains $\eta$ $0/74/0$ with $t_{\mathrm{last}}$ $57/17/0$; the attribution of $\eta$ to reaction and $t_{\mathrm{last}}$ to re-optimization is therefore robust to the accounting rule. We retain the problem's rule as the main metric.
 
 \begin{table}[htbp]
   \centering
-  \caption{Summary by scenario class}
+  \caption{Three-way comparison by scenario class}
   \label{tab:4-6}
-  \begin{tabular}{@{}lccc@{}}
+  {\small
+  \begin{tabular}{@{}lcccc@{}}
     \toprule
-    Scenario class & Scenarios & $\eta$ improved & Tied \\
+    Class & $n$ & $\eta$ vs keep & $t_{\mathrm{last}}$ vs repair & Mean gain (s) \\
     \midrule
-    A New alert & 24 & 24 & 0 \\
-    B Single vehicle failure & 5 & 4 & 1 \\
-    C Single outage & 3 & 0 & 3 \\
-    D Failure $\times$ outage & 15 & 12 & 3 \\
-    E New alert $\times$ failure & 6 & 6 & 0 \\
-    F New alert $\times$ outage & 9 & 9 & 0 \\
-    G Triple combination & 12 & 12 & 0 \\
-    Total & 74 & 67 & 7 \\
+    A New alert & 24 & 24/0 & 24/0 & 2.22 \\
+    B Single vehicle failure & 5 & 4/1 & 4/1 & 7.86 \\
+    C Single outage & 3 & 0/3 & 0/3 & --- \\
+    D Failure $\times$ outage & 15 & 12/3 & 10/5 & 2.73 \\
+    E New alert $\times$ failure & 6 & 6/0 & 6/0 & 9.64 \\
+    F New alert $\times$ outage & 9 & 9/0 & 5/4 & 0.67 \\
+    G Triple combination & 12 & 12/0 & 12/0 & 7.69 \\
+    \midrule
+    Total & 74 & 67/7 & 61/13 & 4.35 \\
     \bottomrule
-  \end{tabular}
-
+  \end{tabular}}
   \vspace{2pt}
-  {\footnotesize Note: G uses 3 representatives $\times$ 2 failed vehicles $\times$ 2 recovery times ($t_{\mathrm{rec}}=10/30$~s only); the intermediate value $t_{\mathrm{rec}}=20$~s is covered by D.}
+  {\footnotesize Note: entries are improved/tied; the $\eta$ column applies to both simple repair and re-optimization (they tie in all 74 scenarios); the $t_{\mathrm{last}}$ column is re-optimization versus simple repair; the mean gain is the average reduction over the improved cases, with ``---'' when there is none. Under a $\ge4$~s completion criterion, the eight V3/V5-failure scenarios have $\eta=2/3$ for repair and re-optimization; the comparison columns are unchanged except $t_{\mathrm{last}}$ vs repair becomes $57/17$. G uses 3 representatives $\times$ 2 failed vehicles $\times$ 2 recovery times ($t_{\mathrm{rec}}=10/30$~s only).}
 \end{table}
 
 \begin{table}[htbp]
   \centering
   \caption{Comparison of representative scenarios}
   \label{tab:4-7}
-  \begin{tabular}{@{}p{55mm}p{50mm}p{50mm}@{}}
+  {\small
+  \begin{tabular}{@{}p{48mm}p{28mm}p{32mm}p{32mm}@{}}
     \toprule
-    Scenario & Keep original $(\eta,t_{\mathrm{last}})$ & Reschedule $(\eta,t_{\mathrm{last}})$ \\
+    Scenario & Keep & Simple repair & Re-optimized \\
     \midrule
-    V4 failure & $(0.667,60)$ & $(1.000,11.17)$ \\
-    New alert $\theta=0^\circ$, $\rho=30$~m & $(0.750,60)$ & $(1.000,16.77)$ \\
-    Triple (median + V4 + $t_{\mathrm{rec}}=10$~s) & $(0.500,60)$ & $(1.000,25.01)$ \\
+    V4 failure & $(0.667,60)$ & $(1.000,21.01)$ & $(1.000,11.17)$ \\
+    New alert $\theta=0^\circ$, $\rho=30$~m & $(0.750,60)$ & $(1.000,18.46)$ & $(1.000,16.77)$ \\
+    Triple (median + V4 + $t_{\mathrm{rec}}=10$~s) & $(0.500,60)$ & $(1.000,31.87)$ & $(1.000,25.01)$ \\
     \bottomrule
-  \end{tabular}
+  \end{tabular}}
 \end{table}
 
 \begin{figure}[htbp]
@@ -144,17 +154,17 @@ Results: rescheduling strictly improves $\eta$ in 67 of 74 scenarios, ties in 7,
   \label{fig:4-10}
 \end{figure}
 
-Figure~\ref{fig:4-10}(a) shows that the new alert's azimuth has little effect on $t_{\mathrm{last}}$ (about $15$--$17$~s), far below the 60~s of keeping the original plan; (b) shows that $t_{\mathrm{last}}$ rises piecewise with the recovery time $t_{\mathrm{rec}}$, that V5 stays at $10.36$~s because T1 is already locked and completed, and that the other failed vehicles exhibit the ``chain-limited---unit-slope'' two-stage behavior.
+Figure~\ref{fig:4-10}(a) shows that the new alert's azimuth has little effect on the re-optimized $t_{\mathrm{last}}$ (about $14.4$--$16.8$~s; simple repair gives $16.3$--$21.7$~s), far below the 60~s of keeping the original plan; (b) shows that $t_{\mathrm{last}}$ rises piecewise with the recovery time $t_{\mathrm{rec}}$, that V5 stays at $10.36$~s because T1 is already locked and completed, and that the other failed vehicles exhibit the ``chain-limited---unit-slope'' two-stage behavior.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\figwidth]{fig4-11_resched_compare.png}
-  \caption{Rescheduling Gantt chart and 74-scenario comparison ((a) V4 failure Gantt chart; (b) keep/resched scatter)}
+  \caption{Rescheduling Gantt chart and 74-scenario comparison ((a) V4 failure Gantt chart; (b) keep/re-optimized scatter)}
   \label{fig:4-11}
 \end{figure}
 
-Figure~\ref{fig:4-11}(a) shows that after V4 fails at $t=5$~s, rescheduling still starts T2 and T3 at about $7$~s and $10$~s and keeps $\eta=1.00$; in (b), among the 74 scenarios, all green hollow points lie at $\eta=1.00$, the red crosses are distributed between $0.50$ and $1.00$, and the arrows show that rescheduling trades a larger $t_{\mathrm{last}}$ for a restored completion rate.
+Figure~\ref{fig:4-11}(a) shows that after V4 fails at $t=5$~s, rescheduling still starts T2 and T3 at about $7$~s and $10$~s and keeps $\eta=1.00$; in (b), among the 74 scenarios, all green hollow points lie at $\eta=1.00$, the red crosses are distributed between $0.50$ and $1.00$, and the arrows show the keep-original-to-re-optimized change. Simple repair also reaches $\eta=1.00$ in all 74 scenarios (Table~\ref{tab:4-6}); the incremental effect of re-optimization is a leftward shift in $t_{\mathrm{last}}$, not a change in $\eta$.
 
 \subsubsection{Algorithm and Efficiency}
 
-This problem uses ``event-triggered snapshot + reuse of the 2(2) solver + deterministic scenario enumeration.'' The steps are: (i) at $t_p$, record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle and classify states as redispatchable or locked; (ii) using the snapshot as the initial condition, re-optimize the pending alerts with the structural enumeration, fixed-point simulation, coordinate descent, and Nelder--Mead of 2(2); (iii) compute $(\eta,t_{\mathrm{last}})$ for keep-original and reschedule in each of the 74 representative scenarios. This approach is chosen because the post-disturbance scale is the same order as 2(2) and reusing the same solver keeps the conventions consistent; with only 74 scenarios, deterministic enumeration completes in one run without online stochastic optimization. Keep-original is evaluated analytically and serves as a comparison with per-scenario simulation. The result is a strict $\eta$ improvement in 67/74 scenarios, 7 ties, and 0 degradations.
+This problem uses ``event-triggered snapshot + reuse of the 2(2) solver + deterministic scenario enumeration.'' The steps are: (i) at $t_p$, record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle and classify states as redispatchable or locked; (ii) using the snapshot as the initial condition, re-optimize the pending alerts with the structural enumeration, fixed-point simulation, coordinate descent, and Nelder--Mead of 2(2); (iii) compute $(\eta,t_{\mathrm{last}})$ for keep-original, simple repair, and re-optimization in each of the 74 representative scenarios. This approach is chosen because the post-disturbance scale is the same order as 2(2) and reusing the same solver keeps the conventions consistent; with only 74 scenarios, deterministic enumeration completes in one run without online stochastic optimization. Keep-original is evaluated analytically; simple repair uses the same simulator with a fixed assignment/order and only nearest-spare insertion. The three-way comparison shows that simple repair already restores $\eta$ in 67/74 scenarios (7 ties), while re-optimization's incremental value is $t_{\mathrm{last}}$ improvements in 61/74 (mean $4.35$~s); the result is therefore attributed to reaction plus timeliness, not to a completion-rate effect of re-optimization.

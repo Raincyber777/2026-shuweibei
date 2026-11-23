@@ -1,0 +1,65 @@
+{
+  "objective_delivered_s": 10.354889235621954,
+  "lower_bound_s": 7.390836224623304,
+  "certified_gap_s": 2.96405301099865,
+  "certified_gap_pct": 28.62467133691766,
+  "grid_step_m": 0.1,
+  "covering_radius_m": 0.2,
+  "field_step_m": 0.25,
+  "field_margin_s": 0.15,
+  "slew_lb_s": {
+    "T1": 0.7126619752421945,
+    "T2": 0.5347212365928904,
+    "T3": 0.8902298008757267
+  },
+  "ready_lb_s": {
+    "V1_T1": 1.1434530127882192,
+    "V1_T2": 2.979447985978156,
+    "V1_T3": 1.5089032419832924,
+    "V2_T1": 2.9568082870175076,
+    "V2_T2": 4.547455213227274,
+    "V2_T3": 5.62758935398496,
+    "V3_T1": 0.8732166558356494,
+    "V3_T2": 3.263734874200208,
+    "V3_T3": 1.775722212191178,
+    "V4_T1": 3.919600084619596,
+    "V4_T2": 5.738469953516341,
+    "V4_T3": 3.758053425292058,
+    "V5_T1": 1.3820327144569216,
+    "V5_T2": 4.9251424158062775,
+    "V5_T3": 2.615520507043483
+  },
+  "transition_lb_s": {
+    "T1_T2": 1.247383211835085,
+    "T1_T3": 1.602891776117921,
+    "T2_T1": 1.247383211835085,
+    "T2_T3": 1.4249510374686172,
+    "T3_T1": 1.602891776117921,
+    "T3_T2": 1.4249510374686172
+  },
+  "best_structure": {
+    "0": [
+      "T1",
+      "T2"
+    ],
+    "1": [
+      "T2"
+    ],
+    "2": [
+      "T1"
+    ],
+    "3": [
+      "T3"
+    ],
+    "4": [
+      "T3"
+    ]
+  },
+  "best_starts_s": {
+    "T1": 1.1434530127882192,
+    "T2": 7.390836224623304,
+    "T3": 3.758053425292058
+  },
+  "structures_orders_checked": 5880,
+  "note": "Valid lower bound: the first-task ready time is minimised over the whole field (superset of the region) with Euclidean travel and exact point-slew, minus a grid margin; transition times use region distances and an elevation slew floor."
+}
