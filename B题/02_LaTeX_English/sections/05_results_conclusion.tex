@@ -14,7 +14,7 @@
     Object & Method & Deviation & Details \\
     \midrule
     Q1 global optimum & Closed-form $r^*$ vs.\ $0.1$~m grid & $7.5821$ vs.\ $7.5828$~m ($+0.0007$~m, $0.009\%$) & 4.2.4 \\
-    Q2 accuracy and scheduling & Covariance vs.\ 200,000 MC; structural enumeration + top-5 + $0.5$~m variant; reuse-aware LB & RMSE $0.1436$~m $=\sqrt2\,\mathrm{DRMS}$; P95 $0.2486$~m; time optimum $10.355$~s, clearance-robust $10.837$~s, accuracy-qualified $12.983$~s; LB $7.391$~s (gap $28.6\%$) & 4.3.2/4.3.5/4.3.7 \\
+    Q2 accuracy and scheduling & Covariance vs.\ 200,000 MC; structural enumeration + top-5 + $0.5$~m variant; reuse-aware LB & RMSE $0.1436$~m $=\sqrt2\,\mathrm{DRMS}$; P95 $0.2486$~m; time optimum $10.355$~s, clearance-robust $10.837$~s, accuracy-qualified $12.983$~s; LB $7.391$~s (gap $28.6\%$) & 4.3.2/4.3.5/B.2 \\
     Q3 error propagation & Linearization vs.\ $256\times256$ Hermite; $10^6$ MC & $s_{\max}$ $66.92$ vs.\ $66.84$~m ($0.13\%$); $P$ deviation $\le3\times10^{-4}$ & 4.4.3 \\
     Q4 rescheduling & 74-scenario audit; keep / simple repair / re-optimization; $0.5$~m margin/tolerance/$22.5^\circ$ densification & 0 anomalies; simple repair restores $\eta$ in 67/74; re-optimization lowers $t_{\mathrm{last}}$ in 61/74 (mean $4.35$~s); conclusions unchanged & 4.5.3 \\
     \bottomrule
@@ -93,7 +93,7 @@ Within reasonable perturbation ranges, no qualitative conclusion flips: the opti
 \subsection{Weaknesses}
 
 \begin{enumerate}[label=(\arabic*)]
-\item \textbf{The global optimality of Problem~2(2) is not certified.} The assignment structures are exhaustively enumerated at the $10^3$ level, but station optimization relies on coordinate descent and Nelder--Mead; $10.355$~s is the best time-optimal solution in the sense of ``structural exhaustion + station refinement,'' and the $12.983$~s accuracy-qualified plan is a constrained re-solution under the delivered structure. The simple per-alert bound is $3.414$~s; a reuse-aware relaxation raises it to $7.391$~s, so the delivered plan is within a \emph{certified} $28.6\%$ gap, but a full continuous-station MILP/CP-SAT certificate is not provided.
+\item \textbf{The global optimality of Problem~2(2) is not certified.} The assignment structures are exhaustively enumerated at the $10^3$ level, but station optimization relies on coordinate descent and Nelder--Mead; $10.355$~s is the best time-optimal solution in the sense of ``structural exhaustion + station refinement,'' and the $12.983$~s accuracy-qualified plan is a constrained re-solution under the delivered structure. A reuse-aware relaxation gives $\mathrm{LB}=7.391$~s, so the delivered plan is within a \emph{certified} $28.6\%$ gap, but a full continuous-station MILP/CP-SAT certificate is not provided.
 
 \item \textbf{The Q2 and Q3 error budgets are not unified.} Problem~2 uses the problem-specified $1^\circ$ azimuth error at surveyed stations, so the self-localization term $\sigma(s)/d$ of Problem~3 is not included. At the 2(1) stations ($d=5.8188$~m; travel $5.11/13.61$~s, hence $\sigma(s)=0.607/1.117$~m) this term would be $6.0^\circ/11.0^\circ$ (even at $s=0$, $\sigma=0.3$~m gives $2.95^\circ$ at this distance), raising DRMS from $0.1016$~m to about $0.90$~m in a first-order audit, and the station optimization would have to be re-run under the merged model. We follow the problem's per-problem error specifications and state this explicitly rather than silently mixing the two budgets.
 

@@ -85,7 +85,6 @@
 | 4.3.4/4.3.5 | 指派/次序 | {'T1': [3, 5], 'T2': [1, 4], 'T3': [2, 3]}；{'V1': ['T2'], 'V2': ['T3'], 'V3': ['T1', 'T3'], 'V4': ['T2'], 'V5': ['T1']} | `q2b_results.json → optimized.assignment/orders` |
 | 4.3.4/4.3.5 | 最近指派基线 | 1.607/11.140/20.968 s，目标 20.968 s | `q2b_results.json → heuristic.alert_starts/objective_s` |
 | 4.3.4/4.3.5 | 时间降低（相对基线） | 10.613 s（−50.6%） | `q2b_results.json → comparison.gap_s`；百分比派生 (opt−base)/base |
-| 4.3.3 | 简单下界 LB | 3.414 s | `q2b_results.json → LB.global` |
 | 4.3.7/7.2 | 复用感知下界与 gap | LB=7.391 s，gap=2.964 s（28.6%） | `q2b_lower_bound.json → lower_bound_s/certified_gap_s/certified_gap_pct` |
 | 5.2 | top-5 并列解 sum starts | 18.956 s | `q2b_results.json → top5_structures[0].sum_starts_s` |
 | 4.3.5 | 鲁棒变体目标/开始 | 10.837 s；{'T1': 1.54, 'T3': 10.837, 'T2': 10.804} | `q2b_results.json → robust_05.obj_s/starts` |

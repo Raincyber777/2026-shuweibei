@@ -201,7 +201,25 @@ where $x_i$ and $w_i$ are the 256-point probabilistic Hermite nodes and weights 
 }
 \end{table}
 
-\subsection*{B.2 Main program list}
+\subsection*{B.2 Algorithm and efficiency details}
+
+\subsubsection*{B.2.1 Problem 1: observable region and optimal station}
+This problem uses ``closed-form lower bound + arc parameterization + three-level lexicographic rule'' rather than 2-D continuous optimization over $(x,y)$. The steps are: (i) solve C2 for $\rmin=\Delta z/\tan80^\circ$; (ii) sample 200,000 points uniformly on the $r=\rmin$ circle (about $0.0018^\circ$ spacing) and mark the feasible arc by 3-D slab intersection; (iii) make the choice unique on the feasible arc by ``maximum-safety-margin band---shortest obstacle-avoiding path within the band---coordinate lexicographic order''; (iv) independently recompute the area and minimum $r$ on a $0.1$~m grid (about $10^6$ points). The reason for this algorithm is that $Q=1/r$ is strictly monotone, so the optimal value must be attained on the active constraint C2 and the closed form provides a global optimality certificate. A 2-D grid search would only give the best grid value, without an optimality proof, at a cost of $10^6$ points, whereas the closed-form part is $O(1)$. The grid is used only for independent verification: arc sampling is $O(2\times10^5)$, and the grid verification is one $O(10^6)$ pass. The closed-form $7.5821$~m and the grid $7.5828$~m differ by only $0.0007$~m, confirming that the certificate and the numerical recomputation agree.
+
+\subsubsection*{B.2.2 Problem 2: two-station intersection and multi-target scheduling}
+2(1) uses ``covariance propagation + analytical lower-bound certificate + pair enumeration.'' First, $G$ is derived from $\Sigma=A^{-1}DA^{-T}$; the QM--AM inequality and C2 then prove $G\ge\rmin$, and the equality condition is reduced to a one-dimensional test: whether a feasible pair with a $90^\circ$ intersection angle exists on the $\rmin$ circle. Then candidate stations are enumerated and refined by Nelder--Mead for all $C(5,2)=10$ vehicle pairs (4-D NM, $\le300$ iterations per call). The analytical certificate reduces the global optimality check to a one-dimensional feasibility test, avoiding local optima while keeping the computation at the scale of 10 pairs; a direct 4-D search has neither an optimality proof nor protection against local optima.
+
+2(2) uses ``complete structural enumeration + fixed-point timeline simulation + coordinate descent/Nelder--Mead.'' The three alerts each have $C(5,2)=10$ vehicle pairs, giving $10^3=1000$ assignment structures; each structure enumerates reuse-chain orders, for a total of $5{,}880$ (structure, order) combinations, each simulated deterministically and checked for deadlock. Stations are initialized greedily, refined by Gauss--Seidel coordinate descent and Nelder--Mead, and the top 12 structures are re-refined. With only 5 vehicles and 6 slots, all $5{,}880$ deterministic simulations complete in one run, exhaust the structures, and guarantee reproducibility; a randomized search such as a genetic algorithm would neither guarantee the same solution nor explain why the plan is optimal. In terms of efficiency, $10.355$~s is $50.6\%$ lower than the nearest-assignment baseline of $20.968$~s, at a cost of only a few thousand simulations, at most 2 tasks per vehicle, and at most 160 NM iterations per call.
+
+\textbf{Certified gap.} Because the station positions are continuous, the $5{,}880$ enumerated structures are not a certificate by themselves. We therefore compute a reuse-aware lower bound: for every structure and reuse order, first-task ready times are minimized over the whole field (a superset of the observable region) with Euclidean travel and the exact point-slew ($0.25$~m field grid, $0.15$~s margin), and each transition is lower-bounded by the region-to-region distance ($0.1$~m feasible clouds, $0.2$~m covering radius) plus elevation slew floors; the minimal latest start under these underestimates is the longest path of the task DAG. Because every term is a provable underestimate, this longest path is a valid lower bound for the continuous-station problem; enumerating the same $5{,}880$ structures/orders gives $\mathrm{LB}=7.391$~s, so the delivered $10.355$~s plan is within $2.964$~s ($28.6\%$) of the global optimum. This is a valid but not tight certificate; closing the remaining gap requires a continuous-station MILP/CP-SAT with polar candidate stations and time windows, which we leave as future work.
+
+\subsubsection*{B.2.3 Problem 3: localization and pointing error propagation}
+This problem uses ``closed-form first-order propagation + monotone criterion + exact quadrature verification.'' The steps are: (i) linearize the lateral projection to obtain $\Delta\psi\sim\mathcal{N}(0,(1.432394\sigma(s))^2+1.0)$; (ii) from the two-sided criterion $P(|\Delta\psi|\le5^\circ)\ge0.95$, obtain $\sigma_\psi\le2.5511^\circ$ and invert for $\sigma(s)$ and $s_{\max}$; (iii) evaluate the exact $\operatorname{atan2}$ geometry by a $256\times256$ Gauss--Hermite quadrature over the two-dimensional expectation and find $s_{\max}$ by bisection; (iv) independently verify with $10^6$ Monte Carlo runs. The closed form is chosen because $\sigma_\psi(s)$ is monotone in $s$, so the criterion can be inverted directly and gives the primary answer in $O(1)$; Hermite quadrature is chosen because 65,536 nodes already reach $10^{-3}$ accuracy, at about $1/15$ of the cost of $10^6$ MC runs and without sampling error. The results are $66.92$~m in closed form and $66.84$~m exact ($0.13\%$ difference), with an MC $P$ deviation no larger than $3\times10^{-4}$.
+
+\subsubsection*{B.2.4 Problem 4: rescheduling under disturbances}
+This problem uses ``event-triggered snapshot + reuse of the 2(2) solver + deterministic scenario enumeration.'' The steps are: (i) at $t_p$, record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle and classify states as redispatchable or locked; (ii) using the snapshot as the initial condition, re-optimize the pending alerts with the structural enumeration, fixed-point simulation, coordinate descent, and Nelder--Mead of 2(2); (iii) compute $(\eta,t_{\mathrm{last}})$ for keep-original, simple repair, and re-optimization in each of the 74 representative scenarios. This approach is chosen because the post-disturbance scale is the same order as 2(2) and reusing the same solver keeps the conventions consistent; with only 74 scenarios, deterministic enumeration completes in one run without online stochastic optimization. Keep-original is evaluated analytically; simple repair uses the same simulator with a fixed assignment/order and only nearest-spare insertion. The three-way comparison shows that simple repair already restores $\eta$ in 67/74 scenarios (7 ties), while re-optimization's incremental value is $t_{\mathrm{last}}$ improvements in 61/74 (mean $4.35$~s); the result is therefore attributed to reaction plus timeliness, not to a completion-rate effect of re-optimization.
+
+\subsection*{B.3 Main program list}
 \begin{itemize}
 \item \textbf{Problem 1} (\texttt{Q1/}): \texttt{q1\_solve.py} (domain gridding, arc sampling, tie-breaking, sensitivity); \texttt{area\_estimators.py}, \texttt{q1\_metric\_compare.py}, \texttt{export\_params.py} (three-convention area recomputation, $Q/Q_2$ comparison, export of the B1--B5/V1--V5/T1--T3 parameters).
 \item \textbf{Problem 2} (\texttt{Q2/}): \texttt{q2a\_core.py}, \texttt{q2b\_core.py}, \texttt{q2b\_gamma.py}, \texttt{q2b\_bound.py} (two-station accuracy, vehicle and station selection, six-slot five-vehicle scheduling and baseline, 2(2) intersection-geometry check, reuse-aware certified lower bound).
@@ -214,7 +232,7 @@ where $x_i$ and $w_i$ are the 256-point probabilistic Hermite nodes and weights 
 \begin{itemize}
 \item Section~4.2.4, three area conventions $\to$ \texttt{Q1/results/q1\_area\_estimators.json} (\texttt{area\_estimators.py}).
 \item Table~\ref{tab:4-4}, the clearance-robust variant geometry of Section~4.3.5, and the $95\%$ ellipse semi-axes $\to$ \texttt{Q2/results/q2b\_precision.json} (\texttt{q2b\_gamma.py}).
-\item Section~4.3.7, the certified lower bound and gap $\to$ \texttt{Q2/results/q2b\_lower\_bound.json} (\texttt{q2b\_bound.py}).
+\item Appendix~B.2, the certified lower bound and gap $\to$ \texttt{Q2/results/q2b\_lower\_bound.json} (\texttt{q2b\_bound.py}).
 \item Section~4.4.3 and Table~\ref{tab:4-5} $\to$ \texttt{Q3/results/q3\_summary.txt} (\texttt{q3\_solve.py}).
 \item Section~4.5.3 and Table~\ref{tab:4-6}, scenario details $\to$ \texttt{Q4/results/q4\_scenario\_list.md} (\texttt{q4\_scenario\_list.py}).
 \item Section~4.5.3, simple-repair baseline and the three-way comparison $\to$ \texttt{Q4/results/q4\_repair.json} (\texttt{q4\_repair.py}).
@@ -224,7 +242,7 @@ where $x_i$ and $w_i$ are the 256-point probabilistic Hermite nodes and weights 
 
 \noindent The complete source programs, run scripts, and result JSON files are provided in the supporting materials.
 
-\subsection*{B.3 Full symbol table}
+\subsection*{B.4 Full symbol table}
 \begin{table}[htbp]
 \centering
 \caption{Full symbol list}
@@ -321,7 +339,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
   Table 5-1 & Summary of validation for the four problems & 5 \\
   Table 6-1 & Objective time under the $v\times\omega$ full factorial & 6.2 \\
   Table B-1 & Full algorithm routes and selection rationale & Appendix B.1 \\
-  Table B-2 & Full symbol list & Appendix B.3 \\
+  Table B-2 & Full symbol list & Appendix B.4 \\
   Table D-1 & All ten vehicle pairs for T2 & Appendix D \\
   Table D-2 & Stations and per-task timeline of the 10.355~s plan & Appendix D \\
   \bottomrule

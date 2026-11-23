@@ -24,13 +24,13 @@ When a low-altitude small UAV enters the surveillance airspace, the reconnaissan
 
 ## 1.2 Problems to Be Solved
 
-**(1) Single-target observable region and optimal station.** For T1, determine and plot the observable region under the three constraints of vehicle geometry, LOS occlusion, and gimbal pitch. Using Q = 1/r as the quality measure, find the optimal station, horizontal distance, and elevation angle, and specify the optimality criterion and tie-breaking rules.
+**(1) Single-target observable region and optimal station.** For T1, determine and plot the observable region under the vehicle-geometry, LOS-occlusion and gimbal-pitch constraints. Using Q = 1/r, find the optimal station, distance and elevation, and state the optimality criterion and tie-breaking rules.
 
-**(2) Two-station intersection accuracy and multi-target assignment.** Under independent azimuth errors N(0,(1°)²), establish the analytical relation between accuracy and baseline, intersection angle, and station–target distance, and define an accuracy index. Under a per-vehicle travel limit of 30 s, select two of five vehicles for T2 and analyze the degeneracy as γ→0°/180° and at boundary stations. With three alerts released simultaneously and six slots shared by five vehicles, minimize the latest observation start time; give the assignment, stations, and complete timeline for each vehicle, and independently define a nearest-assignment baseline for comparison.
+**(2) Two-station intersection accuracy and multi-target assignment.** Under azimuth errors N(0,(1°)²), relate accuracy to baseline, intersection angle and range, and define an accuracy index. Under a 30 s travel limit, select two of five vehicles for T2 and analyze degeneracy; then minimize the latest observation start for three alerts on six slots shared by five vehicles, output the timeline, and define a nearest-assignment baseline.
 
-**(3) Localization and pointing error propagation.** The localization error is σ(s) = 0.3 + 0.02s m (independent and identically distributed in x and y), the gimbal bias is 0.8°, and the control error is 0.6°, independent; the target position is exact and the vehicle–target distance is 40 m. Build the propagation model for Δψ and find the maximum travel distance satisfying P(|Δψ| ≤ 5°) ≥ 0.95. Derive the constraints on a,b ≥ 0 in σ(s) = a + bs required to still satisfy the criterion at 80 m; justify the approximation, compare the contributions of the three error sources, and give deployment implications.
+**(3) Localization and pointing error propagation.** With σ(s) = 0.3 + 0.02s m, gimbal bias 0.8°, control error 0.6° and a 40 m range, build the Δψ propagation model and find the maximum travel distance satisfying P(|Δψ| ≤ 5°) ≥ 0.95. Derive the (a,b) constraints at 80 m, justify the approximation, and compare the three error sources.
 
-**(4) Rescheduling under disturbances.** Taking the 2(2) plan as the baseline, at t = 5 s consider a new alert (θ ∈ [0°,360°), ρ ∈ [30,50] m, H = 50 m), exactly one vehicle failure, a communication outage [5,t<sub>rec</sub>] (t<sub>rec</sub> ∈ (5,30]), and their combinations. Build a rescheduling model and compare it with keeping the original plan; lock observations that have started and allow redispatch of dispatched-but-unobserved vehicles; design a representative scenario set; report results within [0,60] s with η as the primary and t<sub>last</sub> as the secondary index, and analyze the mechanism.
+**(4) Rescheduling under disturbances.** Taking the 2(2) plan as the baseline, at t = 5 s consider a new alert (θ ∈ [0°,360°), ρ ∈ [30,50] m, H = 50 m), one vehicle failure, an outage [5,t<sub>rec</sub>] (t<sub>rec</sub> ∈ (5,30]) and their combinations. Build a rescheduling model, lock started observations and allow redispatch, design representative scenarios, and report (η,t<sub>last</sub>) within [0,60] s.
 
 # 2. Problem Analysis
 
@@ -61,23 +61,23 @@ Note: All buildings are axis-aligned cuboids standing on z = 0; a vehicle is an 
 
 ## 2.2 Analysis of Problem 1
 
-Problem 1 asks where observation is possible, where it is best, what "best" means, and how to break ties: the observable region gives the feasible set, the optimal station is the optimizer within it, and the criterion and tie-breaking rule guarantee uniqueness. The difficulty is that the three constraint types are heterogeneous and the optimal solution may be a one-dimensional continuum; this paper therefore adopts an "analytics first, numerics as evidence" route.
+Problem 1 asks where observation is possible, where it is best, how "optimal" is defined, and how ties are broken; the observable region is the feasible set, and the optimal station is its optimizer. The three constraints are heterogeneous and the optimizer may be a one-dimensional continuum, so we use an analytics-first route with numerics only as evidence.
 
 ## 2.3 Analysis of Problem 2
 
-Part 2(1) requires a two-station intersection accuracy model, an accuracy index, selection of vehicles and stations for T2 under the 30 s limit, and a discussion of degeneracy. Part 2(2) requires minimizing the latest observation start time with three alerts, six slots, and five vehicles, outputting the complete timeline and comparing with a nearest-assignment baseline. The two parts share geometry and the timeline but have different objectives: 2(1) targets accuracy and 2(2) targets timeliness, so the stations in 2(2) are independently re-optimized for timeliness and cannot simply reuse the accuracy-optimal stations of 2(1). It should be stressed that 2(1) is a conditional accuracy analysis of two-station direction finding: the nominal alert position enters only the planning constraints (the 30 s limit, the observable region, and station geometry), not the accuracy computation itself.
+Part 2(1) requires a two-station accuracy model, an accuracy index, station selection for T2 under the 30 s limit, and a degeneracy discussion; Part 2(2) minimizes the latest start with three alerts, six slots and five vehicles and outputs the timeline against a nearest-assignment baseline. The two parts share geometry but not objectives, and 2(1) is a conditional accuracy analysis of two-station bearing intersection.
 
 ## 2.4 Analysis of Problem 3
 
-Problem 3 requires a propagation model for Δψ, the value of s<sub>max</sub>, the (a,b) constraints at 80 m, justification of the approximation, comparison of three error sources, and deployment implications. The difficulties are that the three error sources have different dimensions, atan2 is nonlinear, the criterion is two-sided, and the (a,b) constraints rely on the monotonicity of σ(s).
+Problem 3 requires a propagation model for Δψ, s<sub>max</sub>, the (a,b) constraints at 80 m, justification of the approximation, comparison of the three error sources, and deployment implications. The difficulties are the different dimensions of the sources, the nonlinear atan2, the two-sided criterion, and the monotonicity needed for the (a,b) constraints.
 
 ## 2.5 Analysis of Problem 4
 
-Problem 4 uses the time-optimal 10.355 s plan of Problem 2(2) as the baseline, as the problem prescribes; the accuracy-qualified 12.983 s plan of Section 4.3.6 is an alternative deployment plan and is not used as the rescheduling baseline, so the comparison isolates the effect of the disturbances. It considers, at t = 5 s, new alerts, a single vehicle failure, communication outages, and their combinations. The difficulty is that disturbances occur mid-execution: a state snapshot must decide what is locked and what can be redispatched; no new commands can be received during an outage, so rescheduling should be triggered at t<sub>rec</sub>; new-alert parameters are continuous, so a representative scenario set must be designed; and the evaluation index is the lexicographic pair (η,t<sub>last</sub>). The comparison must also separate the value of merely reacting from the value of re-optimization, so a simple-repair policy (idle insertion and nearest-spare replacement without re-optimization) is included as a middle baseline.
+Problem 4 takes the time-optimal 10.355 s plan as the baseline and considers, at t = 5 s, new alerts, one vehicle failure, communication outages and their combinations, evaluated by (η,t<sub>last</sub>). Disturbances occur mid-execution (locking, outage-triggered rescheduling, continuous new-alert parameters), so the comparison includes a simple-repair baseline to separate reaction from re-optimization.
 
 ## 2.6 Algorithm Routes and Selection
 
-The algorithms for the four problems follow three criteria—provable, reproducible, and scale-matched: a closed-form certificate is used for the optimal value whenever possible instead of iterative search; deterministic complete enumeration is used instead of randomized heuristics when the scale permits; and numerical experiments serve only as verification. Table 2-2 gives a compact overview; the full algorithm routes, complexity, and comparison with alternatives are in Appendix B.1, and implementation details are in Sections 4.2.5, 4.3.7, 4.4.4, and 4.5.4.
+Table 2-2 gives a compact route summary; full details are in Appendix B.1–B.2.
 
 **Table 2-2 Compact algorithm routes**
 
@@ -93,7 +93,7 @@ The algorithms for the four problems follow three criteria—provable, reproduci
 
 ## 3.1 Symbols
 
-Table 3-1 lists the core symbols; the full symbol list is in Appendix B.3.
+Table 3-1 lists the core symbols; the full symbol list is in Appendix B.4.
 
 **Table 3-1 Core symbols**
 
@@ -217,18 +217,15 @@ Figure 4-3(a)(b) shows that r* increases linearly with target height H and decre
 | Item | Result |
 |---|---|
 | Target horizontal projection T′ | (84.6410,70.0000) m |
-| Closed-form lower bound r* | 7.5821 m (43/tan 80°) |
-| Optimal elevation ε* | 80.000° (active constraint) |
-| Optimal quality Q* | 0.1319 m<sup>−1</sup> |
+| Optimal value r*/ε*/Q* | 7.5821 m (43/tan 80°) / 80.000° (active) / 0.1319 m<sup>−1</sup> |
 | Optimal station p* | (88.8753,76.2895) m, φ = 56.05° |
 | Observable area | 5610.4 m² (about 56.1%) |
-| Optimal arc | feasible 283.85°, blocked [160.75°,236.89°] |
-| Grid verification | 7.5828 m @ (92.2,69.4), +0.0007 m |
+| Optimal arc / grid check | feasible 283.85°, blocked [160.75°,236.89°]; grid 7.5828 m @ (92.2,69.4), +0.0007 m |
 | Minimum LOS clearance / nearest vehicle | 7.41 m / V4, 2.78 s |
 
 ### 4.2.5 Algorithm and Efficiency
 
-This problem uses "closed-form lower bound + arc parameterization + three-level lexicographic rule" rather than 2-D continuous optimization over (x,y). The steps are: (i) solve C2 for r<sub>min</sub> = Δz/tan80°; (ii) sample 200,000 points uniformly on the r = r<sub>min</sub> circle (about 0.0018° spacing) and mark the feasible arc by 3-D slab intersection; (iii) make the choice unique on the feasible arc by "maximum-safety-margin band—shortest obstacle-avoiding path within the band—coordinate lexicographic order"; (iv) independently recompute the area and minimum r on a 0.1 m grid (about 10<sup>6</sup> points). The reason for this algorithm is that Q = 1/r is strictly monotone, so the optimal value must be attained on the active constraint C2 and the closed form provides a global optimality certificate. A 2-D grid search would only give the best grid value, without an optimality proof, at a cost of 10<sup>6</sup> points, whereas the closed-form part is O(1). The grid is used only for independent verification: arc sampling is O(2×10<sup>5</sup>), and the grid verification is one O(10<sup>6</sup>) pass. The closed-form 7.5821 m and the grid 7.5828 m differ by only 0.0007 m, confirming that the certificate and the numerical recomputation agree.
+Algorithmic details and the complexity comparison are in Appendix B.2; the closed-form certificate fixes the optimum, and the 0.1 m grid is used only for verification.
 
 ## 4.3 Problem 2: Two-Station Intersection and Multi-Target Scheduling
 
@@ -246,7 +243,7 @@ $$ Σ = A<sup>−1</sup>DA<sup>−T</sup>,  D = diag(d<sub>1</sub>²σ², d<sub>
 
 Hence traceΣ = σ²(d<sub>1</sub>²+d<sub>2</sub>²)/sin²γ and detΣ = σ⁴d<sub>1</sub>²d<sub>2</sub>²/sin²γ (full algebra in Appendix A.2).
 
-Define G = √((d<sub>1</sub>²+d<sub>2</sub>²)/2)/|sin γ|, DRMS = σG = √(traceΣ/2); the 2-D radial RMSE is √2 DRMS, and the 95% circle radius is R95 = 2.4477DRMS (exact when isotropic).
+Define G = √((d<sub>1</sub>²+d<sub>2</sub>²)/2)/|sin γ|, DRMS = σG = √(traceΣ/2); the 2-D radial RMSE is √2 DRMS, and the 95% circle radius is R95 = 2.4477DRMS (exact when isotropic). As γ→0°/180°, G→∞ and the condition number is κ = 1/|sin γ| (Appendix A.2(e)); at γ = 30°, G = 2G*, so [30°,150°] is the operating window, with a ridge-regularized least-squares estimator on the estimation side.
 
 ### 4.3.2 Global Lower Bound and Vehicle/Station Selection
 
@@ -275,13 +272,11 @@ Figure 4-4(a) shows the observable region of T2 and the 30 s reachable domains o
 
 [[FIG:论文图表/fig4-5_accuracy_params.png|Figure 4-5 Two-station accuracy versus parameters ((a) DRMS–γ; (b) DRMS–d; (c) DRMS–baseline)]]
 
-Figure 4-5(a) shows that DRMS is U-shaped in the intersection angle γ, minimized at γ = 90° and diverging rapidly as γ→0°/180° (the shaded region is degenerate); the selected point (γ = 90°, d = 5.8 m) has DRMS = 0.1016 m. (b) shows that DRMS grows almost linearly with the station–target distance d, with the smallest slope at γ = 90°; when d increases from 5.8 m to 30 m, DRMS rises to about 0.75 m. (c) shows that, at a fixed intersection angle, DRMS increases linearly with the baseline β, with the steepest slope at γ = 60°.
+Figure 4-5(a) shows that DRMS is U-shaped in the intersection angle γ, minimized at γ = 90° and diverging outside the operating window (shaded); the selected point (γ = 90°, d = 5.8 m) has DRMS = 0.1016 m. (b) shows that DRMS grows almost linearly with the station–target distance d, with the smallest slope at γ = 90°; when d increases from 5.8 m to 30 m, DRMS rises to about 0.75 m. (c) shows that, at a fixed intersection angle, DRMS increases linearly with the baseline β, with the steepest slope at γ = 60°.
 
 [[FIG:论文图表/fig4-6_error_ellipses.png|Figure 4-6 Intersection error ellipses and 95% circle (with a local zoom)]]
 
-The zoom in Figure 4-6 shows the geometry of the selected stations p<sub>1</sub>, p<sub>2</sub>, and T2′; the local inset gives the 1σ, 2σ, and 95% position-error circles at the target. Because the two stations are equidistant and orthogonal, the error distribution is nearly isotropic with R95 = 0.2486 m. The error-circle radii are much smaller than the station–target distances, indicating that the intersection geometry of this station pair is close to ideal.
-
-Degeneracy analysis: as γ→0°/180°, G→∞ and the condition number is κ = 1/|sin γ|; at γ = 30°, G = 2G*, so [30°,150°] is used as the operating window, and a ridge-regularized least-squares estimator is used on the estimation side. The optimal station lies on the C2 boundary (ε = 80°); if a pitch margin is required, one may fall back to ε ≤ 78°, giving r ≥ 7.0144 m and DRMS = 0.1224 m (+20.5%).
+The zoom in Figure 4-6 shows the geometry of the selected stations p<sub>1</sub>, p<sub>2</sub>, and T2′; the local inset gives the 1σ, 2σ, and 95% position-error circles at the target. Because the two stations are equidistant and orthogonal, the error distribution is nearly isotropic with R95 = 0.2486 m. The error-circle radii are much smaller than the station–target distances, indicating that the intersection geometry of this station pair is close to ideal. The optimal station lies on the C2 boundary (ε = 80°); if a pitch margin is required, one may fall back to ε ≤ 78°, giving r ≥ 7.0144 m and DRMS = 0.1224 m (+20.5%).
 
 ### 4.3.3 Six-Slot, Five-Vehicle Scheduling Model
 
@@ -297,7 +292,7 @@ $$ D<sub>v,k</sub> = S<sub>a</sub> + 5 + τ<sub>rs</sub>,  τ<sub>rs</sub> = max
 
 The objective is min max<sub>a</sub> S<sub>a</sub>, with the timeline propagated by Eqs. (10)–(13). Each alert has 10 vehicle pairs, so the three alerts give 10³ = 1000 assignment structures. For each structure, reuse orders are enumerated; stations are initialized greedily, refined by Gauss–Seidel coordinate descent and Nelder–Mead [6]; if two reused vehicles wait for each other and the fixed-point iteration makes no progress, the structure is declared deadlocked and removed.
 
-A simple per-alert lower bound is LB(v,a) = min<sub>p</sub>[dist<sub>path</sub>(V<sub>v</sub><sup>0</sup>,p)/3 + max(|α|,|ε|)/30], S<sub>a</sub> ≥ the second-smallest LB(v,a), and LB = max<sub>a</sub> second-smallest = 3.414 s. It ignores reuse and synchronization and is therefore loose; Section 4.3.7 gives a reuse-aware relaxation that raises it to 7.391 s and certifies a gap of 28.6%.
+A reuse-aware lower bound in Section 4.3.7 gives LB = 7.391 s, certifying that the delivered 10.355 s plan is within 28.6% of the global optimum.
 
 ### 4.3.4 Nearest-Assignment Baseline and Comparison
 
@@ -349,11 +344,7 @@ Note: DRMS = σG, σ = 1° = 0.017453 rad; T1* is the constrained re-solution wi
 
 ### 4.3.7 Algorithm and Efficiency
 
-2(1) uses "covariance propagation + analytical lower-bound certificate + pair enumeration." First, G is derived from Σ = A<sup>−1</sup>DA<sup>−T</sup>; the QM–AM inequality and C2 then prove G ≥ r<sub>min</sub>, and the equality condition is reduced to a one-dimensional test: whether a feasible pair with a 90° intersection angle exists on the r<sub>min</sub> circle. Then candidate stations are enumerated and refined by Nelder–Mead for all C(5,2) = 10 vehicle pairs (4-D NM, ≤300 iterations per call). The analytical certificate reduces the global optimality check to a one-dimensional feasibility test, avoiding local optima while keeping the computation at the scale of 10 pairs; a direct 4-D search has neither an optimality proof nor protection against local optima.
-
-2(2) uses "complete structural enumeration + fixed-point timeline simulation + coordinate descent/Nelder–Mead." The three alerts each have C(5,2) = 10 vehicle pairs, giving 10³ = 1000 assignment structures; each structure enumerates reuse-chain orders, for a total of 5,880 (structure, order) combinations, each simulated deterministically and checked for deadlock. Stations are initialized greedily, refined by Gauss–Seidel coordinate descent and Nelder–Mead, and the top 12 structures are re-refined. With only 5 vehicles and 6 slots, all 5,880 deterministic simulations complete in one run, exhaust the assignment structures, and guarantee reproducibility; a randomized search such as a genetic algorithm would neither guarantee the same solution nor explain why the plan is optimal. In terms of efficiency, 10.355 s is 50.6% lower than the nearest-assignment baseline of 20.968 s, at a cost of only a few thousand simulations, at most 2 tasks per vehicle, and at most 160 NM iterations per call.
-
-**Certified gap.** Because the station positions are continuous, the 5,880 enumerated structures are not a certificate by themselves. We therefore compute a reuse-aware lower bound: for every structure and reuse order, first-task ready times are minimized over the whole field (a superset of the observable region) with Euclidean travel and the exact point-slew (0.25 m field grid, 0.15 s margin), and each transition is lower-bounded by the region-to-region distance (0.1 m feasible clouds, 0.2 m covering radius) plus elevation slew floors; the minimal latest start under these underestimates is the longest path of the task DAG. Because every term is a provable underestimate, this longest path is a valid lower bound for the continuous-station problem; enumerating the same 5,880 structures/orders gives LB = 7.391 s, so the delivered 10.355 s plan is within 2.964 s (28.6%) of the global optimum. This is a valid but not tight certificate; closing the remaining gap requires a continuous-station MILP/CP-SAT with polar candidate stations and time windows, which we leave as future work.
+Algorithmic details and the complexity comparison are in Appendix B.2. The delivered 10.355 s plan is supported by a reuse-aware lower bound LB = 7.391 s (gap 28.6%), computed over the same 5,880 structures.
 
 ## 4.4 Problem 3: Localization and Pointing Error Propagation
 
@@ -405,7 +396,7 @@ Figure 4-9(a) gives the decreasing curve of P(|Δψ| ≤ 5°) versus s; its inte
 
 ### 4.4.4 Algorithm and Efficiency
 
-This problem uses "closed-form first-order propagation + monotone criterion + exact quadrature verification." The steps are: (i) linearize the lateral projection to obtain Δψ ~ N(0,(1.432394σ(s))²+1.0); (ii) from the two-sided criterion P(|Δψ| ≤ 5°) ≥ 0.95, obtain σ<sub>ψ</sub> ≤ 2.5511° and invert for σ(s) and s<sub>max</sub>; (iii) evaluate the exact atan2 geometry by a 256×256 Gauss–Hermite quadrature over the two-dimensional expectation and find s<sub>max</sub> by bisection; (iv) independently verify with 10<sup>6</sup> Monte Carlo runs. The closed form is chosen because σ<sub>ψ</sub>(s) is monotone in s, so the criterion can be inverted directly and gives the primary answer in O(1); Hermite quadrature is chosen because 65,536 nodes already reach 10<sup>−3</sup> accuracy, at about 1/15 of the cost of 10<sup>6</sup> MC runs and without sampling error. The results are 66.92 m in closed form and 66.84 m exact (0.13% difference), with an MC P deviation no larger than 3×10<sup>−4</sup>.
+Algorithmic details and the efficiency comparison are in Appendix B.2; the closed form and exact quadrature agree to 0.13%.
 
 ## 4.5 Problem 4: Rescheduling under Disturbances
 
@@ -429,7 +420,7 @@ Results: keep-original has η < 1 in 67 of 74 scenarios and ties in 7. Both simp
 
 Representative values: V4 failure, keep (0.667,60)→simple repair (1.000,21.01)→re-optimized (1.000,11.17); new alert θ = 0°, ρ = 30 m, (0.750,60)→(1.000,18.46)→(1.000,16.77); triple combination (median new alert + V4 failure + t<sub>rec</sub> = 10 s), (0.500,60)→(1.000,31.87)→(1.000,25.01). By failed vehicle, the re-optimized t<sub>last</sub> for V1/V4, V2/V3, and V5 is 11.17, 10.90, and 10.35 s, respectively, all with η = 1. For a V1 failure, failure × outage with t<sub>rec</sub> = 10/20/30 gives t<sub>last</sub> = 21.01/25.08/35.08 s (increments 4.07/10.00 s), showing the two-stage behavior. The mechanism is "structural loss → temporal loss": simple repair recovers the structure, and re-optimization compresses the resulting temporal loss; its upper limit is jointly constrained by the azimuth of idle vehicles, the slew + travel recovery delay, and the outage duration.
 
-**Completion-rule sensitivity.** The main η follows the problem's started-means-served rule. If completion instead requires at least 4 s of synchronized observation (here equivalent to the full 5 s, because T1 has only 3.39 s elapsed at t = 5), T1 is incomplete in the eight scenarios with a V3 or V5 failure; since it has started it cannot be rescheduled. Counting it as failed lowers the number of η = 1 scenarios from 74 to 66 for both simple repair and re-optimization (keep: 7 to 3), and the affected scenarios have η = 2/3 (V3 failure: keep η = 1/3); t<sub>last</sub> is set to 60 there, following the convention that an uncompleted alert sets t<sub>last</sub> = 60. The repair-vs-keep comparison remains 67/7/0, and re-optimization vs simple repair remains η 0/74/0 with t<sub>last</sub> 57/17/0; the attribution of η to reaction and t<sub>last</sub> to re-optimization is therefore robust to the accounting rule. We retain the problem's rule as the main metric.
+**Completion-rule sensitivity.** The main η uses the problem's started-means-served rule. If completion instead requires ≥4 s of synchronized observation (T1 has only 3.39 s at t = 5, so this equals the full 5 s), T1 fails in the eight V3/V5-failure scenarios and cannot be rescheduled; counting it as failed gives η = 2/3 there (V3 failure: keep 1/3), reduces the η = 1 count from 74 to 66 for repair and re-optimization (keep 7 to 3), and sets t<sub>last</sub> = 60. The comparisons are unchanged: repair vs keep 67/7/0 and re-optimization vs repair η 0/74/0, t<sub>last</sub> 57/17/0; the attribution is therefore robust, and we retain the problem's rule as the main metric.
 
 **Table 4-6 Three-way comparison by scenario class**
 
@@ -464,7 +455,7 @@ Figure 4-11(a) shows that after V4 fails at t = 5 s, rescheduling still starts T
 
 ### 4.5.4 Algorithm and Efficiency
 
-This problem uses "event-triggered snapshot + reuse of the 2(2) solver + deterministic scenario enumeration." The steps are: (i) at t<sub>p</sub>, record (t<sub>avail</sub>,pos,att,locked<sub>until</sub>) for each vehicle and classify states as redispatchable or locked; (ii) using the snapshot as the initial condition, re-optimize the pending alerts with the structural enumeration, fixed-point simulation, coordinate descent, and Nelder–Mead of 2(2); (iii) compute (η,t<sub>last</sub>) for keep-original, simple repair, and re-optimization in each of the 74 representative scenarios. This approach is chosen because the post-disturbance scale is the same order as 2(2) and reusing the same solver keeps the conventions consistent; with only 74 scenarios, deterministic enumeration completes in one run without online stochastic optimization. Keep-original is evaluated analytically; simple repair uses the same simulator with a fixed assignment/order and only nearest-spare insertion. The three-way comparison shows that simple repair already restores η in 67/74 scenarios (7 ties), while re-optimization's incremental value is t<sub>last</sub> improvements in 61/74 (mean 4.35 s); the result is therefore attributed to reaction plus timeliness, not to a completion-rate effect of re-optimization.
+Algorithmic details are in Appendix B.2; the three-way comparison is reported in Section 4.5.3.
 
 # 5. Model Validation and Result Analysis
 
@@ -535,7 +526,7 @@ Within reasonable perturbation ranges, no qualitative conclusion changes sign: t
 
 ## 7.2 Weaknesses
 
-(1) **The global optimality of Problem 2(2) is not fully certified.** The assignment structures are exhaustively enumerated at the 10³ level, but station optimization relies on coordinate descent and Nelder–Mead; 10.355 s is the best time-optimal solution in the sense of "structural exhaustion + station refinement," and the 12.983 s accuracy-qualified plan is a constrained re-solution under the delivered structure. The simple per-alert bound is 3.414 s; a reuse-aware relaxation raises it to 7.391 s, so the delivered plan is within a certified 28.6% gap, but a full continuous-station MILP/CP-SAT certificate is not provided.
+(1) **The global optimality of Problem 2(2) is not fully certified.** The assignment structures are exhaustively enumerated at the 10³ level, but station optimization relies on coordinate descent and Nelder–Mead; 10.355 s is the best time-optimal solution in the sense of "structural exhaustion + station refinement," and the 12.983 s accuracy-qualified plan is a constrained re-solution under the delivered structure. A reuse-aware relaxation gives LB = 7.391 s, so the delivered plan is within a certified 28.6% gap, but a full continuous-station MILP/CP-SAT certificate is not provided.
 
 (2) **The Q2 and Q3 error budgets are not unified.** Problem 2 uses the problem-specified 1° azimuth error at surveyed stations, so the self-localization term σ(s)/d of Problem 3 is not included. At the 2(1) stations (d = 5.8188 m; travel 5.11/13.61 s, hence σ(s) = 0.607/1.117 m) this term would be 6.0°/11.0° (even at s = 0, σ = 0.3 m gives 2.95° at this distance), raising DRMS from 0.1016 m to about 0.90 m in a first-order audit, and the station optimization would have to be re-run under the merged model. We follow the problem's per-problem error specifications and state this explicitly rather than silently mixing the two budgets.
 
@@ -717,7 +708,25 @@ where x<sub>i</sub> and w<sub>i</sub> are the 256-point probabilistic Hermite no
 | Q3 | Closed-form first-order propagation; two-sided quantile criterion; bisection; 256×256 Gauss–Hermite quadrature; 10<sup>6</sup> MC verification | σ<sub>ψ</sub>(s) is monotone, so the P criterion can be inverted in closed form; Hermite quadrature has no sampling error and uses 1/15 of the MC nodes | Closed form O(1); 65,536 quadrature nodes; 10<sup>6</sup> MC for verification only | Closed form 66.92 m vs. exact 66.84 m (0.13%); direct MC root search requires multiple rounds of 10<sup>6</sup> samples |
 | Q4 | Event-triggered snapshot; reuse of the Q2(2) solver; deterministic enumeration of 74 scenarios; keep / simple-repair / re-optimization comparison | After a disturbance, available resources and pending alerts are of the same order as Q2(2); reusing the solver keeps the conventions consistent; the scenario set is small, so no online stochastic optimization is needed; simple repair separates reaction from re-optimization | 74 scenarios × one re-optimization each; timeline audit finds 0 negative durations/overlaps | Simple repair restores η in 67/74; re-optimization lowers t<sub>last</sub> in 61/74 (mean 4.35 s) |
 
-### B.2 Main program list
+### B.2 Algorithm and efficiency details
+
+#### B.2.1 Problem 1: observable region and optimal station
+This problem uses "closed-form lower bound + arc parameterization + three-level lexicographic rule" rather than 2-D continuous optimization over (x,y). The steps are: (i) solve C2 for r<sub>min</sub> = Δz/tan80°; (ii) sample 200,000 points uniformly on the r = r<sub>min</sub> circle (about 0.0018° spacing) and mark the feasible arc by 3-D slab intersection; (iii) make the choice unique on the feasible arc by "maximum-safety-margin band—shortest obstacle-avoiding path within the band—coordinate lexicographic order"; (iv) independently recompute the area and minimum r on a 0.1 m grid (about 10<sup>6</sup> points). The reason for this algorithm is that Q = 1/r is strictly monotone, so the optimal value must be attained on the active constraint C2 and the closed form provides a global optimality certificate. A 2-D grid search would only give the best grid value, without an optimality proof, at a cost of 10<sup>6</sup> points, whereas the closed-form part is O(1). The grid is used only for independent verification: arc sampling is O(2×10<sup>5</sup>), and the grid verification is one O(10<sup>6</sup>) pass. The closed-form 7.5821 m and the grid 7.5828 m differ by only 0.0007 m, confirming that the certificate and the numerical recomputation agree.
+
+#### B.2.2 Problem 2: two-station intersection and multi-target scheduling
+2(1) uses "covariance propagation + analytical lower-bound certificate + pair enumeration." First, G is derived from Σ = A<sup>−1</sup>DA<sup>−T</sup>; the QM–AM inequality and C2 then prove G ≥ r<sub>min</sub>, and the equality condition is reduced to a one-dimensional test: whether a feasible pair with a 90° intersection angle exists on the r<sub>min</sub> circle. Then candidate stations are enumerated and refined by Nelder–Mead for all C(5,2) = 10 vehicle pairs (4-D NM, ≤300 iterations per call). The analytical certificate reduces the global optimality check to a one-dimensional feasibility test, avoiding local optima while keeping the computation at the scale of 10 pairs; a direct 4-D search has neither an optimality proof nor protection against local optima.
+
+2(2) uses "complete structural enumeration + fixed-point timeline simulation + coordinate descent/Nelder–Mead." The three alerts each have C(5,2) = 10 vehicle pairs, giving 10³ = 1000 assignment structures; each structure enumerates reuse-chain orders, for a total of 5,880 (structure, order) combinations, each simulated deterministically and checked for deadlock. Stations are initialized greedily, refined by Gauss–Seidel coordinate descent and Nelder–Mead, and the top 12 structures are re-refined. With only 5 vehicles and 6 slots, all 5,880 deterministic simulations complete in one run, exhaust the assignment structures, and guarantee reproducibility; a randomized search such as a genetic algorithm would neither guarantee the same solution nor explain why the plan is optimal. In terms of efficiency, 10.355 s is 50.6% lower than the nearest-assignment baseline of 20.968 s, at a cost of only a few thousand simulations, at most 2 tasks per vehicle, and at most 160 NM iterations per call.
+
+**Certified gap.** Because the station positions are continuous, the 5,880 enumerated structures are not a certificate by themselves. We therefore compute a reuse-aware lower bound: for every structure and reuse order, first-task ready times are minimized over the whole field (a superset of the observable region) with Euclidean travel and the exact point-slew (0.25 m field grid, 0.15 s margin), and each transition is lower-bounded by the region-to-region distance (0.1 m feasible clouds, 0.2 m covering radius) plus elevation slew floors; the minimal latest start under these underestimates is the longest path of the task DAG. Because every term is a provable underestimate, this longest path is a valid lower bound for the continuous-station problem; enumerating the same 5,880 structures/orders gives LB = 7.391 s, so the delivered 10.355 s plan is within 2.964 s (28.6%) of the global optimum. This is a valid but not tight certificate; closing the remaining gap requires a continuous-station MILP/CP-SAT with polar candidate stations and time windows, which we leave as future work.
+
+#### B.2.3 Problem 3: localization and pointing error propagation
+This problem uses "closed-form first-order propagation + monotone criterion + exact quadrature verification." The steps are: (i) linearize the lateral projection to obtain Δψ ~ N(0,(1.432394σ(s))²+1.0); (ii) from the two-sided criterion P(|Δψ| ≤ 5°) ≥ 0.95, obtain σ<sub>ψ</sub> ≤ 2.5511° and invert for σ(s) and s<sub>max</sub>; (iii) evaluate the exact atan2 geometry by a 256×256 Gauss–Hermite quadrature over the two-dimensional expectation and find s<sub>max</sub> by bisection; (iv) independently verify with 10<sup>6</sup> Monte Carlo runs. The closed form is chosen because σ<sub>ψ</sub>(s) is monotone in s, so the criterion can be inverted directly and gives the primary answer in O(1); Hermite quadrature is chosen because 65,536 nodes already reach 10<sup>−3</sup> accuracy, at about 1/15 of the cost of 10<sup>6</sup> MC runs and without sampling error. The results are 66.92 m in closed form and 66.84 m exact (0.13% difference), with an MC P deviation no larger than 3×10<sup>−4</sup>.
+
+#### B.2.4 Problem 4: rescheduling under disturbances
+This problem uses "event-triggered snapshot + reuse of the 2(2) solver + deterministic scenario enumeration." The steps are: (i) at t<sub>p</sub>, record (t<sub>avail</sub>,pos,att,locked<sub>until</sub>) for each vehicle and classify states as redispatchable or locked; (ii) using the snapshot as the initial condition, re-optimize the pending alerts with the structural enumeration, fixed-point simulation, coordinate descent, and Nelder–Mead of 2(2); (iii) compute (η,t<sub>last</sub>) for keep-original, simple repair, and re-optimization in each of the 74 representative scenarios. This approach is chosen because the post-disturbance scale is the same order as 2(2) and reusing the same solver keeps the conventions consistent; with only 74 scenarios, deterministic enumeration completes in one run without online stochastic optimization. Keep-original is evaluated analytically; simple repair uses the same simulator with a fixed assignment/order and only nearest-spare insertion. The three-way comparison shows that simple repair already restores η in 67/74 scenarios (7 ties), while re-optimization's incremental value is t<sub>last</sub> improvements in 61/74 (mean 4.35 s); the result is therefore attributed to reaction plus timeliness, not to a completion-rate effect of re-optimization.
+
+### B.3 Main program list
 
 - **Problem 1** (`Q1/`): `q1_solve.py` (domain gridding, arc sampling, tie-breaking, sensitivity); `area_estimators.py`, `q1_metric_compare.py`, `export_params.py` (three-convention area recomputation, Q/Q<sub>2</sub> comparison, export of the B1–B5/V1–V5/T1–T3 parameters).
 - **Problem 2** (`Q2/`): `q2a_core.py`, `q2b_core.py`, `q2b_gamma.py`, `q2b_bound.py` (two-station accuracy, vehicle and station selection, six-slot five-vehicle scheduling and baseline, 2(2) intersection-geometry check, reuse-aware certified lower bound).
@@ -738,7 +747,7 @@ The directory names `Q1/`–`Q4/` stand for the Chinese original directories in 
 
 The complete source programs, run scripts, and result JSON files are provided in the supporting materials.
 
-### B.3 Full symbol table
+### B.4 Full symbol table
 
 | Symbol | Meaning | Unit / value |
 |---|---|---|
@@ -803,7 +812,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 | Table 5-1 | Summary of validation for the four problems | 5 |
 | Table 6-1 | Objective time under the v×ω full factorial | 6.2 |
 | Table B-1 | Full algorithm routes and selection rationale | Appendix B.1 |
-| Table B-2 | Full symbol list | Appendix B.3 |
+| Table B-2 | Full symbol list | Appendix B.4 |
 | Table D-1 | All ten vehicle pairs for T2 | Appendix D |
 | Table D-2 | Stations and per-task timeline of the 10.355 s plan | Appendix D |
 
