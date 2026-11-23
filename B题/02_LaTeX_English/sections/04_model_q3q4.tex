@@ -6,7 +6,7 @@
 
 \subsubsection{Error Propagation Model}
 
-Problem~3 assumes the target position to be perfectly known; in this paper the pointing reference is the nominal alert datum of Section~4.1(a), which is a planning datum rather than a measurement. The errors propagated below are the vehicle's own localization error and the gimbal pointing errors, and include no alert error. This error budget belongs to Problem~3; it is separate from the Q2 $1^\circ$ budget and is not added to it (Section~4.3.1).
+Problem~3 assumes the target position to be perfectly known; the pointing reference is the nominal alert datum of Section~4.1(a), a planning datum rather than a measurement, so only the vehicle's own localization error and the gimbal pointing errors are propagated. It is not added to the Q2 $1^\circ$ budget (Section~4.3.1).
 
 Take the true position $P$ as the origin and the true LOS as the $x'$ axis, with the target at $(d,0)$, $d=40$~m. Decompose the localization error into cross-range $\delta_\perp$ and along-range $\delta_\parallel$; under isotropy, $\delta_\perp\sim\mathcal{N}(0,\sigma(s)^2)$. The exact deviation from the estimated position to the target is $\Delta\alpha=\operatorname{atan2}(-\delta_\perp,d-\delta_\parallel)\approx-\delta_\perp/d$ (residual analysis in Appendix~A.3). Adding the gimbal bias $\varepsilon_0\sim\mathcal{N}(0,0.8^2)$ and control error $\varepsilon_c\sim\mathcal{N}(0,0.6^2)$,
 \begin{equation}
@@ -63,7 +63,7 @@ Let $\mathrm{var}_{\mathrm{loc}}=(1.432394\sigma(s))^2$, $\mathrm{var}_{\mathrm{
   \label{fig:4-8}
 \end{figure}
 
-In Figure~\ref{fig:4-8}(a), the localization term rises linearly with $s$, and its intersection with the allowable line $2.551^\circ$ is $s_{\max}=66.92$~m; (b) shows that after $s\approx19.9$~m the localization share exceeds the sum of the gimbal bias and control shares, reaching $88.1\%$ at $s=80$~m.
+In Figure~\ref{fig:4-8}(a), the localization term rises linearly with $s$ and crosses the allowable line at $s_{\max}$; (b) shows the localization share overtaking the two gimbal shares at the switch point and dominating thereafter.
 
 \begin{figure}[htbp]
   \centering
@@ -72,7 +72,7 @@ In Figure~\ref{fig:4-8}(a), the localization term rises linearly with $s$, and i
   \label{fig:4-9}
 \end{figure}
 
-Figure~\ref{fig:4-9}(a) gives the decreasing curve of $P(|\Delta\psi|\le5^\circ)$ versus $s$; its intersection with the $0.95$ line is $s_{\max}=66.92$~m (exact $66.84$~m), and the Monte Carlo points coincide with the analytical curve. In (b), the shaded area is the $(a,b)$ feasible region where $P\ge0.95$ at 80~m; the nominal point $(0.3,0.02)$ lies outside.
+Figure~\ref{fig:4-9}(a) shows $P(|\Delta\psi|\le5^\circ)$ decreasing with $s$ and crossing the $0.95$ line at $s_{\max}$, with the Monte Carlo points on the analytical curve; (b) shows the shaded $(a,b)$ region where $P\ge0.95$ at 80~m, with the nominal point outside.
 
 \subsubsection{Algorithm and Efficiency}
 
@@ -106,7 +106,7 @@ The scenario set has 74 scenarios: A, new alert, $8$ azimuths $\times$ $3$ dista
 
 Results: keep-original has $\eta<1$ in 67 of 74 scenarios and ties in 7. Both simple repair and re-optimization restore $\eta$ in all 67, so the \emph{completion-rate} gain is due to reacting at all, not to re-optimization; the 7 ties are the pure-outage class (3), the V5 failure (1), and the V5-failure outage pairs (3), where no pending alert is affected. Against simple repair, re-optimization leaves $\eta$ unchanged in all 74 scenarios but lowers $t_{\mathrm{last}}$ in 61, ties in 13, and degrades none ($0.01$~s precision); the mean $t_{\mathrm{last}}$ falls from $23.15$ to $19.57$~s, with a mean gain of $4.35$~s and a maximum gain of $13.10$~s among the improved cases. The gain is concentrated in failure, new$\times$failure, and triple scenarios (mean $7.86$, $9.64$, and $7.69$~s), is small for new$\times$outage ($0.67$~s), and is zero for pure outage, where no decision is available during the outage. Table~\ref{tab:4-6} summarizes the three-way comparison by class and Table~\ref{tab:4-7} lists three representative scenarios.
 
-Representative values: V4 failure, keep $(0.667,60)\to$ simple repair $(1.000,21.01)\to$ re-optimized $(1.000,11.17)$; new alert $\theta=0^\circ$, $\rho=30$~m, $(0.750,60)\to(1.000,18.46)\to(1.000,16.77)$; triple combination (median new alert + V4 failure + $t_{\mathrm{rec}}=10$~s), $(0.500,60)\to(1.000,31.87)\to(1.000,25.01)$. By failed vehicle, the re-optimized $t_{\mathrm{last}}$ for V1/V4, V2/V3, and V5 is $11.17$, $10.90$, and $10.35$~s, respectively, all with $\eta=1$. For a V1 failure, failure $\times$ outage with $t_{\mathrm{rec}}=10\bsl20\bsl30$ gives $t_{\mathrm{last}}=21.01\bsl25.08\bsl35.08$~s (increments $4.07\bsl10.00$~s), showing the two-stage behavior. The mechanism is ``structural loss $\to$ temporal loss'': simple repair recovers the structure, and re-optimization compresses the resulting temporal loss; its upper limit is jointly constrained by the azimuth of idle vehicles, the slew + travel recovery delay, and the outage duration.
+By failed vehicle, the re-optimized $t_{\mathrm{last}}$ for V1/V4, V2/V3, and V5 is $11.17$, $10.90$, and $10.35$~s, respectively, all with $\eta=1$. For a V1 failure, failure $\times$ outage with $t_{\mathrm{rec}}=10\bsl20\bsl30$ gives $t_{\mathrm{last}}=21.01\bsl25.08\bsl35.08$~s (increments $4.07\bsl10.00$~s), showing the two-stage behavior. The mechanism is ``structural loss $\to$ temporal loss'': simple repair recovers the structure, and re-optimization compresses the resulting temporal loss; its upper limit is jointly constrained by the azimuth of idle vehicles, the slew + travel recovery delay, and the outage duration.
 
 \textbf{Completion-rule sensitivity.} The main $\eta$ uses the problem's started-means-served rule. If completion instead requires $\ge4$~s of synchronized observation (T1 has only $3.39$~s at $t=5$, so this equals the full $5$~s), T1 fails in the eight V3/V5-failure scenarios and cannot be rescheduled; counting it as failed gives $\eta=2/3$ there (V3 failure: keep $1/3$), reduces the $\eta=1$ count from $74$ to $66$ for repair and re-optimization (keep $7$ to $3$), and sets $t_{\mathrm{last}}=60$. The comparisons are unchanged: repair vs keep $67/7/0$ and re-optimization vs repair $\eta$ $0/74/0$, $t_{\mathrm{last}}$ $57/17/0$; the attribution is therefore robust, and we retain the problem's rule as the main metric.
 
@@ -159,7 +159,7 @@ Representative values: V4 failure, keep $(0.667,60)\to$ simple repair $(1.000,21
   \label{fig:4-10}
 \end{figure}
 
-Figure~\ref{fig:4-10}(a) shows that the new alert's azimuth has little effect on the re-optimized $t_{\mathrm{last}}$ (about $14.4$--$16.8$~s; simple repair gives $16.3$--$21.7$~s), far below the 60~s of keeping the original plan; (b) shows that $t_{\mathrm{last}}$ rises piecewise with the recovery time $t_{\mathrm{rec}}$, that V5 stays at $10.36$~s because T1 is already locked and completed, and that the other failed vehicles exhibit the ``chain-limited---unit-slope'' two-stage behavior.
+Figure~\ref{fig:4-10}(a) shows that the new alert's azimuth has little effect on the re-optimized $t_{\mathrm{last}}$ (simple repair is consistently higher), both far below keeping the original plan; (b) shows the piecewise ``chain-limited---unit-slope'' response to $t_{\mathrm{rec}}$, with V5 constant because T1 is locked and completed.
 
 \begin{figure}[htbp]
   \centering
@@ -168,7 +168,7 @@ Figure~\ref{fig:4-10}(a) shows that the new alert's azimuth has little effect on
   \label{fig:4-11}
 \end{figure}
 
-Figure~\ref{fig:4-11}(a) shows that after V4 fails at $t=5$~s, rescheduling still starts T2 and T3 at about $7$~s and $10$~s and keeps $\eta=1.00$; in (b), among the 74 scenarios, all green hollow points lie at $\eta=1.00$, the red crosses are distributed between $0.50$ and $1.00$, and the arrows show the keep-original-to-re-optimized change. Simple repair also reaches $\eta=1.00$ in all 74 scenarios (Table~\ref{tab:4-6}); the incremental effect of re-optimization is a leftward shift in $t_{\mathrm{last}}$, not a change in $\eta$.
+Figure~\ref{fig:4-11}(a) shows that after V4 fails, rescheduling still starts T2 and T3 on time with $\eta=1.00$; in (b), all green points lie at $\eta=1.00$, the red crosses spread between $0.50$ and $1.00$, and the arrows trace the keep-to-re-optimized change, showing that re-optimization shifts $t_{\mathrm{last}}$ left without changing $\eta$.
 
 \subsubsection{Algorithm and Efficiency}
 
