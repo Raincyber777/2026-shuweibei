@@ -15,11 +15,23 @@
 % ---- page geometry: A4, compact margins to respect the 25-page limit
 \geometry{top=20mm,bottom=20mm,left=20mm,right=20mm,headsep=6mm}
 \setlength{\headheight}{18pt}
+% make the running header exactly as wide as the final text block
+\AtBeginDocument{\setlength{\headwidth}{\textwidth}}
 
 % ---- body typography
 \linespread{1.3}
 \setlength{\parindent}{2em}
 \setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{3em}
+\tolerance=1000
+\usepackage{microtype}
+\usepackage{float}
+
+% ---- indent the first paragraph after every heading (Chinese convention)
+\makeatletter
+\let\@afterindentfalse\@afterindenttrue
+\@afterindenttrue
+\makeatother
 \setcounter{tocdepth}{2}
 
 % ---- chapter-based figure/table numbering (Figure 2-1, Table 4-3, ...)
@@ -60,16 +72,16 @@
 \date{2026}
 
 \abstract{%
-{\linespread{1.15}\selectfont\footnotesize
+{\linespread{1.15}\selectfont\footnotesize\indent
 Low-altitude small UAVs are reported only by coarse azimuth--range--altitude alerts whose nominal values cannot localize precisely. We build four models---observable region, two-station intersection accuracy, pointing-error propagation and event-triggered rescheduling---and \textbf{certify optima in closed form, enumerate optima deterministically, and verify numerically}.
 
-\textbf{For Problem~1} (observable region and optimal station for one target), intersecting the vehicle-geometry, gimbal-pitch and line-of-sight (LOS) constraints, using quality measure $1/r$, \textbf{gives an observable-region model and a quality-optimization model}. \textbf{The minimum horizontal distance is about 7.58~m} at \textbf{the $80^\circ$ pitch limit}, so the pitch constraint is active, the optimum is layout-independent, and the optimal set is \textbf{a continuous arc of 283.85$^\circ$}. The three-level rule (safety-margin band, shortest reachable point, lexicographic order) selects the representative station $(88.88,76.29)$~m. The observable area covers \textbf{56.1\% of the site}.
+\textbf{For Problem~1} (observable region and optimal station for one target), intersecting the vehicle-geometry, gimbal-pitch and line-of-sight (LOS) constraints, using the reciprocal of the horizontal distance as the quality measure, \textbf{gives an observable-region model and a quality-optimization model}. \textbf{The minimum horizontal distance is about 7.58~m} at \textbf{the $80^\circ$ pitch limit}, so the pitch constraint is active, the optimum is layout-independent, and the optimal set is \textbf{a continuous arc of 283.85$^\circ$}. The three-level rule (safety-margin band, shortest reachable point, lexicographic order) selects the representative station $(88.88,76.29)$~m. The observable area covers \textbf{56.1\% of the site}.
 
-\textbf{For Problem~2} (two-station intersection accuracy and multi-alert scheduling), the LOS equations yield error propagation, the geometric dilution of precision $G$ characterizes accuracy, and the mean inequality proves the lower bound, \textbf{giving a two-station accuracy model and a six-slot five-vehicle scheduling model}. Under $1^\circ$ azimuth error, \textbf{the accuracy bound is 5.8188~m}, attained with equidistant stations and orthogonal sight lines. \textbf{The time-optimal schedule starts the latest alert at 10.355~s}, \textbf{50.6\% shorter than the nearest-assignment baseline of 20.968~s}, \textbf{but it is not deployable}: its first alert has an intersection angle of only $19.34^\circ$ and a DRMS about $30$ times the bound. \textbf{Imposing the $[30^\circ,150^\circ]$ operating window} gives an \textbf{accuracy-qualified plan whose latest start is 12.983~s}, \textbf{recommended for deployment}. A reuse-aware relaxation certifies a $7.391$~s lower bound; the $10.355$~s plan is within $28.6\%$ of optimal. Timeliness and accuracy are not interchangeable.
+\textbf{For Problem~2} (two-station intersection accuracy and multi-alert scheduling), the LOS equations yield error propagation, the geometric dilution of precision characterizes accuracy, and the mean inequality proves the lower bound, \textbf{giving a two-station accuracy model and a six-slot five-vehicle scheduling model}. Under $1^\circ$ azimuth error, \textbf{the lower bound of the geometric dilution of precision is $5.8188$~m}, attained with equidistant stations and orthogonal sight lines. \textbf{The time-optimal schedule starts the latest alert at 10.355~s}, \textbf{50.6\% shorter than the nearest-assignment baseline of 20.968~s}, \textbf{but it is not deployable}: its first alert has an intersection angle of only $19.34^\circ$ and a distance root mean square (DRMS) position error about $30$ times the $0.1016$~m bound at the selected pair. \textbf{Imposing the $[30^\circ,150^\circ]$ operating window} gives an \textbf{accuracy-qualified plan whose latest start is 12.983~s}, \textbf{recommended for deployment}. A reuse-aware relaxation certifies a $7.391$~s lower bound; the $10.355$~s plan is within $28.6\%$ of optimal. Timeliness and accuracy are not interchangeable.
 
 \textbf{For Problem~3} (localization and pointing errors versus horizontal azimuth accuracy), projecting the localization error onto the cross-range direction, linearizing for small angles and combining the three error sources into a normal distribution \textbf{gives a pointing-error propagation model}. \textbf{The maximum reliable observation distance is 66.92~m}, and the dominant source switches at a vehicle--target distance near $19.9$~m. At $80$~m the criterion probability falls to $0.915$, so the distance-error coefficient must shrink by about $16.3\%$; localization then contributes $88.1\%$ of the variance.
 
-\textbf{For Problem~4} (plan failure under vehicle failure, communication outage and new alerts), event-triggered snapshots and rescheduling \textbf{give a rescheduling model under disturbance}. Among 74 scenarios a no-reaction baseline loses completion in 67; a \textbf{simple repair} (idle-vehicle insertion, nearest-spare replacement) \textbf{restores completion in all 67} (7 ties, none worse), so the gain comes from reacting. \textbf{Re-optimization keeps completion unchanged but lowers the latest start in 61 of 74 scenarios} (13 ties, none worse), e.g., a failure drops from $60$~s to $21.01$~s (repair) and $11.17$~s (re-optimization). \textbf{Structural loss is thus converted into temporal loss}, which re-optimization compresses. Under the started-means-served rule, a $\ge4$~s criterion gives $66/74$ $\eta=1$ but the same attribution.
+\textbf{For Problem~4} (plan failure under vehicle failure, communication outage and new alerts), event-triggered snapshots and rescheduling \textbf{give a rescheduling model under disturbance}. Among 74 scenarios a no-reaction baseline loses completion in 67; a \textbf{simple repair} (idle-vehicle insertion, nearest-spare replacement) \textbf{restores completion in all 67} (7 ties, none worse), so the gain comes from reacting. \textbf{Re-optimization keeps completion unchanged but lowers the latest start in 61 of 74 scenarios} (13 ties, none worse), e.g., a failure drops from $60$~s to $21.01$~s (repair) and $11.17$~s (re-optimization). \textbf{Structural loss is thus converted into temporal loss}, which re-optimization compresses. Under the started-means-served rule, a $\ge4$~s criterion gives $66/74$ fully completed scenarios but the same attribution.
 
 \textbf{Sensitivity analysis} identifies the pitch limit, angular rate, vehicle--target distance and communication recovery time as core parameters; a 1~m rise in target height increases the minimum horizontal distance by $0.176$~m, and no qualitative conclusion changes under reasonable perturbations. The paper provides provable station/accuracy results and reliable scheduling/disturbance plans for low-altitude surveillance.%
 \par}

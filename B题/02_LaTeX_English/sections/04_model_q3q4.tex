@@ -12,9 +12,11 @@ Take the true position $P$ as the origin and the true LOS as the $x'$ axis, with
 \end{equation}
 where $\wrap(\cdot)$ folds angles into $(-180^\circ,180^\circ]$. The three terms are independent zero-mean normals, and $\wrap$ is not triggered at this problem's scale, so
 \begin{equation}
-  \Delta\psi\sim\mathcal{N}\bigl(0,\sigma_\psi^2(s)\bigr),\qquad
-  \sigma_\psi^2(s)=\left(\frac{\sigma(s)}{40}\cdot\frac{180}{\pi}\right)^2+0.8^2+0.6^2
+\begin{split}
+  \Delta\psi&\sim\mathcal{N}\bigl(0,\sigma_\psi^2(s)\bigr),\\
+  \sigma_\psi^2(s)&=\left(\frac{\sigma(s)}{40}\cdot\frac{180}{\pi}\right)^2+0.8^2+0.6^2
   =(1.432394\sigma(s))^2+1.0.
+\end{split}
 \end{equation}
 
 From $P(|\Delta\psi|\le5^\circ)=2\Phi(5/\sigma_\psi)-1\ge0.95$, we obtain $\sigma_\psi\le5/z_{0.975}=2.551067^\circ$. Substituting into the expression above,
@@ -26,7 +28,7 @@ From $P(|\Delta\psi|\le5^\circ)=2\Phi(5/\sigma_\psi)-1\ge0.95$, we obtain $\sigm
 \end{equation}
 At $s=80$~m, $\sigma(80)=1.9$~m, $\sigma_\psi=2.89945^\circ$, and $P=0.91538<0.95$. If the criterion must still hold at 80~m, then $a+80b\le1.638446$~m, which together with $a,b\ge0$ forms a triangular feasible region ($b=0$ gives $a\le1.6384$~m; $a=0$ gives $b\le0.0204806$~m/m). The nominal point $(0.3,0.02)$ lies outside; one must reduce $b$ to $0.0167306$~m/m ($-16.3\%$) or reduce $a$ to $0.0384$~m.
 
-Let $\mathrm{var}_{\mathrm{loc}}=(1.432394\sigma(s))^2$, $\mathrm{var}_{\mathrm{bias}}=0.64$, and $\mathrm{var}_{\mathrm{ctrl}}=0.36$. At $s=0$ the three shares are $15.6\%\bsl54.0\%\bsl30.4\%$; at $s=40$ they are $71.3\%\bsl18.4\%\bsl10.3\%$; at $s=80$ they are $88.1\%\bsl7.6\%\bsl4.3\%$; the bias:control ratio is always $64:36$. The dominant-factor switch point is obtained from $\mathrm{var}_{\mathrm{loc}}=\mathrm{var}_{\mathrm{bias}}+\mathrm{var}_{\mathrm{ctrl}}$ as $s=19.907$~m (shares $50.0\%\bsl32.0\%\bsl18.0\%$), after which localization becomes the first source. The linearization residual RMS is $\sigma(s)^2/d^2$, which at $s=80$~m is $0.1293^\circ$, only $4.46\%$ of $\sigma_\psi$ and about $0.2\%$ of the variance. A $256\times256$ Hermite quadrature gives the exact $s_{\max}=66.84$~m, $P(66.92)=0.94980$, and $a+80b\le1.6367$~m; the recommended practice is to use $66.84$~m as the conservative design value and $66.92$~m as the closed-form primary answer. The $P$ deviation of $10^6$ Monte Carlo runs \cite{hammersley} is $\le3\times10^{-4}$, validating the linearization and the normal composition.
+Let $\mathrm{var}_{\mathrm{loc}}=(1.432394\sigma(s))^2$, $\mathrm{var}_{\mathrm{bias}}=0.64$, and $\mathrm{var}_{\mathrm{ctrl}}=0.36$. At $s=0$ the three shares are $15.6\%\bsl54.0\%\bsl30.4\%$; at $s=40$ they are $71.3\%\bsl18.4\%\bsl10.3\%$; at $s=80$ they are $88.1\%\bsl7.6\%\bsl4.3\%$; the bias:control ratio is always $64:36$. The dominant-factor switch point is obtained from $\mathrm{var}_{\mathrm{loc}}=\mathrm{var}_{\mathrm{bias}}+\mathrm{var}_{\mathrm{ctrl}}$ as $s=19.907$~m (shares $50.0\%\bsl32.0\%\bsl18.0\%$), after which localization becomes the first source. The linearization residual RMS is $\sigma(s)^2/d^2$, which at $s=80$~m is $0.1293^\circ$, only $4.46\%$ of $\sigma_\psi$ and about $0.2\%$ of the variance. A $256\times256$ Hermite quadrature gives the exact $s_{\max}=66.84$~m, $P(66.92)=0.94980$, and $a+80b\le1.6367$~m; the recommended practice is to use $66.84$~m as the conservative design value and $66.92$~m as the closed-form primary answer. The $P$ deviation of $10^6$ Monte Carlo runs \cite{hammersley} is $\le3\times10^{-4}$, validating the linearization and the normal composition; Table~\ref{tab:4-5} compares the empirical and analytical values at representative distances.
 
 \noindent\textbf{Deployment implications.} (i) The travel budget should be capped near the conservative $66.84$~m rather than $66.92$~m, because the closed form slightly understates the risk at the boundary. (ii) If the sensing budget is limited, reducing the slope $b$ of the localization error is far more effective than reducing the offset $a$: at 80~m one unit of $b$ saves 80 units of $\sigma$, whereas $a$ enters one-to-one. (iii) Improving the gimbal (bias plus control, $1.0^\circ$ combined) helps mainly at short travel; beyond about 100~m the localization term dominates and gimbal upgrades saturate (Section~6.2).
 
@@ -117,7 +119,7 @@ By failed vehicle, the re-optimized $t_{\mathrm{last}}$ for V1/V4, V2/V3, and V5
     \bottomrule
   \end{tabularnb}}
   \vspace{2pt}
-  {\footnotesize Note: entries are improved/tied; the $\eta$ column applies to both simple repair and re-optimization (they tie in all 74 scenarios); the $t_{\mathrm{last}}$ column is re-optimization versus simple repair; the mean gain is the average reduction over the improved cases, with ``---'' when there is none. Under a $\ge4$~s completion criterion, the eight V3/V5-failure scenarios have $\eta=2/3$ for repair and re-optimization; the comparison columns are unchanged except $t_{\mathrm{last}}$ vs repair becomes $57/17$. G uses 3 representatives $\times$ 2 failed vehicles $\times$ 2 recovery times ($t_{\mathrm{rec}}=10/30$~s only).}
+  \noindent{\raggedright\footnotesize Note: entries are improved/tied; the $\eta$ column applies to both simple repair and re-optimization (they tie in all 74 scenarios); the $t_{\mathrm{last}}$ column is re-optimization versus simple repair; the mean gain is the average reduction over the improved cases, with ``---'' when there is none. Under a $\ge4$~s completion criterion, the eight V3/V5-failure scenarios have $\eta=2/3$ for repair and re-optimization; the comparison columns are unchanged except $t_{\mathrm{last}}$ vs repair becomes $57/17$. G uses 3 representatives $\times$ 2 failed vehicles $\times$ 2 recovery times ($t_{\mathrm{rec}}=10/30$~s only).}
 \end{table}
 
 \begin{table}[htbp]

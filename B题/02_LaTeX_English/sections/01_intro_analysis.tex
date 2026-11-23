@@ -37,9 +37,9 @@ The four problems progress along the chain ``geometric feasibility---intersectio
 
 \subsection{Geometry and Parameters}
 
-The site is a $100~\mathrm{m}\times100~\mathrm{m}$ plane with the southwest corner as the origin, the $x$-axis east and the $y$-axis north; the dispatch center is $O=(50,50)$. The site contains five axis-aligned cuboid buildings and five standby observation vehicles; their geometry and initial positions are listed in Table~\ref{tab:2-1}. A vehicle is modeled as a disk of radius $1.5$~m, travels at a constant $3$~m/s, carries a camera $2$~m above the ground, and has a gimbal pitch range of $[-10^\circ,80^\circ]$ with horizontal and pitch angular rates of $30^\circ$/s; the slew time is the longer axis. During travel the gimbal remains level facing east, and it may turn toward the target only after arrival. A task consists of travel, slew, synchronized $5$~s observation by two vehicles, and reset; all phases are counted on the timeline. A line of sight tangent to a building is judged occluded. An alert is given as $(\theta,R,H)$, and the target's horizontal position is $(50+R\cos\theta,50+R\sin\theta)$; the baseline alerts are T1$(30^\circ,40~\mathrm{m},45~\mathrm{m})$, T2$(150^\circ,45~\mathrm{m},35~\mathrm{m})$, and T3$(285^\circ,38~\mathrm{m},55~\mathrm{m})$ (see~\cite{swmcm}); Problem~4 adds T4$(\theta\in[0^\circ,360^\circ),R\in[30,50]~\mathrm{m},H=50~\mathrm{m})$. These nominal alert values are planning data for all geometry, feasibility, and scheduling computations (Assumption~A5); every accuracy conclusion is conditional on the bearing and pointing error models of Problems~2 and 3.
+The site is a $100~\mathrm{m}\times100~\mathrm{m}$ plane with the southwest corner as the origin, the $x$-axis east and the $y$-axis north; the dispatch center is $O=(50,50)$. The site contains five axis-aligned cuboid buildings and five standby observation vehicles; their geometry and initial positions are listed in Table~\ref{tab:2-1}.
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Building geometry and initial positions of the observation vehicles}
 \label{tab:2-1}
@@ -64,9 +64,11 @@ The site is a $100~\mathrm{m}\times100~\mathrm{m}$ plane with the southwest corn
 }
 \par\smallskip
 \begin{minipage}{\linewidth}
-\footnotesize Note: All buildings are axis-aligned cuboids standing on $z=0$; a vehicle is an equivalent disk of radius $1.5$~m, and the tabulated position is the initial coordinate of its center (the ground projection of the camera). The three baseline alerts are given in Section~2.1; the complete parameter table is provided in \texttt{params\_table.md} in the supporting materials.
+\noindent\footnotesize Note: All buildings are axis-aligned cuboids standing on $z=0$; a vehicle is an equivalent disk of radius $1.5$~m, and the tabulated position is the initial coordinate of its center (the ground projection of the camera). The three baseline alerts are given in Section~2.1; the complete parameter table is provided in \texttt{params\_table.md} in the supporting materials.
 \end{minipage}
 \end{table}
+
+A vehicle is modeled as a disk of radius $1.5$~m, travels at a constant $3$~m/s, carries a camera $2$~m above the ground, and has a gimbal pitch range of $[-10^\circ,80^\circ]$ with horizontal and pitch angular rates of $30^\circ$/s; the slew time is the longer axis. During travel the gimbal remains level facing east, and it may turn toward the target only after arrival. A task consists of travel, slew, synchronized $5$~s observation by two vehicles, and reset; all phases are counted on the timeline. A line of sight tangent to a building is judged occluded. An alert is given as $(\theta,R,H)$, and the target's horizontal position is $(50+R\cos\theta,50+R\sin\theta)$; the baseline alerts are T1$(30^\circ,40~\mathrm{m},45~\mathrm{m})$, T2$(150^\circ,45~\mathrm{m},35~\mathrm{m})$, and T3$(285^\circ,38~\mathrm{m},55~\mathrm{m})$ (see~\cite{swmcm}); Problem~4 adds T4$(\theta\in[0^\circ,360^\circ),R\in[30,50]~\mathrm{m},H=50~\mathrm{m})$. These nominal alert values are planning data for all geometry, feasibility, and scheduling computations (Assumption~A5); every accuracy conclusion is conditional on the bearing and pointing error models of Problems~2 and 3.
 
 \subsection{Analysis of Problem 1}
 

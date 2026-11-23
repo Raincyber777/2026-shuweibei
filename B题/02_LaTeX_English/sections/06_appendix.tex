@@ -64,9 +64,11 @@ using the $90^\circ$ rotation relation between $u_i=(\cos\alpha_i,\sin\alpha_i)$
 
 \noindent\textbf{(b) Outer-product expansion.}
 \begin{equation}
-  \Sigma=A^{-1}DA^{-T}
-  =\sum_{i=1}^{2}D_{ii}\,\mathrm{col}_i(A^{-1})\,\mathrm{col}_i(A^{-1})^T
-  =\frac{\sigma^2}{\det^2A}\left[d_1^2u_2u_2^T+d_2^2u_1u_1^T\right].
+\begin{split}
+  \Sigma&=A^{-1}DA^{-T}
+  =\sum_{i=1}^{2}D_{ii}\,\mathrm{col}_i(A^{-1})\,\mathrm{col}_i(A^{-1})^T\\
+  &=\frac{\sigma^2}{\det^2A}\left[d_1^2u_2u_2^T+d_2^2u_1u_1^T\right].
+\end{split}
 \end{equation}
 No cross term appears because $D$ is diagonal; if $u_i$ were mistakenly written as the normal $n_i$, the expression would be rotated by $90^\circ$ (trace and determinant unchanged, but the matrix itself different). The main text consistently uses the LOS direction $u_i$.
 
@@ -80,10 +82,12 @@ No cross term appears because $D$ is diagonal; if $u_i$ were mistakenly written 
 \end{equation}
 These correspond respectively to
 \begin{equation}
-  \mathrm{DRMS}^2=\frac{\trace\Sigma}{2}
-  =\frac{\sigma^2(d_1^2+d_2^2)}{2\sin^2\gamma}
-  \ \Longrightarrow\
-  \mathrm{DRMS}=\frac{\sigma\sqrt{(d_1^2+d_2^2)/2}}{|\sin\gamma|}=\sigma G.
+\begin{split}
+  \mathrm{DRMS}^2&=\frac{\trace\Sigma}{2}
+  =\frac{\sigma^2(d_1^2+d_2^2)}{2\sin^2\gamma}\\
+  \Longrightarrow\quad
+  \mathrm{DRMS}&=\frac{\sigma\sqrt{(d_1^2+d_2^2)/2}}{|\sin\gamma|}=\sigma G.
+\end{split}
 \end{equation}
 
 \noindent\textbf{(d) $1\sigma$ ellipse and $95\%$ radius.} From $\det\Sigma$, the area of the $1\sigma$ error ellipse is
@@ -121,9 +125,11 @@ The first-order (linearized) model takes $\Delta\alpha\approx-v=-\delta_\perp/d$
 \end{equation}
 The leading term is $-uv$. Since $\delta_\parallel$ and $\delta_\perp$ are independent, zero-mean, and have variance $\sigma^2$,
 \begin{equation}
-  \mathbb{E}[R^2]=\mathbb{E}[u^2v^2]+O(\sigma^6/d^6)
-  =\frac{\mathbb{E}[\delta_\parallel^2]\,\mathbb{E}[\delta_\perp^2]}{d^4}+O(\sigma^6/d^6)
+\begin{split}
+  \mathbb{E}[R^2]&=\mathbb{E}[u^2v^2]+O(\sigma^6/d^6)\\
+  &=\frac{\mathbb{E}[\delta_\parallel^2]\,\mathbb{E}[\delta_\perp^2]}{d^4}+O(\sigma^6/d^6)
   =\frac{\sigma^4}{d^4}+O(\sigma^6/d^6).
+\end{split}
 \end{equation}
 Hence the residual RMS (in radians) is
 \begin{equation}
@@ -137,22 +143,26 @@ Relative to $\sigma_\psi(80)=2.8995^\circ$ at the same point, the standard-devia
 
 \noindent\textbf{(c) Normal composition and the $P$ criterion.} The gimbal bias $\varepsilon_0\sim\mathcal{N}(0,0.8^2)$, the control error $\varepsilon_c\sim\mathcal{N}(0,0.6^2)$, and the localization error are independent, so $S=\varepsilon_0+\varepsilon_c\sim\mathcal{N}(0,1.0^2)$ (in degrees). Given $(\delta_\parallel,\delta_\perp)$, $\Delta\alpha$ is deterministic, and the conditional probability is
 \begin{equation}
+\begin{split}
   P(|\Delta\alpha+S|\le5^\circ\mid\delta_\parallel,\delta_\perp)
-  =\Phi\!\left(\frac{5^\circ-\Delta\alpha}{1^\circ}\right)
-  -\Phi\!\left(\frac{-5^\circ-\Delta\alpha}{1^\circ}\right),
+  &=\Phi\!\left(\frac{5^\circ-\Delta\alpha}{1^\circ}\right)\\
+  &\quad-\Phi\!\left(\frac{-5^\circ-\Delta\alpha}{1^\circ}\right),
+\end{split}
 \end{equation}
 where $\Phi$ is the standard normal CDF. Therefore
-\begin{equation}
-  P(s)=\mathbb{E}_{\delta\parallel,\delta\perp}\!\left[
-  \Phi\!\left(\frac{5^\circ-\Delta\alpha(\delta_\parallel,\delta_\perp)}{1^\circ}\right)
-  -\Phi\!\left(\frac{-5^\circ-\Delta\alpha(\delta_\parallel,\delta_\perp)}{1^\circ}\right)\right].
-\end{equation}
+\begin{multline}
+  P(s)=\mathbb{E}_{\delta_\parallel,\delta_\perp}\!\Biggl[
+  \Phi\!\left(\frac{5^\circ-\Delta\alpha(\delta_\parallel,\delta_\perp)}{1^\circ}\right)\\
+  -\Phi\!\left(\frac{-5^\circ-\Delta\alpha(\delta_\parallel,\delta_\perp)}{1^\circ}\right)\Biggr].
+\end{multline}
 Since $\delta_\parallel$ and $\delta_\perp$ are independent and have equal variance, the two-dimensional expectation can be evaluated by tensor-product Gauss--Hermite quadrature:
-\begin{equation}
-  P(s)\approx\frac{1}{\pi}\sum_{i=1}^{256}\sum_{j=1}^{256}w_iw_j
-  \left[\Phi\!\left(\frac{5^\circ-\Delta\alpha(\sqrt2\sigma(s)x_i,\sqrt2\sigma(s)x_j)}{1^\circ}\right)
-  -\Phi\!\left(\frac{-5^\circ-\Delta\alpha(\cdot)}{1^\circ}\right)\right],
-\end{equation}
+\begin{multline}
+  P(s)\approx\frac{1}{\pi}\sum_{i=1}^{256}\sum_{j=1}^{256}w_iw_j\\
+  \times\Biggl[\Phi\!\left(
+  \frac{5^\circ-\Delta\alpha(\sqrt2\sigma(s)x_i,\sqrt2\sigma(s)x_j)}{1^\circ}
+  \right)\\
+  -\Phi\!\left(\frac{-5^\circ-\Delta\alpha(\cdot)}{1^\circ}\right)\Biggr],
+\end{multline}
 where $x_i$ and $w_i$ are the 256-point probabilistic Hermite nodes and weights ($\int e^{-x^2}f(x)\,dx\approx\sum w_if(x_i)$, $\sum w_i=\sqrt\pi$). $P(s)$ decreases monotonically with $s$ ($\sigma(s)=a+bs$ is increasing, and the distribution of $\Delta\alpha$ widens with $\sigma$); bisection/root finding on $P(s)=0.95$ gives $s_{\max}=66.84$~m. The closed-form linearization gives $66.92$~m, a $0.13\%$ difference consistent with the Monte Carlo results in Table~\ref{tab:4-5}.
 
 % ---------------------------------------------------------------------
@@ -226,14 +236,14 @@ Problem~4 uses ``event-triggered snapshot + reuse of the 2(2) solver + determini
 
 \noindent The directory names \texttt{Q1/}--\texttt{Q4/} stand for the Chinese original directories in the submitted supporting materials. The correspondence between body numbers and data files is as follows:
 \begin{itemize}
-\item Section~4.2, three area conventions $\to$ \texttt{Q1/results/q1\_area\_estimators.json} (\texttt{area\_estimators.py}).
-\item Table~\ref{tab:4-4}, the clearance-robust variant geometry of Section~4.3, and the $95\%$ ellipse semi-axes $\to$ \texttt{Q2/results/q2b\_precision.json} (\texttt{q2b\_gamma.py}).
-\item Appendix~B.2, the certified lower bound and gap $\to$ \texttt{Q2/results/q2b\_lower\_bound.json} (\texttt{q2b\_bound.py}).
-\item Section~4.4 and Table~\ref{tab:4-5} $\to$ \texttt{Q3/results/q3\_summary.txt} (\texttt{q3\_solve.py}).
-\item Section~4.5 and Table~\ref{tab:4-6}, scenario details $\to$ \texttt{Q4/results/q4\_scenario\_list.md} (\texttt{q4\_scenario\_list.py}).
-\item Section~4.5, simple-repair baseline and the three-way comparison $\to$ \texttt{Q4/results/q4\_repair.json} (\texttt{q4\_repair.py}).
-\item Section~6.2, $Q/Q_2$ comparison $\to$ \texttt{Q1/results/q1\_metric\_compare.json} (\texttt{q1\_metric\_compare.py}).
-\item Tables D-1 and D-2, all ten pairs and the 2(2) timeline $\to$ \texttt{Q2/results/q2a\_results.json}, \texttt{Q2/results/q2b\_results.json}.
+\item Section~4.2, three area conventions $\to$ \path{Q1/results/q1_area_estimators.json} (\texttt{area\_estimators.py}).
+\item Table~\ref{tab:4-4}, the clearance-robust variant geometry of Section~4.3, and the $95\%$ ellipse semi-axes $\to$ \path{Q2/results/q2b_precision.json} (\texttt{q2b\_gamma.py}).
+\item Appendix~B.2, the certified lower bound and gap $\to$ \path{Q2/results/q2b_lower_bound.json} (\texttt{q2b\_bound.py}).
+\item Section~4.4 and Table~\ref{tab:4-5} $\to$ \path{Q3/results/q3_summary.txt} (\texttt{q3\_solve.py}).
+\item Section~4.5 and Table~\ref{tab:4-6}, scenario details $\to$ \path{Q4/results/q4_scenario_list.md} (\texttt{q4\_scenario\_list.py}).
+\item Section~4.5, simple-repair baseline and the three-way comparison $\to$ \path{Q4/results/q4_repair.json} (\texttt{q4\_repair.py}).
+\item Section~6.2, $Q/Q_2$ comparison $\to$ \path{Q1/results/q1_metric_compare.json} (\texttt{q1\_metric\_compare.py}).
+\item Tables D-1 and D-2, all ten pairs and the 2(2) timeline $\to$ \path{Q2/results/q2a_results.json}, \path{Q2/results/q2b_results.json}.
 \end{itemize}
 
 \noindent The complete source programs, run scripts, and result JSON files are provided in the supporting materials.
@@ -243,8 +253,8 @@ Problem~4 uses ``event-triggered snapshot + reuse of the 2(2) solver + determini
 \centering
 \caption{Full symbol list}
 \label{tab:B-2}
-{\small
-\renewcommand{\arraystretch}{1.08}
+{\footnotesize
+\renewcommand{\arraystretch}{1.04}
 \begin{tabularnb}{@{}p{36mm}p{90mm}p{28mm}@{}}
   \toprule
   Symbol & Meaning & Unit / value \\
@@ -265,7 +275,7 @@ Problem~4 uses ``event-triggered snapshot + reuse of the 2(2) solver + determini
   $d_i$; $d$ & Horizontal distance from station $i$ to target; single-station shorthand in Problem~3 (nominal 40~m) & m \\
   $\sigma_\alpha$; $\gamma$; $\beta$ & Single-station azimuth standard deviation; intersection angle of the two LOS; two-station baseline length & $1^\circ$ (rad in computation); $^\circ$; m \\
   $\Sigma$; $G$ & Covariance of the intersection-point position error; geometric dilution of precision $\sqrt{(d_1^2+d_2^2)/2}/|\sin\gamma|$ & m$^2$; m \\
-  DRMS; $R_{95}$ & Root-mean-square position error $\sigma_\alpha G$; 95\% error-circle radius $2.4477\,\mathrm{DRMS}$ & m; m \\
+  DRMS; $R_{95}$ & Distance root mean square position error $\sigma_\alpha G$; 95\% error-circle radius $2.4477\,\mathrm{DRMS}$ & m; m \\
   $\pi_j$; $p_{j,a}$; $M_a$ & Task order of vehicle $j$; station of vehicle $j$ for alert $a$; vehicle pair observing alert $a$ & ---; m; --- \\
   $t^{\mathrm{rd}}_{v,k}$; $t_a^{\mathrm{start}}$ & Ready time of the $k$-th task of vehicle $v$; observation start time of alert $a$ & s \\
   $P,\hat P,\delta$; $s$; $\sigma(s)=a+bs$ & True position, estimated position, and localization error; cumulative travel distance; single-axis localization standard deviation ($a,b\ge0$) & m; m; m, m/m \\
@@ -374,7 +384,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 }
 \par\smallskip
 \begin{minipage}{\linewidth}
-\footnotesize Note: $d_1,d_2$ are the station--target distances, $G$ and DRMS follow Section~4.3 with $\sigma=1^\circ=0.017453$~rad, and $t_1,t_2$ are the obstacle-avoiding travel times. The four V2 pairs share the same candidate station, hence their identical $G$. ``Feasible'' means both ready times are within the 30~s limit; among the six feasible pairs, V3+V5 has the smallest total travel time ($18.72$~s).
+\noindent\footnotesize Note: $d_1,d_2$ are the station--target distances, $G$ and DRMS follow Section~4.3 with $\sigma=1^\circ=0.017453$~rad, and $t_1,t_2$ are the obstacle-avoiding travel times. The four V2 pairs share the same candidate station, hence their identical $G$. ``Feasible'' means both ready times are within the 30~s limit; among the six feasible pairs, V3+V5 has the smallest total travel time ($18.72$~s).
 \end{minipage}
 \end{table}
 
@@ -399,6 +409,6 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 }
 \par\smallskip
 \begin{minipage}{\linewidth}
-\footnotesize Note: the observation lasts 5~s and the reset time is the slew back to the east-facing attitude. The start time of an alert is the later of its two vehicles' ready times, so V1 waits from $3.24$~s to $6.994$~s for the longer slew of V4. V3 serves T1 and then T3 (the only reuse chain); T1 is already under way at $t_p=5$~s and is therefore locked in Problem~4. Clearance is the minimum distance from the station to the $1.5$~m-expanded building footprints; the two knife-edge values ($0.001$~m and $0.067$~m) are those discussed in Section~4.3.
+\noindent\footnotesize Note: the observation lasts 5~s and the reset time is the slew back to the east-facing attitude. The start time of an alert is the later of its two vehicles' ready times, so V1 waits from $3.24$~s to $6.994$~s for the longer slew of V4. V3 serves T1 and then T3 (the only reuse chain); T1 is already under way at $t_p=5$~s and is therefore locked in Problem~4. Clearance is the minimum distance from the station to the $1.5$~m-expanded building footprints; the two knife-edge values ($0.001$~m and $0.067$~m) are those discussed in Section~4.3.
 \end{minipage}
 \end{table}

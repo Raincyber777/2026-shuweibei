@@ -45,7 +45,7 @@ The observable region is $\Omega=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$. Wit
 \begin{equation}
   p^*=\argmax_{p\in\Omega}Q(p)=\argmin_{p\in\Omega}r(p).
 \end{equation}
-The criterion is chosen for four reasons. (i) A single-station angle error $\delta\alpha$ translates into a lateral position error $r\,\delta\alpha$ at the target, so $1/r$ has the same direction as single-station accuracy. (ii) C2 itself is $r\ge\rmin$, so $Q$ is aligned with the active constraint, and maximizing $Q$ is equivalent to pushing the pitch to its upper bound. (iii) In the two-station accuracy model of 2(1), DRMS increases monotonically with the station--target distances $d_i$ (Section~4.3), so a smaller $r$ is necessary for two-station accuracy. (iv) $Q$ is coordinate-independent, dimensionally simple, and strictly monotone, which facilitates tie-breaking. $Q$ is not the only admissible criterion; the alternative $Q_2=(1/r)\cos^2(\varepsilon-45^\circ)$ was also tested, and both criteria have the same optimal set.
+The criterion is chosen for four reasons. (i) A single-station angle error $\delta\alpha$ translates into a lateral position error $r\,\delta\alpha$ at the target, so $1/r$ has the same direction as single-station accuracy. (ii) C2 itself is $r\ge\rmin$, so $Q$ is aligned with the active constraint, and maximizing $Q$ is equivalent to pushing the pitch to its upper bound. (iii) In the two-station accuracy model of 2(1), the distance root mean square position error increases monotonically with the station--target distances $d_i$ (Section~4.3), so a smaller $r$ is necessary for two-station accuracy. (iv) $Q$ is coordinate-independent, dimensionally simple, and strictly monotone, which facilitates tie-breaking. $Q$ is not the only admissible criterion; the alternative $Q_2=(1/r)\cos^2(\varepsilon-45^\circ)$ was also tested, and both criteria have the same optimal set.
 
 The optimum is certified by a global lower bound and an explicit attainment argument.
 
@@ -53,13 +53,13 @@ The optimum is certified by a global lower bound and an explicit attainment argu
 For any $p\in\Omega$, $r(p)\ge\rmin$.
 \end{lemma}
 
-\noindent\textbf{Proof.} By C2, $\varepsilon(p)\le80^\circ$. Since $\arctan$ is strictly increasing on $(0,\infty)$ and $\Delta z>0$, $r(p)\ge\Delta z/\tan80^\circ=\rmin$. \hfill$\square$
+\noindent\textbf{Proof.} By C2, $\varepsilon(p)\le80^\circ$. Since $\arctan$ is strictly increasing on $(0,\infty)$ and $\Delta z>0$, $r(p)\ge\Delta z/\tan80^\circ=\rmin$.
 
 \begin{theorem}
 If $\Omega\cap\{p:r(p)=\rmin\}$ is nonempty, then $r^*=\rmin$, $\varepsilon^*=80^\circ$, $Q^*=1/\rmin=0.1319$~m$^{-1}$, and the optimal set is the arc(s) of the $\rmin$ circle that lie in $\Omega$.
 \end{theorem}
 
-\noindent\textbf{Proof.} By Lemma~1, $r^*\ge\rmin$. If some $p_0$ satisfies $r(p_0)=\rmin$, then $r^*\le\rmin$, hence $r^*=\rmin$. Then $\varepsilon^*=\arctan(\Delta z/\rmin)=80^\circ$ and $Q^*=1/\rmin$. Every optimizer must satisfy $r=\rmin$, so the optimal set is the intersection of $\Omega$ with the circle, i.e., a union of arcs. \hfill$\square$
+\noindent\textbf{Proof.} By Lemma~1, $r^*\ge\rmin$. If some $p_0$ satisfies $r(p_0)=\rmin$, then $r^*\le\rmin$, hence $r^*=\rmin$. Then $\varepsilon^*=\arctan(\Delta z/\rmin)=80^\circ$ and $Q^*=1/\rmin$. Every optimizer must satisfy $r=\rmin$, so the optimal set is the intersection of $\Omega$ with the circle, i.e., a union of arcs.
 
 The theorem also shows that $r^*$ is independent of the building layout; the environment changes only the position and length of the optimal arc. This is the origin of the principle ``the optimal value is robust, the optimal location is sensitive.''
 
@@ -130,9 +130,9 @@ Hence $\trace\Sigma=\sigma^2(d_1^2+d_2^2)/\sin^2\gamma$ and $\det\Sigma=\sigma^4
 Define
 \begin{equation}
   G=\frac{\sqrt{(d_1^2+d_2^2)/2}}{|\sin\gamma|},\qquad
-  \mathrm{DRMS}=\sigma G=\sqrt{\trace\Sigma/2};
+  \mathrm{DRMS}=\sigma G=\sqrt{\trace\Sigma/2},
 \end{equation}
-the 2-D radial RMSE is $\sqrt2\,\mathrm{DRMS}$, and the $95\%$ circle radius is $R_{95}=2.4477\,\mathrm{DRMS}$ (exact when isotropic). As $\gamma\to0^\circ/180^\circ$, $G\to\infty$ and the condition number is $\kappa=1/|\sin\gamma|$ (Appendix~A.2(e)); at $\gamma=30^\circ$, $G=2G^*$, so $[30^\circ,150^\circ]$ is the operating window, with a ridge-regularized least-squares estimator on the estimation side.
+where DRMS is the distance root mean square position error (smaller is more accurate); the 2-D radial RMSE is $\sqrt2\,\mathrm{DRMS}$, and the $95\%$ circle radius is $R_{95}=2.4477\,\mathrm{DRMS}$ (exact when isotropic). As $\gamma\to0^\circ/180^\circ$, $G\to\infty$ and the condition number is $\kappa=1/|\sin\gamma|$ (Appendix~A.2(e)); at $\gamma=30^\circ$, $G=2G^*$, so $[30^\circ,150^\circ]$ is the operating window, with a ridge-regularized least-squares estimator on the estimation side.
 
 The accuracy index is then bounded and the station pair selected. From $|\sin\gamma|\le1$, the QM--AM (quadratic-mean--arithmetic-mean) inequality, and $d_i\ge\rmin$ from C2,
 \begin{equation}
@@ -283,6 +283,6 @@ If T1 must also satisfy $\gamma\ge30^\circ$, fixing the assignment and order and
   }
 
   \vspace{2pt}
-  {\footnotesize Note: $\mathrm{DRMS}=\sigma G$, $\sigma=1^\circ=0.017453$~rad; T1* is the constrained re-solution with $\gamma_{\mathrm{T1}}\ge30^\circ$ under the same assignment/order and does not constitute a global optimality claim. None of the four station pairs is isotropic (the eigenvalue ratio of T1 is about $46:1$); exact $95\%$ coverage should use the ellipse semi-axes $\sqrt{5.991\lambda_i}$, which are $(10.56,1.55)\bsl(3.27,2.48)\bsl(4.77,1.19)\bsl(6.87,1.58)$~m for T1/T2/T3/T1*, respectively.}
+  \noindent{\raggedright\footnotesize Note: $\mathrm{DRMS}=\sigma G$, $\sigma=1^\circ=0.017453$~rad; T1* is the constrained re-solution with $\gamma_{\mathrm{T1}}\ge30^\circ$ under the same assignment/order and does not constitute a global optimality claim. None of the four station pairs is isotropic (the eigenvalue ratio of T1 is about $46:1$); exact $95\%$ coverage should use the ellipse semi-axes $\sqrt{5.991\lambda_i}$, which are $(10.56,1.55)\bsl(3.27,2.48)\bsl(4.77,1.19)\bsl(6.87,1.58)$~m for T1/T2/T3/T1*, respectively.}
 \end{table}
 
