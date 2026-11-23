@@ -77,17 +77,17 @@ Problem 4 uses the time-optimal 10.355 s plan of Problem 2(2) as the baseline, a
 
 ## 2.6 Algorithm Routes and Selection
 
-The algorithms for the four problems follow three criteria—provable, reproducible, and scale-matched: a closed-form certificate is used for the optimal value whenever possible instead of iterative search; deterministic complete enumeration is used instead of randomized heuristics when the scale permits; and numerical experiments serve only as verification. Table 2-2 gives an overview; details are in Sections 4.2.5, 4.3.7, 4.4.4, and 4.5.4.
+The algorithms for the four problems follow three criteria—provable, reproducible, and scale-matched: a closed-form certificate is used for the optimal value whenever possible instead of iterative search; deterministic complete enumeration is used instead of randomized heuristics when the scale permits; and numerical experiments serve only as verification. Table 2-2 gives a compact overview; the full algorithm routes, complexity, and comparison with alternatives are in Appendix B.1, and implementation details are in Sections 4.2.5, 4.3.7, 4.4.4, and 4.5.4.
 
-**Table 2-2 Algorithm routes and selection rationale for the four problems**
+**Table 2-2 Compact algorithm routes**
 
-| Problem | Algorithm (key steps) | Rationale | Scale / complexity | Comparison with alternatives |
-|---|---|---|---|---|
-| Q1 | Closed-form lower bound (C2 ⇒ r ≥ r<sub>min</sub>); 200,000-point sampling on the r<sub>min</sub> circle; 3-D slab intersection; visibility graph + Dijkstra; three-level lexicographic rule | Q = 1/r is strictly monotone, so the optimal value is fixed in closed form by the active constraint; the optimal set is a one-dimensional arc, and sampling only describes the set, not a 2-D search | Closed form O(1); arc sampling O(2×10⁵); one grid verification O(10⁶) | A 0.1 m grid only gives the best grid value 7.5828 m; the closed form also gives the global certificate 7.5821 m |
-| Q2(1) | Covariance propagation Σ = A<sup>−1</sup>DA<sup>−T</sup>; QM–AM lower-bound certificate; enumeration of C(5,2) = 10 pairs; polar candidate stations + Nelder–Mead | The equality condition reduces optimality verification to a one-dimensional 90° pairing test on the r<sub>min</sub> circle; with only five vehicles, pairs can be exhaustively enumerated | 10 pairs; 4-D NM ≤ 300 iterations per pair | Direct 4-D search has no optimality proof and easily falls into local optima; the certificate gives G* = 5.8188 m |
-| Q2(2) | 1,000 assignment structures expanded through reuse-chain orderings into 5,880 combinations; fixed-point timeline simulation for each; greedy initialization → Gauss–Seidel coordinate descent → Nelder–Mead; top-12 re-refinement; deadlock detection | With only 5 vehicles and 6 slots, complete enumeration exhausts the structures and is deterministic and reproducible; continuous station positions are handled by local refinement | 5,880 simulations; at most 2 tasks per vehicle; ≤160 NM iterations per call | 10.355 s vs. 20.968 s for nearest assignment (−50.6%); randomized searches such as GA cannot guarantee the same solution |
-| Q3 | Closed-form first-order propagation; two-sided quantile criterion; bisection; 256×256 Gauss–Hermite quadrature; 10<sup>6</sup> MC verification | σ<sub>ψ</sub>(s) is monotone, so the P criterion can be inverted in closed form; Hermite quadrature has no sampling error and uses 1/15 of the MC nodes | Closed form O(1); 65,536 quadrature nodes; 10<sup>6</sup> MC for verification only | Closed form 66.92 m vs. exact 66.84 m (0.13%); direct MC root search requires multiple rounds of 10<sup>6</sup> samples |
-| Q4 | Event-triggered snapshot; reuse of the Q2(2) solver; deterministic enumeration of 74 scenarios; keep / simple-repair / re-optimization comparison | After a disturbance, available resources and pending alerts are of the same order as Q2(2); reusing the solver keeps the conventions consistent; the scenario set is small, so no online stochastic optimization is needed; simple repair separates reaction from re-optimization | 74 scenarios × one re-optimization each; timeline audit finds 0 negative durations/overlaps | Simple repair restores η in 67/74; re-optimization lowers t<sub>last</sub> in 61/74 (mean 4.35 s) |
+| Problem | Method | Why |
+|---|---|---|
+| Q1 | Closed-form r ≥ r<sub>min</sub> + r<sub>min</sub>-circle sampling + 3-D slab/visibility graph + lexicographic tie-break | Q = 1/r is strictly monotone, so the optimum is certified in closed form; the optimal set is a one-dimensional arc |
+| Q2(1) | Covariance propagation + QM–AM bound + C(5,2) pair enumeration + polar candidates/Nelder–Mead | The equality condition reduces optimality to a 90° pairing test on the r<sub>min</sub> circle; only 10 pairs exist |
+| Q2(2) | 1,000 structures / 5,880 reuse orders + fixed-point timeline + coordinate descent/Nelder–Mead | 5 vehicles and 6 slots permit exhaustive deterministic enumeration; stations are locally refined |
+| Q3 | Closed-form first-order propagation + two-sided quantile + 256×256 Gauss–Hermite quadrature + MC verification | σ<sub>ψ</sub>(s) is monotone, so the P criterion is invertible; quadrature has no sampling error |
+| Q4 | Event-triggered snapshot + reuse of the Q2(2) solver + deterministic 74-scenario enumeration | The post-disturbance scale matches Q2(2), so the same solver is reused and all scenarios are comparable |
 
 # 3. Symbols and Assumptions
 
@@ -713,7 +713,21 @@ $$ P(s) ≈ (1/π)Σ<sub>i=1</sub><sup>256</sup>Σ<sub>j=1</sub><sup>256</sup> w
 
 where x<sub>i</sub> and w<sub>i</sub> are the 256-point probabilistic Hermite nodes and weights (∫e<sup>−x²</sup>f(x)dx ≈ Σw<sub>i</sub>f(x<sub>i</sub>), Σw<sub>i</sub> = √π). P(s) decreases monotonically with s (σ(s) = a+bs is increasing, and the distribution of Δα widens with σ); bisection/root finding on P(s) = 0.95 gives s<sub>max</sub> = 66.84 m. The closed-form linearization gives 66.92 m, a 0.13% difference consistent with the Monte Carlo results in Table 4-5.
 
-## Appendix B: Main Program List
+## Appendix B: Algorithm Routes and Main Program List
+
+### B.1 Algorithm routes (full table)
+
+**Table B-1 Algorithm routes and selection rationale for the four problems (full)**
+
+| Problem | Algorithm (key steps) | Rationale | Scale / complexity | Comparison with alternatives |
+|---|---|---|---|---|
+| Q1 | Closed-form lower bound (C2 ⇒ r ≥ r<sub>min</sub>); 200,000-point sampling on the r<sub>min</sub> circle; 3-D slab intersection; visibility graph + Dijkstra; three-level lexicographic rule | Q = 1/r is strictly monotone, so the optimal value is fixed in closed form by the active constraint; the optimal set is a one-dimensional arc, and sampling only describes the set, not a 2-D search | Closed form O(1); arc sampling O(2×10⁵); one grid verification O(10⁶) | A 0.1 m grid only gives the best grid value 7.5828 m; the closed form also gives the global certificate 7.5821 m |
+| Q2(1) | Covariance propagation Σ = A<sup>−1</sup>DA<sup>−T</sup>; QM–AM lower-bound certificate; enumeration of C(5,2) = 10 pairs; polar candidate stations + Nelder–Mead | The equality condition reduces optimality verification to a one-dimensional 90° pairing test on the r<sub>min</sub> circle; with only five vehicles, pairs can be exhaustively enumerated | 10 pairs; 4-D NM ≤ 300 iterations per pair | Direct 4-D search has no optimality proof and easily falls into local optima; the certificate gives G* = 5.8188 m |
+| Q2(2) | 1,000 assignment structures expanded through reuse-chain orderings into 5,880 combinations; fixed-point timeline simulation for each; greedy initialization → Gauss–Seidel coordinate descent → Nelder–Mead; top-12 re-refinement; deadlock detection; reuse-aware lower bound | With only 5 vehicles and 6 slots, complete enumeration exhausts the structures and is deterministic and reproducible; continuous station positions are handled by local refinement | 5,880 simulations; at most 2 tasks per vehicle; ≤160 NM iterations per call | 10.355 s vs. 20.968 s for nearest assignment (−50.6%); certified LB 7.391 s (gap 28.6%); randomized searches such as GA cannot guarantee the same solution |
+| Q3 | Closed-form first-order propagation; two-sided quantile criterion; bisection; 256×256 Gauss–Hermite quadrature; 10<sup>6</sup> MC verification | σ<sub>ψ</sub>(s) is monotone, so the P criterion can be inverted in closed form; Hermite quadrature has no sampling error and uses 1/15 of the MC nodes | Closed form O(1); 65,536 quadrature nodes; 10<sup>6</sup> MC for verification only | Closed form 66.92 m vs. exact 66.84 m (0.13%); direct MC root search requires multiple rounds of 10<sup>6</sup> samples |
+| Q4 | Event-triggered snapshot; reuse of the Q2(2) solver; deterministic enumeration of 74 scenarios; keep / simple-repair / re-optimization comparison | After a disturbance, available resources and pending alerts are of the same order as Q2(2); reusing the solver keeps the conventions consistent; the scenario set is small, so no online stochastic optimization is needed; simple repair separates reaction from re-optimization | 74 scenarios × one re-optimization each; timeline audit finds 0 negative durations/overlaps | Simple repair restores η in 67/74; re-optimization lowers t<sub>last</sub> in 61/74 (mean 4.35 s) |
+
+### B.2 Main program list
 
 - **Problem 1** (`Q1/`): `q1_solve.py` (domain gridding, arc sampling, tie-breaking, sensitivity); `area_estimators.py`, `q1_metric_compare.py`, `export_params.py` (three-convention area recomputation, Q/Q<sub>2</sub> comparison, export of the B1–B5/V1–V5/T1–T3 parameters).
 - **Problem 2** (`Q2/`): `q2a_core.py`, `q2b_core.py`, `q2b_gamma.py`, `q2b_bound.py` (two-station accuracy, vehicle and station selection, six-slot five-vehicle scheduling and baseline, 2(2) intersection-geometry check, reuse-aware certified lower bound).
@@ -760,7 +774,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 | Table | Content | Section |
 |---|---|---|
 | Table 2-1 | Building geometry and initial vehicle positions | 2.1 |
-| Table 2-2 | Algorithm routes and selection rationale | 2.6 |
+| Table 2-2 | Compact algorithm routes (full table in B-1) | 2.6 |
 | Table 3-1 | Main symbols | 3.1 |
 | Table 4-1 | Main results of Problem 1 | 4.2.4 |
 | Table 4-2 | Two-station accuracy and station selection | 4.3.2 |
@@ -771,6 +785,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 | Table 4-7 | Comparison of representative scenarios | 4.5.3 |
 | Table 5-1 | Summary of validation for the four problems | 5 |
 | Table 6-1 | Objective time under the v×ω full factorial | 6.2 |
+| Table B-1 | Full algorithm routes and selection rationale | Appendix B.1 |
 | Table D-1 | All ten vehicle pairs for T2 | Appendix D |
 | Table D-2 | Stations and per-task timeline of the 10.355 s plan | Appendix D |
 

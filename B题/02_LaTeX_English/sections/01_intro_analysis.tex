@@ -86,42 +86,32 @@ Problem~4 uses the time-optimal 10.355~s plan of Problem~2(2) as the baseline (t
 
 \subsection{Algorithm Routes and Selection}
 
-The algorithms for the four problems follow three criteria---provable, reproducible, and scale-matched: a closed-form certificate is used for the optimal value whenever possible instead of iterative search; deterministic complete enumeration is used instead of randomized heuristics when the scale permits; and numerical experiments serve only as verification. Table~\ref{tab:2-2} gives an overview; details are in Sections~4.2.5, 4.3.7, 4.4.4, and 4.5.4.
+The algorithms for the four problems follow three criteria---provable, reproducible, and scale-matched: a closed-form certificate is used for the optimal value whenever possible instead of iterative search; deterministic complete enumeration is used instead of randomized heuristics when the scale permits; and numerical experiments serve only as verification. Table~\ref{tab:2-2} gives a compact overview; the full algorithm routes, complexity, and comparison with alternatives are in Appendix~B.1, and implementation details are in Sections~4.2.5, 4.3.7, 4.4.4, and 4.5.4.
 
 \begin{table}[htbp]
 \centering
-\caption{Algorithm routes and selection rationale for the four problems}
+\caption{Compact algorithm routes for the four problems}
 \label{tab:2-2}
-{\footnotesize
+{\small
 \renewcommand{\arraystretch}{1.08}
-\begin{tabularnb}{@{}p{10mm}p{43mm}p{37mm}p{26mm}p{32mm}@{}}
+\begin{tabularnb}{@{}p{12mm}p{64mm}p{74mm}@{}}
   \toprule
-  Problem & Algorithm (key steps) & Rationale & Scale / complexity & Comparison with alternatives \\
+  Problem & Method & Why \\
   \midrule
-  Q1 & Closed-form lower bound (C2 $\Rightarrow r\ge\rmin$); 200,000-point sampling on the $\rmin$ circle; 3-D slab intersection; visibility graph + Dijkstra; three-level lexicographic rule &
-  $Q=1/r$ is strictly monotone, so the optimal value is fixed in closed form by the active constraint; the optimal set is a one-dimensional arc, and sampling only describes the set, not a 2-D search &
-  Closed form $O(1)$; arc sampling $O(2\times10^5)$; one grid verification $O(10^6)$ &
-  A 0.1~m grid only gives the best grid value 7.5828~m; the closed form also gives the global certificate 7.5821~m \\
+  Q1 & Closed-form $r\ge\rmin$ + $\rmin$-circle sampling + 3-D slab/visibility graph + lexicographic tie-break &
+  $Q=1/r$ is strictly monotone, so the optimum is certified in closed form; the optimal set is a one-dimensional arc \\
   \midrule
-  Q2(1) & Covariance propagation $\Sigma=A^{-1}DA^{-T}$; QM--AM lower-bound certificate; enumeration of $C(5,2)=10$ pairs; polar candidate stations + Nelder--Mead &
-  The equality condition reduces optimality verification to a one-dimensional $90^\circ$ pairing test on the $\rmin$ circle; with only five vehicles, pairs can be exhaustively enumerated &
-  10 pairs; 4-D NM $\le300$ iterations per pair &
-  Direct 4-D search has no optimality proof and easily falls into local optima; the certificate gives $G^*=5.8188$~m \\
+  Q2(1) & Covariance propagation $\Sigma=A^{-1}DA^{-T}$ + QM--AM bound + $C(5,2)$ pair enumeration + polar candidates/Nelder--Mead &
+  The equality condition reduces optimality to a $90^\circ$ pairing test on the $\rmin$ circle; only 10 pairs exist \\
   \midrule
-  Q2(2) & 1,000 assignment structures expanded through reuse-chain orderings into 5,880 combinations; fixed-point timeline simulation; greedy initialization $\to$ Gauss--Seidel coordinate descent $\to$ Nelder--Mead; top-12 re-refinement; deadlock detection &
-  With only 5 vehicles and 6 slots, complete enumeration exhausts the structures and is deterministic and reproducible; continuous station positions are handled by local refinement &
-  5,880 simulations; at most 2 tasks per vehicle; $\le160$ NM iterations per call &
-  10.355~s vs.\ 20.968~s for nearest assignment ($-50.6\%$); randomized searches such as GA cannot guarantee the same solution \\
+  Q2(2) & 1,000 structures / 5,880 reuse orders + fixed-point timeline + coordinate descent/Nelder--Mead; reuse-aware LB &
+  5 vehicles and 6 slots permit exhaustive deterministic enumeration; stations are locally refined; certified gap $28.6\%$ \\
   \midrule
-  Q3 & Closed-form first-order propagation; two-sided quantile criterion; bisection; $256\times256$ Gauss--Hermite quadrature; $10^6$ MC verification &
-  $\sigma_\psi(s)$ is monotone, so the $P$ criterion can be inverted in closed form; Hermite quadrature has no sampling error and uses $1/15$ of the MC nodes &
-  Closed form $O(1)$; 65,536 quadrature nodes; $10^6$ MC for verification only &
-  Closed form 66.92~m vs.\ exact 66.84~m (0.13\%); direct MC root search requires multiple rounds of $10^6$ samples \\
+  Q3 & Closed-form first-order propagation + two-sided quantile + $256\times256$ Gauss--Hermite quadrature + MC verification &
+  $\sigma_\psi(s)$ is monotone, so the $P$ criterion is invertible; quadrature has no sampling error \\
   \midrule
-  Q4 & Event-triggered snapshot; reuse of the Q2(2) solver; deterministic enumeration of 74 scenarios; analytical keep-original evaluation &
-  After a disturbance, available resources and pending alerts are of the same order as Q2(2); reusing the solver keeps the conventions consistent; the scenario set is small, so no online stochastic optimization is needed &
-  74 scenarios $\times$ one re-optimization each; timeline audit finds 0 negative durations/overlaps &
-  $\eta$ improved in 67/74, tied in 7, degraded in 0; scenario-by-scenario comparison with keep-original \\
+  Q4 & Event-triggered snapshot + reuse of the Q2(2) solver + 74-scenario enumeration with keep/simple-repair/re-optimization comparison &
+  The post-disturbance scale matches Q2(2), so the same solver is reused and all scenarios are comparable \\
   \bottomrule
 \end{tabularnb}
 }
