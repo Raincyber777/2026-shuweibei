@@ -9,16 +9,17 @@
   \caption{Summary of validation for the four problems}
   \label{tab:5-1}
   \small
-  \begin{tabular}{@{}p{28mm}p{52mm}p{55mm}p{17mm}@{}}
+  \renewcommand{\arraystretch}{1.06}
+  \begin{tabularnb}{@{}p{26mm}p{48mm}p{54mm}p{22mm}@{}}
     \toprule
     Object & Method & Deviation & Details \\
     \midrule
     Q1 global optimum & Closed-form $r^*$ vs.\ $0.1$~m grid & $7.5821$ vs.\ $7.5828$~m ($+0.0007$~m, $0.009\%$) & 4.2.4 \\
-    Q2 accuracy and scheduling & Covariance vs.\ 200,000 MC; structural enumeration + top-5 + $0.5$~m variant; reuse-aware LB & RMSE $0.1436$~m $=\sqrt2\,\mathrm{DRMS}$; P95 $0.2486$~m; time optimum $10.355$~s, clearance-robust $10.837$~s, accuracy-qualified $12.983$~s; LB $7.391$~s (gap $28.6\%$) & 4.3.2/4.3.5/B.2 \\
+    Q2 accuracy and scheduling & Covariance vs.\ 200,000 MC; structural enumeration + top-5 + $0.5$~m variant; reuse-aware LB & RMSE $0.1436$~m $=\sqrt2\,\mathrm{DRMS}$; P95 $0.2486$~m; time optimum $10.355$~s, clearance-robust $10.837$~s, accuracy-qualified $12.983$~s; LB $7.391$~s (gap $28.6\%$) & 4.3.2, 4.3.5, B.2 \\
     Q3 error propagation & Linearization vs.\ $256\times256$ Hermite; $10^6$ MC & $s_{\max}$ $66.92$ vs.\ $66.84$~m ($0.13\%$); $P$ deviation $\le3\times10^{-4}$ & 4.4.3 \\
     Q4 rescheduling & 74-scenario audit; keep / simple repair / re-optimization; $0.5$~m margin/tolerance/$22.5^\circ$ densification & 0 anomalies; simple repair restores $\eta$ in 67/74; re-optimization lowers $t_{\mathrm{last}}$ in 61/74 (mean $4.35$~s); conclusions unchanged & 4.5.3 \\
     \bottomrule
-  \end{tabular}
+  \end{tabularnb}
 \end{table}
 
 \subsection{Validation of Problem 1}
@@ -53,7 +54,9 @@ Parameters are selected by relevance to the problem, dimensional scale, model do
   \centering
   \caption{Objective time under the $v\times\omega$ full factorial (unit: s)}
   \label{tab:6-1}
-  \begin{tabular}{@{}lccc@{}}
+  {\small
+  \renewcommand{\arraystretch}{1.06}
+  \begin{tabularnb}{@{}lccc@{}}
     \toprule
     $v\backslash\omega$ & $24^\circ$/s & $30^\circ$/s & $36^\circ$/s \\
     \midrule
@@ -61,7 +64,8 @@ Parameters are selected by relevance to the problem, dimensional scale, model do
     $3.0$~m/s & 11.499 & 10.355 & 9.676 \\
     $3.5$~m/s & 11.387 & 10.243 & 9.493 \\
     \bottomrule
-  \end{tabular}
+  \end{tabularnb}
+  }
 \end{table}
 
 \noindent\textbf{Problem 1 elasticities.} The closed-form partial derivatives of $r^*$ are $\partial r^*/\partial H=0.1763$~m/m, $\partial r^*/\partial\varepsilon_{\max}=-0.7738$~m/deg, and $\partial r^*/\partial h_{\mathrm{cam}}=-0.1763$~m/m; at the nominal point $(H,\varepsilon_{\max})=(45~\mathrm{m},80^\circ)$, the elasticities are $E_H=1.05$ and $E_{\varepsilon\max}=(-0.7738\times80)/7.5821\approx-8.16$. As $H$ increases from 30 to 60~m, $r^*$ increases linearly from $4.94$ to $10.23$~m; as $\varepsilon_{\max}$ increases from $70^\circ$ to $85^\circ$, $r^*$ decreases nonlinearly from $15.65$ to $3.76$~m. Replacing $Q$ with $Q_2=(1/r)\cos^2(\varepsilon-45^\circ)$ leaves the argmax $(92.2,69.4)$, $r=7.5828$~m, and the optimal set unchanged; on the $\rmin$ circle, $Q_2$ is identically $0.0885$~m$^{-1}$, showing that the criterion choice is robust.

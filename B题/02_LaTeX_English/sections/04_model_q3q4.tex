@@ -40,7 +40,9 @@ Let $\mathrm{var}_{\mathrm{loc}}=(1.432394\sigma(s))^2$, $\mathrm{var}_{\mathrm{
   \centering
   \caption{Monte Carlo verification for Problem~3 ($10^6$ samples)}
   \label{tab:4-5}
-  \begin{tabular}{@{}p{16mm}p{22mm}p{25mm}p{25mm}p{30mm}p{30mm}@{}}
+  {\small
+  \renewcommand{\arraystretch}{1.06}
+  \begin{tabularnb}{@{}p{14mm}p{20mm}p{24mm}p{24mm}p{28mm}p{28mm}@{}}
     \toprule
     $s$ (m) & $\sigma(s)$ (m) & $P$ empirical & $P$ analytical & $\sigma$ empirical ($^\circ$) & $\sigma$ analytical ($^\circ$) \\
     \midrule
@@ -50,7 +52,8 @@ Let $\mathrm{var}_{\mathrm{loc}}=(1.432394\sigma(s))^2$, $\mathrm{var}_{\mathrm{
     66.92 & 1.6384 & 0.949730 & 0.950000 & 2.5528 & 2.5511 \\
     80 & 1.90 & 0.915229 & 0.915376 & 2.9006 & 2.8995 \\
     \bottomrule
-  \end{tabular}
+  \end{tabularnb}
+  }
 \end{table}
 
 \begin{figure}[htbp]
@@ -112,7 +115,8 @@ Representative values: V4 failure, keep $(0.667,60)\to$ simple repair $(1.000,21
   \caption{Three-way comparison by scenario class}
   \label{tab:4-6}
   {\small
-  \begin{tabular}{@{}lcccc@{}}
+  \renewcommand{\arraystretch}{1.08}
+  \begin{tabularnb}{@{}p{42mm}cp{24mm}p{28mm}p{22mm}@{}}
     \toprule
     Class & $n$ & $\eta$ vs keep & $t_{\mathrm{last}}$ vs repair & Mean gain (s) \\
     \midrule
@@ -126,7 +130,7 @@ Representative values: V4 failure, keep $(0.667,60)\to$ simple repair $(1.000,21
     \midrule
     Total & 74 & 67/7 & 61/13 & 4.35 \\
     \bottomrule
-  \end{tabular}}
+  \end{tabularnb}}
   \vspace{2pt}
   {\footnotesize Note: entries are improved/tied; the $\eta$ column applies to both simple repair and re-optimization (they tie in all 74 scenarios); the $t_{\mathrm{last}}$ column is re-optimization versus simple repair; the mean gain is the average reduction over the improved cases, with ``---'' when there is none. Under a $\ge4$~s completion criterion, the eight V3/V5-failure scenarios have $\eta=2/3$ for repair and re-optimization; the comparison columns are unchanged except $t_{\mathrm{last}}$ vs repair becomes $57/17$. G uses 3 representatives $\times$ 2 failed vehicles $\times$ 2 recovery times ($t_{\mathrm{rec}}=10/30$~s only).}
 \end{table}
@@ -136,7 +140,8 @@ Representative values: V4 failure, keep $(0.667,60)\to$ simple repair $(1.000,21
   \caption{Comparison of representative scenarios}
   \label{tab:4-7}
   {\small
-  \begin{tabular}{@{}p{48mm}p{28mm}p{32mm}p{32mm}@{}}
+  \renewcommand{\arraystretch}{1.08}
+  \begin{tabularnb}{@{}p{46mm}p{27mm}p{31mm}p{31mm}@{}}
     \toprule
     Scenario & Keep & Simple repair & Re-optimized \\
     \midrule
@@ -144,7 +149,7 @@ Representative values: V4 failure, keep $(0.667,60)\to$ simple repair $(1.000,21
     New alert $\theta=0^\circ$, $\rho=30$~m & $(0.750,60)$ & $(1.000,18.46)$ & $(1.000,16.77)$ \\
     Triple (median + V4 + $t_{\mathrm{rec}}=10$~s) & $(0.500,60)$ & $(1.000,31.87)$ & $(1.000,25.01)$ \\
     \bottomrule
-  \end{tabular}}
+  \end{tabularnb}}
 \end{table}
 
 \begin{figure}[htbp]
