@@ -5,7 +5,6 @@
 \addcontentsline{toc}{section}{Appendix A: Proofs and Supplementary Derivations}
 
 \subsection*{A.1 Problem 1: Intersection of the Optimal Arc and the Proof That C3 Adds No Occlusion}
-\addcontentsline{toc}{subsection}{A.1 Problem 1: Intersection of the optimal arc and C3}
 
 \noindent\textbf{(a) Derivation of the blocked arc.} Let $T'=(84.6410,70.0000)$ and $\rmin=7.5821$~m. The $1.5$~m expanded rectangle of B2 is $[61.5,80.5]\times[57.5,72.5]$; a point on the circle, $(84.6410+7.5821\cos\varphi,\ 70+7.5821\sin\varphi)$, falls inside this rectangle if and only if
 \begin{equation}
@@ -26,7 +25,6 @@ The first inequality gives $\varphi\in[123.11^\circ,236.89^\circ]$, and the seco
 This expression is strictly increasing on $t\in(2.5,7.5821]$, so $y(79)\ge y(79)|_{t=2.5}=71.97>71$; that is, the LOS passes north of the north face of B2 ($y=71$) and does not enter the B2 footprint. Therefore C3 produces no additional occlusion on the feasible arc.
 
 \subsection*{A.2 Problem 2(1): Algebraic Expansion of $\Sigma=A^{-1}DA^{-T}$}
-\addcontentsline{toc}{subsection}{A.2 Problem 2(1): Algebraic expansion of the covariance}
 
 Let the LOS azimuths of stations $p_1$ and $p_2$ be $\alpha_i$, with unit directions $u_i=(\cos\alpha_i,\sin\alpha_i)$ and unit normals $n_i=(-\sin\alpha_i,\cos\alpha_i)$ ($n_i^Tu_i=0$). A first-order azimuth error $\delta\alpha_i$ makes the signed distance from the true target to the perturbed bearing line approximately $d_i\delta\alpha_i$, so
 \begin{equation}
@@ -103,7 +101,6 @@ with semi-axes $\sqrt{5.991\lambda_i}$, where $\lambda_i$ are the eigenvalues of
 \noindent\textbf{(e) Degeneracy and condition number.} As $\gamma\to0^\circ$ or $180^\circ$, $\det A=\pm\sin\gamma\to0$, $A$ becomes singular, and the entries of $A^{-1}$ diverge as $1/|\sin\gamma|$; by (c), $\trace\Sigma$ and $\det\Sigma$ both diverge as $1/\sin^2\gamma$. $\det A=n_1\times n_2=\pm\sin\gamma$ measures the singularity of $A$; using $1/|\det A|=1/|\sin\gamma|$ as the condition-number indicator (same order as the 2-norm condition number $\cot(\gamma/2)$, both diverging as $1/\gamma$ as $\gamma\to0$) gives the quantitative basis for the operating window $[30^\circ,150^\circ]$: at $\gamma=30^\circ$, $G=2G(90^\circ)$, i.e., the accuracy cost doubles.
 
 \subsection*{A.3 Problem 3: Linearization Residual RMS $=\sigma(s)^2/d^2$ and Hermite Quadrature}
-\addcontentsline{toc}{subsection}{A.3 Problem 3: Linearization residual and Hermite quadrature}
 
 \noindent\textbf{(a) Exact angle and first-order approximation.} Take the true position as the origin and the true LOS as the $x'$ axis, with the target at $(d,0)$, $d=40$~m. Decompose the localization error into along-range $\delta_\parallel$ and cross-range $\delta_\perp$, isotropic and independent, $\delta_\parallel,\delta_\perp\sim\mathcal{N}(0,\sigma(s)^2)$. The exact azimuth deviation from the estimated position to the target is
 \begin{equation}
@@ -170,6 +167,7 @@ where $x_i$ and $w_i$ are the 256-point probabilistic Hermite nodes and weights 
 \addcontentsline{toc}{section}{Appendix B: Algorithm Routes and Main Program List}
 
 \subsection*{B.1 Algorithm routes (full table)}
+Table~\ref{tab:B-1} lists the complete algorithm routes and selection rationale.
 \renewcommand{\thetable}{B-\arabic{table}}
 \setcounter{table}{0}
 \begin{table}[htbp]
@@ -243,12 +241,13 @@ Problem~4 uses ``event-triggered snapshot + reuse of the 2(2) solver + determini
 \item Section~4.5 and Table~\ref{tab:4-6}, scenario details $\to$ \path{Q4/results/q4_scenario_list.md} (\texttt{q4\_scenario\_list.py}).
 \item Section~4.5, simple-repair baseline and the three-way comparison $\to$ \path{Q4/results/q4_repair.json} (\texttt{q4\_repair.py}).
 \item Section~6.2, $Q/Q_2$ comparison $\to$ \path{Q1/results/q1_metric_compare.json} (\texttt{q1\_metric\_compare.py}).
-\item Tables D-1 and D-2, all ten pairs and the 2(2) timeline $\to$ \path{Q2/results/q2a_results.json}, \path{Q2/results/q2b_results.json}.
+\item Tables~\ref{tab:D-1} and~\ref{tab:D-2}, all ten pairs and the 2(2) timeline $\to$ \path{Q2/results/q2a_results.json}, \path{Q2/results/q2b_results.json}.
 \end{itemize}
 
-\noindent The complete source programs, run scripts, and result JSON files are provided in the supporting materials.
+\noindent The complete source programs, run scripts, and result JSON files are provided in the supporting materials; the core solver listings are reproduced in Appendix~E.
 
 \subsection*{B.4 Full symbol table}
+Table~\ref{tab:B-2} lists the complete symbol set.
 \begin{table}[htbp]
 \centering
 \caption{Full symbol list}
@@ -290,7 +289,7 @@ Problem~4 uses ``event-triggered snapshot + reuse of the 2(2) solver + determini
 \section*{Appendix C: Figure and Table Inventory}
 \addcontentsline{toc}{section}{Appendix C: Figure and Table Inventory}
 
-The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 4 for Q2, 2 for Q3, and 2 for Q4), plus one framework figure in Chapter~2 (Figure~\ref{fig:framework}); each is delivered as an SVG vector with a PNG fallback.
+The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 4 for Q2, 2 for Q3, and 2 for Q4), plus one framework figure in Chapter~2 (Figure~\ref{fig:framework}); each is delivered as an SVG vector with a PNG fallback. Table~\ref{tab:C-1} lists the figures and Table~\ref{tab:C-2} the tables.
 
 \renewcommand{\thetable}{C-\arabic{table}}
 \setcounter{table}{0}
@@ -352,6 +351,8 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 }
 \end{table}
 
+Appendix~E reproduces the core solver source code.
+
 % ---------------------------------------------------------------------
 \section*{Appendix D: Supplementary Tables}
 \addcontentsline{toc}{section}{Appendix D: Supplementary Tables}
@@ -412,3 +413,61 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 \noindent\footnotesize Note: the observation lasts 5~s and the reset time is the slew back to the east-facing attitude. The start time of an alert is the later of its two vehicles' ready times, so V1 waits from $3.24$~s to $6.994$~s for the longer slew of V4. V3 serves T1 and then T3 (the only reuse chain); T1 is already under way at $t_p=5$~s and is therefore locked in Problem~4. Clearance is the minimum distance from the station to the $1.5$~m-expanded building footprints; the two knife-edge values ($0.001$~m and $0.067$~m) are those discussed in Section~4.3.
 \end{minipage}
 \end{table}
+
+\clearpage
+\section*{Appendix E: Source Code}
+\addcontentsline{toc}{section}{Appendix E: Source Code}
+
+The core solver programs are reproduced below. Non-ASCII comments and path literals were transliterated to ASCII so that the listings compile with pdfLaTeX; the complete, unmodified source files, including the auxiliary scripts, are provided in the supporting materials.
+
+\begingroup
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  stepnumber=1,
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  tabsize=4,
+  xleftmargin=1.5em,
+  framexleftmargin=1.5em,
+  aboveskip=4pt,
+  belowskip=4pt
+}
+
+\subsection*{E.1 Problem 1}
+\noindent\textbf{\texttt{q1\_solve.py}}\par
+\lstinputlisting{code/q1_solve.py}
+\noindent\textbf{\texttt{area\_estimators.py}}\par
+\lstinputlisting{code/area_estimators.py}
+
+\subsection*{E.2 Problem 2}
+\noindent\textbf{\texttt{q2\_lib.py}}\par
+\lstinputlisting{code/q2_lib.py}
+\noindent\textbf{\texttt{q2a\_core.py}}\par
+\lstinputlisting{code/q2a_core.py}
+\noindent\textbf{\texttt{q2b\_core.py}}\par
+\lstinputlisting{code/q2b_core.py}
+\noindent\textbf{\texttt{q2b\_bound.py}}\par
+\lstinputlisting{code/q2b_bound.py}
+
+\subsection*{E.3 Problem 3}
+\noindent\textbf{\texttt{q3\_solve.py}}\par
+\lstinputlisting{code/q3_solve.py}
+
+\subsection*{E.4 Problem 4}
+\noindent\textbf{\texttt{q4\_core.py}}\par
+\lstinputlisting{code/q4_core.py}
+\noindent\textbf{\texttt{q4\_lib4.py}}\par
+\lstinputlisting{code/q4_lib4.py}
+\noindent\textbf{\texttt{q4\_repair.py}}\par
+\lstinputlisting{code/q4_repair.py}
+\noindent\textbf{\texttt{q4\_robust.py}}\par
+\lstinputlisting{code/q4_robust.py}
+\endgroup
