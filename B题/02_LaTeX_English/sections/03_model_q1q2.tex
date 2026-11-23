@@ -30,8 +30,6 @@ The observable region is $\Omega=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$, whe
 \subsection{Problem 1: Observable Region and Optimal Station}
 \label{sec:q1}
 
-\subsubsection{Constraint Formalization and Optimization Model}
-
 The horizontal projection and 3-D position of T1 are
 \begin{equation}
   T'=(50+40\cos30^\circ,\ 50+40\sin30^\circ)=(84.6410,70.0000)~\mathrm{m},
@@ -47,9 +45,9 @@ The observable region is $\Omega=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$. Wit
 \begin{equation}
   p^*=\argmax_{p\in\Omega}Q(p)=\argmin_{p\in\Omega}r(p).
 \end{equation}
-The criterion is chosen for four reasons. (i) A single-station angle error $\delta\alpha$ translates into a lateral position error $r\,\delta\alpha$ at the target, so $1/r$ has the same direction as single-station accuracy. (ii) C2 itself is $r\ge\rmin$, so $Q$ is aligned with the active constraint, and maximizing $Q$ is equivalent to pushing the pitch to its upper bound. (iii) In the two-station accuracy model of 2(1), DRMS increases monotonically with the station--target distances $d_i$ (Section~4.3.1), so a smaller $r$ is necessary for two-station accuracy. (iv) $Q$ is coordinate-independent, dimensionally simple, and strictly monotone, which facilitates tie-breaking. $Q$ is not the only admissible criterion; the alternative $Q_2=(1/r)\cos^2(\varepsilon-45^\circ)$ was also tested, and both criteria have the same optimal set.
+The criterion is chosen for four reasons. (i) A single-station angle error $\delta\alpha$ translates into a lateral position error $r\,\delta\alpha$ at the target, so $1/r$ has the same direction as single-station accuracy. (ii) C2 itself is $r\ge\rmin$, so $Q$ is aligned with the active constraint, and maximizing $Q$ is equivalent to pushing the pitch to its upper bound. (iii) In the two-station accuracy model of 2(1), DRMS increases monotonically with the station--target distances $d_i$ (Section~4.3), so a smaller $r$ is necessary for two-station accuracy. (iv) $Q$ is coordinate-independent, dimensionally simple, and strictly monotone, which facilitates tie-breaking. $Q$ is not the only admissible criterion; the alternative $Q_2=(1/r)\cos^2(\varepsilon-45^\circ)$ was also tested, and both criteria have the same optimal set.
 
-\subsubsection{Global Lower Bound and Optimality Theorem}
+The optimum is certified by a global lower bound and an explicit attainment argument.
 
 \begin{lemma}
 For any $p\in\Omega$, $r(p)\ge\rmin$.
@@ -65,7 +63,7 @@ If $\Omega\cap\{p:r(p)=\rmin\}$ is nonempty, then $r^*=\rmin$, $\varepsilon^*=80
 
 The theorem also shows that $r^*$ is independent of the building layout; the environment changes only the position and length of the optimal arc. This is the origin of the principle ``the optimal value is robust, the optimal location is sensitive.''
 
-\subsubsection{Optimal Arc and Tie-Breaking}
+The optimal set is then delimited on the $\rmin$ circle.
 
 The distance from $T'$ to the east face $x=79$ of B2 is only $5.6410$~m, less than $\rmin$, so the $\rmin$ circle intrudes westward into the $1.5$~m buffer of B2. Substituting points on the circle into the two inequalities of the expanded rectangle $[61.5,80.5]\times[57.5,72.5]$ gives the blocked arc $\varphi\in[160.75^\circ,236.89^\circ]$ ($76.15^\circ$); the feasible arc crosses $0^\circ$ continuously and has length $283.85^\circ$ ($78.85\%$ of the circle). The derivation is in Appendix~A.1. The distances from the other buildings to $T'$ exceed $\rmin$, and LOS on the feasible arc passes east of or above B2, so C3 does not shorten the feasible arc further (proof in Appendix~A.1); 200,000-point arc sampling agrees with the analytics. In addition, the explicit feasible point $p_c=(84.641,77.582)$ has LOS with $x\equiv84.641>79$ throughout, does not intersect any building, and satisfies C1; thus both steps---``lower bound'' and ``attainability''---are verified by explicit construction.
 
@@ -81,9 +79,7 @@ keep the tie band $m(p)\ge m^*-0.05$~m, where $m^*=9.6746$~m ($\varphi=56.5038^\
 \end{enumerate}
 The result is $p^*=(88.8753,76.2895)$~m, $\varphi=56.05^\circ$, $r^*=7.5821$~m, $\varepsilon^*=80^\circ$, $Q^*=0.1319$~m$^{-1}$. The margin of $p^*$ itself is $9.6247$~m, entering the tie band with a $0.0001$~m surplus; the travel time to the nearest vehicle V4 is $2.78$~s, and the minimum LOS clearance is $7.41$~m. It should be emphasized that $p^*$ is ``the fastest station within the near-maximum-margin band,'' not the maximum-margin point itself.
 
-\subsubsection{Results}
-
-A $0.1$~m midpoint grid estimates the observable area as $5610.4$~m$^2$ (about $56.1\%$ of the site); a $0.05$~m midpoint recomputation gives $5608.5$~m$^2$ (difference $1.87$~m$^2$, $0.033\%$, converged). The value $5614.9$~m$^2$ is the $0.25$~m grid benchmark of the sensitivity scan in Figure~\ref{fig:4-3} and is used only for relative comparisons under the same convention; the node-count convention $5628.7$~m$^2$ is for reference only. The minimum feasible $r$ on the grid is $7.5828$~m (at $(92.2,69.4)$), $0.0007$~m above the closed-form bound, which is explained by grid quantization. C1, C2, and C3 remove $1685.7$, $157.9$, and $2547.7$~m$^2$, respectively, leaving $5610.4$~m$^2$ (the three sum to $4391.3$~m$^2$; the $1.7$~m$^2$ difference from $10000-5610.4$ is grid quantization). The LOS passes north of the north face of B2, with a minimum clearance of $7.41$~m (see Appendix~A.1(b)). Figure~\ref{fig:4-1} shows the observable region, Figure~\ref{fig:4-2} shows the optimal arc and the margin--azimuth curve, and Figure~\ref{fig:4-3} shows the sensitivity of $r^*$ and the area to $H$, $\varepsilon_{\max}$, the B2 height, and the vehicle radius.
+As a verification, a $0.1$~m midpoint grid estimates the observable area as $5610.4$~m$^2$ (about $56.1\%$ of the site); a $0.05$~m midpoint recomputation gives $5608.5$~m$^2$ (difference $1.87$~m$^2$, $0.033\%$, converged). The value $5614.9$~m$^2$ is the $0.25$~m grid benchmark of the sensitivity scan in Figure~\ref{fig:4-3} and is used only for relative comparisons under the same convention; the node-count convention $5628.7$~m$^2$ is for reference only. The minimum feasible $r$ on the grid is $7.5828$~m (at $(92.2,69.4)$), $0.0007$~m above the closed-form bound, which is explained by grid quantization. C1, C2, and C3 remove $1685.7$, $157.9$, and $2547.7$~m$^2$, respectively, leaving $5610.4$~m$^2$ (the three sum to $4391.3$~m$^2$; the $1.7$~m$^2$ difference from $10000-5610.4$ is grid quantization). The LOS passes north of the north face of B2, with a minimum clearance of $7.41$~m (see Appendix~A.1(b)). Figure~\ref{fig:4-1} shows the observable region, Figure~\ref{fig:4-2} shows the optimal arc and the margin--azimuth curve, and Figure~\ref{fig:4-3} shows the sensitivity of $r^*$ and the area to $H$, $\varepsilon_{\max}$, the B2 height, and the vehicle radius.
 
 \begin{figure}[htbp]
   \centering
@@ -112,17 +108,12 @@ In Figure~\ref{fig:4-2}(a), green and red mark the feasible and B2-blocked arcs 
 
 Figure~\ref{fig:4-3}(a)(b) shows $r^*$ rising linearly with target height $H$ and falling nonlinearly as the pitch limit $\varepsilon_{\max}$ rises; (c)(d) shows the area shrinking quickly then slowly with B2 height and almost linearly with vehicle radius, so the pitch limit is the most sensitive parameter for $r^*$.
 
-\subsubsection{Algorithm and Efficiency}
-
-Algorithmic details and the complexity comparison are in Appendix~B.2; the closed-form certificate fixes the optimum, and the $0.1$~m grid is used only for verification.
 
 % ---------------------------------------------------------------------
 \subsection{Problem 2: Two-Station Intersection and Multi-Target Scheduling}
 \label{sec:q2}
 
-\subsubsection{Two-Station Intersection Accuracy Model}
-
-The accuracy below is a conditional analysis of the two-station synchronous bearing intersection prescribed by Problem~2: it describes the horizontal position recovered from the two bearing lines, and its only stochastic input is the specified azimuth error $\mathcal{N}(0,(1^\circ)^2)$. The alert's nominal $(\theta,R,H)$ fixes only the target position used for planning in Sections~4.3.2 and 4.3.3 (Section~4.1(a), Assumption~A5), and no value below is a claim about its accuracy.
+The accuracy below is a conditional analysis of the two-station synchronous bearing intersection prescribed by Problem~2: it describes the horizontal position recovered from the two bearing lines, and its only stochastic input is the specified azimuth error $\mathcal{N}(0,(1^\circ)^2)$. The alert's nominal $(\theta,R,H)$ fixes only the target position used for planning below (Section~4.1(a), Assumption~A5), and no value below is a claim about its accuracy.
 
 The $1^\circ$ is the problem-specified azimuth measurement error at surveyed stations, and the vehicle is assumed to be at the nominal station coordinate, so any residual docking error is absorbed into the $1^\circ$. The self-localization term $\sigma(s)/d$ of Problem~3 is defined separately at a fixed $40$~m distance and is not part of this budget; the two budgets are not merged (Section~7.2).
 
@@ -143,9 +134,7 @@ Define
 \end{equation}
 the 2-D radial RMSE is $\sqrt2\,\mathrm{DRMS}$, and the $95\%$ circle radius is $R_{95}=2.4477\,\mathrm{DRMS}$ (exact when isotropic). As $\gamma\to0^\circ/180^\circ$, $G\to\infty$ and the condition number is $\kappa=1/|\sin\gamma|$ (Appendix~A.2(e)); at $\gamma=30^\circ$, $G=2G^*$, so $[30^\circ,150^\circ]$ is the operating window, with a ridge-regularized least-squares estimator on the estimation side.
 
-\subsubsection{Global Lower Bound and Vehicle/Station Selection}
-
-From $|\sin\gamma|\le1$, the QM--AM (quadratic-mean--arithmetic-mean) inequality, and $d_i\ge\rmin$ from C2,
+The accuracy index is then bounded and the station pair selected. From $|\sin\gamma|\le1$, the QM--AM (quadratic-mean--arithmetic-mean) inequality, and $d_i\ge\rmin$ from C2,
 \begin{equation}
   G\ge\sqrt{\frac{d_1^2+d_2^2}{2}}\ge\frac{d_1+d_2}{2}\ge\rmin=\frac{35-2}{\tan80^\circ}=5.8188~\mathrm{m}.
 \end{equation}
@@ -208,9 +197,7 @@ Figure~\ref{fig:4-5}(a) shows that DRMS is U-shaped in the intersection angle $\
 
 The zoom in Figure~\ref{fig:4-6} shows the selected stations and $T2'$, with an inset of the $1\sigma$, $2\sigma$, and $95\%$ position-error circles; the equidistant orthogonal geometry makes the error nearly isotropic, and the circles are much smaller than the station--target distances. A required pitch margin can be met by falling back to $\varepsilon\le78^\circ$, at the DRMS cost listed in Table~\ref{tab:4-2}.
 
-\subsubsection{Six-Slot, Five-Vehicle Scheduling Model}
-
-Let the alert set be $A=\{\mathrm{T1},\mathrm{T2},\mathrm{T3}\}$ and the vehicle set be $V=\{\mathrm{V1},\dots,\mathrm{V5}\}$. Each alert $a$ is assigned two distinct vehicles $M_a$; the task sequence of vehicle $v$ is $\pi_v$, and the station of task $k$ is $p_{v,k}\in\Omega_a$. For task $k$, let $D_{v,k-1}$ be the previous task's departure time and $\mathrm{pos}_{v,k-1}$ the previous position. Then
+We now turn from accuracy to scheduling. Let the alert set be $A=\{\mathrm{T1},\mathrm{T2},\mathrm{T3}\}$ and the vehicle set be $V=\{\mathrm{V1},\dots,\mathrm{V5}\}$. Each alert $a$ is assigned two distinct vehicles $M_a$; the task sequence of vehicle $v$ is $\pi_v$, and the station of task $k$ is $p_{v,k}\in\Omega_a$. For task $k$, let $D_{v,k-1}$ be the previous task's departure time and $\mathrm{pos}_{v,k-1}$ the previous position. Then
 \begin{equation}
   \tau_{\mathrm{tr}}=\distpath(\mathrm{pos},p)/3,\qquad
   \tau_{\mathrm{sl}}=\max(|\alpha|,|\varepsilon|)/30,
@@ -229,7 +216,7 @@ The objective is $\min\max_a S_a$. Each alert has 10 vehicle pairs, so the three
 
 A reuse-aware lower bound is given in Appendix~B.2: $\mathrm{LB}=7.391$~s, certifying that the delivered $10.355$~s plan is within $28.6\%$ of the global optimum.
 
-\subsubsection{Nearest-Assignment Baseline and Comparison}
+For comparison, a nearest-assignment baseline is defined as follows.
 
 In the order T1$\to$T2$\to$T3, fill two slots for each alert. For each slot, among vehicles not already serving this alert, choose the one with the smallest ``travel time from the current chain end to its minimum-ready station for this alert'' (ties: smaller vehicle number), and use that minimum-ready station; if the vehicle already has tasks, append to its chain. The same timeline simulation computes the start times. This baseline considers only ``who is nearest'' and ignores synchronized pairing, reuse-chain order, and slew angle.
 
@@ -237,11 +224,9 @@ Table~\ref{tab:4-3} compares the two plans; the latest start is reduced by $10.6
 
 The difference has three sources. (i) Synchronized-pairing loss: the baseline places T2 as the second task in V3's reuse chain, so V3 must first finish T1 and reset, forcing V1 on the other side of T2 to wait; the optimized plan instead pairs V1 with the dedicated V4. (ii) Reuse-chain order: the baseline's three two-task chains serialize slow tasks after fast alerts and block T3's early window; the optimized plan has only one T1$\to$T3 chain. (iii) Azimuth-driven station selection: ready time is highly sensitive to the pan angle ($30^\circ$/s), while the baseline selects stations by distance and ignores the turn angle; the optimization model minimizes ready time.
 
-Note that the T2 pair of 2(1) is accuracy-optimal, whereas 2(2) re-optimizes the stations for timeliness; Section~4.3.6 verifies the accuracy that this costs.
+Note that the T2 pair of 2(1) is accuracy-optimal, whereas 2(2) re-optimizes the stations for timeliness; the accuracy check below verifies what this costs.
 
-\subsubsection{Results and Clearance-Robust Variant}
-
-The $10.355$~s optimum has knife-edge station clearances of only $1.3\times10^{-3}$~m (V3 at T3) and $6.7\times10^{-2}$~m (V4 at T2); the full stations and timings are listed in Table~\ref{tab:D-2}. Re-optimizing with $0.5$~m clearance yields a robust variant of $10.837$~s ($+4.7\%$), with assignment T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V4,V5) and start times $1.54\bsl10.804\bsl10.837$~s. This variant addresses line-of-sight clearance only and is not accuracy-qualified (its T1 and T2 intersection angles are $21.14^\circ$ and $170.54^\circ$); it is a robustness study, not a deployment recommendation. The accuracy-qualified deployment plan is given in Section~4.3.6. The sensitivities to speed and angular rate are given in Section~6.2; the elasticity of $\omega$ is about four times that of $v$.
+The $10.355$~s optimum has knife-edge station clearances of only $1.3\times10^{-3}$~m (V3 at T3) and $6.7\times10^{-2}$~m (V4 at T2); the full stations and timings are listed in Table~\ref{tab:D-2}. Re-optimizing with $0.5$~m clearance yields a robust variant of $10.837$~s ($+4.7\%$), with assignment T1$\leftarrow$(V3,V5), T2$\leftarrow$(V1,V3), T3$\leftarrow$(V4,V5) and start times $1.54\bsl10.804\bsl10.837$~s. This variant addresses line-of-sight clearance only and is not accuracy-qualified (its T1 and T2 intersection angles are $21.14^\circ$ and $170.54^\circ$); it is a robustness study, not a deployment recommendation. The accuracy-qualified deployment plan is given below. The sensitivities to speed and angular rate are given in Section~6.2; the elasticity of $\omega$ is about four times that of $v$.
 
 \begin{table}[htbp]
   \centering
@@ -273,13 +258,11 @@ The baseline Gantt chart is structurally the same as the optimized plan and is o
   \label{fig:4-7}
 \end{figure}
 
-Figure~\ref{fig:4-7}(a) gives the task chain on the time axis, with orange slew segments and gray synchronized waits explaining each start time and V3 forming the only reuse chain (T1$\to$T3); (b) shows the post-arrival positions and bearings: T1 is viewed from the same northwest side, while T2 and T3 are bracketed from different directions, the geometric basis of the accuracy check in Section~4.3.6.
-
-\subsubsection{Accuracy Check and Recommended Deployment Plan}
+Figure~\ref{fig:4-7}(a) gives the task chain on the time axis, with orange slew segments and gray synchronized waits explaining each start time and V3 forming the only reuse chain (T1$\to$T3); (b) shows the post-arrival positions and bearings: T1 is viewed from the same northwest side, while T2 and T3 are bracketed from different directions, the geometric basis of the accuracy check below.
 
 The stations of 2(2) are re-optimized independently for timeliness and must be substituted back into the accuracy model of 2(1) to check the intersection geometry; the three pairs are evaluated in Table~\ref{tab:4-4}. T2 and T3 lie inside the $[30^\circ,150^\circ]$ operating window, while T1 is near-degenerate ($\kappa=3.02$): the two stations are on the same side and the LOS nearly parallel, and its DRMS is about $30$ times the 2(1) bound. The $10.355$~s plan is therefore the time-optimal benchmark for the problem as posed, but is not recommended for deployment.
 
-If T1 must also satisfy $\gamma\ge30^\circ$, fixing the assignment and order and reselecting T1's stations gives $(14.90,85.60)/(53.90,98.40)$ (the T1* row of Table~\ref{tab:4-4}); T1's start is delayed from $1.607$~s to $3.746$~s, and the maximum start rises from $10.355$~s to $12.983$~s ($+2.629$~s, $+25.38\%$). Relative to Table~\ref{tab:D-2}, only T1's stations and the T1/T3 start times change; T2 and the task orders are unchanged. This accuracy-qualified plan is recommended for deployment, while the $10.355$~s plan remains the timeliness benchmark. Because only T1's stations change, the T2/T3 knife-edge clearances of Section~4.3.5 persist; a plan satisfying both the accuracy window and the $0.5$~m clearance requires a joint re-optimization, left as a refinement. The $12.983$~s value is a constrained re-solution under the delivered assignment/order, not a global optimality claim; extending the structural enumeration with the $\gamma$ constraint is a further refinement. Timeliness and accuracy are thus not interchangeable: a deployment that requires $\gamma\ge30^\circ$ must add an intersection-angle constraint to the scheduling model.
+If T1 must also satisfy $\gamma\ge30^\circ$, fixing the assignment and order and reselecting T1's stations gives $(14.90,85.60)/(53.90,98.40)$ (the T1* row of Table~\ref{tab:4-4}); T1's start is delayed from $1.607$~s to $3.746$~s, and the maximum start rises from $10.355$~s to $12.983$~s ($+2.629$~s, $+25.38\%$). Relative to Table~\ref{tab:D-2}, only T1's stations and the T1/T3 start times change; T2 and the task orders are unchanged. This accuracy-qualified plan is recommended for deployment, while the $10.355$~s plan remains the timeliness benchmark. Because only T1's stations change, the T2/T3 knife-edge clearances above persist; a plan satisfying both the accuracy window and the $0.5$~m clearance requires a joint re-optimization, left as a refinement. The $12.983$~s value is a constrained re-solution under the delivered assignment/order, not a global optimality claim; extending the structural enumeration with the $\gamma$ constraint is a further refinement. Timeliness and accuracy are thus not interchangeable: a deployment that requires $\gamma\ge30^\circ$ must add an intersection-angle constraint to the scheduling model.
 
 \begin{table}[htbp]
   \centering
@@ -303,6 +286,3 @@ If T1 must also satisfy $\gamma\ge30^\circ$, fixing the assignment and order and
   {\footnotesize Note: $\mathrm{DRMS}=\sigma G$, $\sigma=1^\circ=0.017453$~rad; T1* is the constrained re-solution with $\gamma_{\mathrm{T1}}\ge30^\circ$ under the same assignment/order and does not constitute a global optimality claim. None of the four station pairs is isotropic (the eigenvalue ratio of T1 is about $46:1$); exact $95\%$ coverage should use the ellipse semi-axes $\sqrt{5.991\lambda_i}$, which are $(10.56,1.55)\bsl(3.27,2.48)\bsl(4.77,1.19)\bsl(6.87,1.58)$~m for T1/T2/T3/T1*, respectively.}
 \end{table}
 
-\subsubsection{Algorithm and Efficiency}
-
-Algorithmic details and the complexity comparison are in Appendix~B.2. The delivered $10.355$~s plan is supported by a reuse-aware lower bound $\mathrm{LB}=7.391$~s (gap $28.6\%$), computed over the same $5{,}880$ structures.

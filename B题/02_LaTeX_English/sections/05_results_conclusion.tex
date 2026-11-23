@@ -14,10 +14,10 @@
     \toprule
     Object & Method & Deviation & Details \\
     \midrule
-    Q1 global optimum & Closed-form $r^*$ vs.\ $0.1$~m grid & $7.5821$ vs.\ $7.5828$~m ($+0.0007$~m, $0.009\%$) & 4.2.4 \\
-    Q2 accuracy and scheduling & Covariance vs.\ 200,000 MC; structural enumeration + top-5 + $0.5$~m variant; reuse-aware LB & RMSE $0.1436$~m $=\sqrt2\,\mathrm{DRMS}$; P95 $0.2486$~m; time optimum $10.355$~s, clearance-robust $10.837$~s, accuracy-qualified $12.983$~s; LB $7.391$~s (gap $28.6\%$) & 4.3.2, 4.3.5, B.2 \\
-    Q3 error propagation & Linearization vs.\ $256\times256$ Hermite; $10^6$ MC & $s_{\max}$ $66.92$ vs.\ $66.84$~m ($0.13\%$); $P$ deviation $\le3\times10^{-4}$ & 4.4.3 \\
-    Q4 rescheduling & 74-scenario audit; keep / simple repair / re-optimization; $0.5$~m margin/tolerance/$22.5^\circ$ densification & 0 anomalies; simple repair restores $\eta$ in 67/74; re-optimization lowers $t_{\mathrm{last}}$ in 61/74 (mean $4.35$~s); conclusions unchanged & 4.5.3 \\
+    Q1 global optimum & Closed-form $r^*$ vs.\ $0.1$~m grid & $7.5821$ vs.\ $7.5828$~m ($+0.0007$~m, $0.009\%$) & 4.2 \\
+    Q2 accuracy and scheduling & Covariance vs.\ 200,000 MC; structural enumeration + top-5 + $0.5$~m variant; reuse-aware LB & RMSE $0.1436$~m $=\sqrt2\,\mathrm{DRMS}$; P95 $0.2486$~m; time optimum $10.355$~s, clearance-robust $10.837$~s, accuracy-qualified $12.983$~s; LB $7.391$~s (gap $28.6\%$) & 4.3, B.2 \\
+    Q3 error propagation & Linearization vs.\ $256\times256$ Hermite; $10^6$ MC & $s_{\max}$ $66.92$ vs.\ $66.84$~m ($0.13\%$); $P$ deviation $\le3\times10^{-4}$ & 4.4 \\
+    Q4 rescheduling & 74-scenario audit; keep / simple repair / re-optimization; $0.5$~m margin/tolerance/$22.5^\circ$ densification & 0 anomalies; simple repair restores $\eta$ in 67/74; re-optimization lowers $t_{\mathrm{last}}$ in 61/74 (mean $4.35$~s); conclusions unchanged & 4.5 \\
     \bottomrule
   \end{tabularnb}
 \end{table}
@@ -76,7 +76,7 @@ Parameters are selected by relevance to the problem, dimensional scale, model do
 
 \subsection{Stability Conclusions}
 
-Within reasonable perturbation ranges, no qualitative conclusion flips: the optimum lies on the boundary, $G^*=\rmin$, localization dominates over long travel, and rescheduling converts structural loss into temporal loss all remain valid. The model is insensitive to numerical/engineering parameters such as the grid step, $0.5$~m margin, zero-displacement tolerance, and $45^\circ$ azimuth sampling; the two-stage response of $t_{\mathrm{last}}$ to $t_{\mathrm{rec}}$ in Problem~4 is shown in Section~4.5.3. Remodeling is needed only under extreme conditions (the $\rmin$ circle is completely occluded, $t_{\mathrm{rec}}$ approaches 30~s with triple disturbances, or errors are strongly correlated).
+Within reasonable perturbation ranges, no qualitative conclusion flips: the optimum lies on the boundary, $G^*=\rmin$, localization dominates over long travel, and rescheduling converts structural loss into temporal loss all remain valid. The model is insensitive to numerical/engineering parameters such as the grid step, $0.5$~m margin, zero-displacement tolerance, and $45^\circ$ azimuth sampling; the two-stage response of $t_{\mathrm{last}}$ to $t_{\mathrm{rec}}$ in Problem~4 is shown in Section~4.5. Remodeling is needed only under extreme conditions (the $\rmin$ circle is completely occluded, $t_{\mathrm{rec}}$ approaches 30~s with triple disturbances, or errors are strongly correlated).
 
 % =====================================================================
 % 7. Strengths and Weaknesses
@@ -99,7 +99,7 @@ Within reasonable perturbation ranges, no qualitative conclusion flips: the opti
 \begin{enumerate}[label=(\arabic*)]
 \item \textbf{The global optimality of Problem~2(2) is not certified.} The assignment structures are exhaustively enumerated at the $10^3$ level, but station optimization relies on coordinate descent and Nelder--Mead; $10.355$~s is the best time-optimal solution in the sense of ``structural exhaustion + station refinement,'' and the $12.983$~s accuracy-qualified plan is a constrained re-solution under the delivered structure. A reuse-aware relaxation gives $\mathrm{LB}=7.391$~s, so the delivered plan is within a \emph{certified} $28.6\%$ gap, but a full continuous-station MILP/CP-SAT certificate is not provided.
 
-\item \textbf{The Q2 and Q3 error budgets are not unified.} The Q2 budget excludes the self-localization term $\sigma(s)/d$ (Section~4.3.1). At the 2(1) stations ($d=5.8188$~m; travel $5.11/13.61$~s, hence $\sigma(s)=0.607/1.117$~m) this term would be $6.0^\circ/11.0^\circ$ (even at $s=0$, $\sigma=0.3$~m gives $2.95^\circ$), raising DRMS from $0.1016$~m to about $0.90$~m in a first-order audit, and the station optimization would have to be re-run under the merged model. We follow the per-problem specifications and state this explicitly rather than silently mixing the budgets.
+\item \textbf{The Q2 and Q3 error budgets are not unified.} The Q2 budget excludes the self-localization term $\sigma(s)/d$ (Section~4.3). At the 2(1) stations ($d=5.8188$~m; travel $5.11/13.61$~s, hence $\sigma(s)=0.607/1.117$~m) this term would be $6.0^\circ/11.0^\circ$ (even at $s=0$, $\sigma=0.3$~m gives $2.95^\circ$), raising DRMS from $0.1016$~m to about $0.90$~m in a first-order audit, and the station optimization would have to be re-run under the merged model. We follow the per-problem specifications and state this explicitly rather than silently mixing the budgets.
 
 \item \textbf{The independent normal error assumption is strong.} Problem~2 assumes independent $\mathcal{N}(0,(1^\circ)^2)$ azimuth errors at the two stations, and Problem~3 assumes three independent zero-mean normal sources; MC validates the nominal parameters but does not cover correlated, nonzero-mean, or heavy-tailed cases.
 
@@ -135,6 +135,7 @@ Overall, geometry determines feasibility, accuracy determines station placement,
 % =====================================================================
 % References
 % =====================================================================
+\clearpage
 \begin{thebibliography}{9}
 \bibitem{swmcm} 2026 12th ShuWei Cup National College Mathematical Modeling Challenge (Autumn), Problem B: Rapid UAV Localization via Coordinated Mobile Vehicles. 2026.
 

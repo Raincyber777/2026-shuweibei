@@ -4,9 +4,7 @@
 \subsection{Problem 3: Localization and Pointing Error Propagation}
 \label{sec:q3}
 
-\subsubsection{Error Propagation Model}
-
-Problem~3 assumes the target position to be perfectly known; the pointing reference is the nominal alert datum of Section~4.1(a), a planning datum rather than a measurement, so only the vehicle's own localization error and the gimbal pointing errors are propagated. It is not added to the Q2 $1^\circ$ budget (Section~4.3.1).
+Problem~3 assumes the target position to be perfectly known; the pointing reference is the nominal alert datum of Section~4.1(a), a planning datum rather than a measurement, so only the vehicle's own localization error and the gimbal pointing errors are propagated. This budget is not added to the Q2 $1^\circ$ budget (Section~4.3).
 
 Take the true position $P$ as the origin and the true LOS as the $x'$ axis, with the target at $(d,0)$, $d=40$~m. Decompose the localization error into cross-range $\delta_\perp$ and along-range $\delta_\parallel$; under isotropy, $\delta_\perp\sim\mathcal{N}(0,\sigma(s)^2)$. The exact deviation from the estimated position to the target is $\Delta\alpha=\operatorname{atan2}(-\delta_\perp,d-\delta_\parallel)\approx-\delta_\perp/d$ (residual analysis in Appendix~A.3). Adding the gimbal bias $\varepsilon_0\sim\mathcal{N}(0,0.8^2)$ and control error $\varepsilon_c\sim\mathcal{N}(0,0.6^2)$,
 \begin{equation}
@@ -19,8 +17,6 @@ where $\wrap(\cdot)$ folds angles into $(-180^\circ,180^\circ]$. The three terms
   =(1.432394\sigma(s))^2+1.0.
 \end{equation}
 
-\subsubsection{$s_{\max}$ and $(a,b)$ Constraints}
-
 From $P(|\Delta\psi|\le5^\circ)=2\Phi(5/\sigma_\psi)-1\ge0.95$, we obtain $\sigma_\psi\le5/z_{0.975}=2.551067^\circ$. Substituting into the expression above,
 \begin{equation}
   \sigma(s)\le\frac{\sqrt{2.551067^2-1.0}}{1.432394}=1.638446~\mathrm{m},
@@ -29,8 +25,6 @@ From $P(|\Delta\psi|\le5^\circ)=2\Phi(5/\sigma_\psi)-1\ge0.95$, we obtain $\sigm
   s_{\max}=\frac{1.638446-0.3}{0.02}=66.9223~\mathrm{m}\approx66.92~\mathrm{m}.
 \end{equation}
 At $s=80$~m, $\sigma(80)=1.9$~m, $\sigma_\psi=2.89945^\circ$, and $P=0.91538<0.95$. If the criterion must still hold at 80~m, then $a+80b\le1.638446$~m, which together with $a,b\ge0$ forms a triangular feasible region ($b=0$ gives $a\le1.6384$~m; $a=0$ gives $b\le0.0204806$~m/m). The nominal point $(0.3,0.02)$ lies outside; one must reduce $b$ to $0.0167306$~m/m ($-16.3\%$) or reduce $a$ to $0.0384$~m.
-
-\subsubsection{Contribution Decomposition and Exact Verification}
 
 Let $\mathrm{var}_{\mathrm{loc}}=(1.432394\sigma(s))^2$, $\mathrm{var}_{\mathrm{bias}}=0.64$, and $\mathrm{var}_{\mathrm{ctrl}}=0.36$. At $s=0$ the three shares are $15.6\%\bsl54.0\%\bsl30.4\%$; at $s=40$ they are $71.3\%\bsl18.4\%\bsl10.3\%$; at $s=80$ they are $88.1\%\bsl7.6\%\bsl4.3\%$; the bias:control ratio is always $64:36$. The dominant-factor switch point is obtained from $\mathrm{var}_{\mathrm{loc}}=\mathrm{var}_{\mathrm{bias}}+\mathrm{var}_{\mathrm{ctrl}}$ as $s=19.907$~m (shares $50.0\%\bsl32.0\%\bsl18.0\%$), after which localization becomes the first source. The linearization residual RMS is $\sigma(s)^2/d^2$, which at $s=80$~m is $0.1293^\circ$, only $4.46\%$ of $\sigma_\psi$ and about $0.2\%$ of the variance. A $256\times256$ Hermite quadrature gives the exact $s_{\max}=66.84$~m, $P(66.92)=0.94980$, and $a+80b\le1.6367$~m; the recommended practice is to use $66.84$~m as the conservative design value and $66.92$~m as the closed-form primary answer. The $P$ deviation of $10^6$ Monte Carlo runs \cite{hammersley} is $\le3\times10^{-4}$, validating the linearization and the normal composition.
 
@@ -74,17 +68,12 @@ In Figure~\ref{fig:4-8}(a), the localization term rises linearly with $s$ and cr
 
 Figure~\ref{fig:4-9}(a) shows $P(|\Delta\psi|\le5^\circ)$ decreasing with $s$ and crossing the $0.95$ line at $s_{\max}$, with the Monte Carlo points on the analytical curve; (b) shows the shaded $(a,b)$ region where $P\ge0.95$ at 80~m, with the nominal point outside.
 
-\subsubsection{Algorithm and Efficiency}
-
-Algorithmic details and the efficiency comparison are in Appendix~B.2; the closed form and exact quadrature agree to $0.13\%$.
 
 % ---------------------------------------------------------------------
 \subsection{Problem 4: Rescheduling under Disturbances}
 \label{sec:q4}
 
-The baseline is the time-optimal $10.355$~s plan of Section~4.3.5, as the problem prescribes; the accuracy-qualified $12.983$~s plan of Section~4.3.6 is an alternative deployment plan and is not used as the rescheduling baseline, so the comparison isolates the effect of the disturbances.
-
-\subsubsection{State Snapshot and Locking Rules}
+The baseline is the time-optimal $10.355$~s plan of Section~4.3, as the problem prescribes; the accuracy-qualified $12.983$~s plan of the same section is an alternative deployment plan and is not used as the rescheduling baseline, so the comparison isolates the effect of the disturbances.
 
 At $t_p$ (5~s without an outage, $t_{\mathrm{rec}}$ with an outage), record $(t_{\mathrm{avail}},\mathrm{pos},\mathrm{att},\text{\texttt{locked\_until}})$ for each vehicle. Traveling: position is interpolated linearly, attitude is east, and the vehicle can be redispatched immediately. Slewing: the vehicle is at its station, attitude is interpolated, and it can be redispatched. Synchronized waiting: the vehicle is at its station, attitude points at the target, and it can be redispatched. Observing/resetting: the alert is locked and counted as served---it is not rescheduled even though its 5~s observation may still be in progress---and the vehicle remains locked until its reset finishes; this is the problem's lock rule. At $t=5$~s, T1 is in this state with $3.39$~s of its 5~s observation elapsed.
 
@@ -94,13 +83,9 @@ Rules: alerts that started before $t_p$ cannot be rescheduled; dispatched-but-un
 \end{equation}
 after that task resets, all subsequent tasks perform a full-angle slew from east. Other redispatches (new station more than 5~cm from the current position) follow A3/A6: return to east during travel and perform a full slew after arrival. For example, in the $(\theta=0^\circ,\rho=30~\mathrm{m})$ scenario (internal id \texttt{th0\_R30}), V1's redispatch chain is T2$\to$T3: T2 has a $0$~s continue-slew; after T2 observation and reset, T3 slews from east for $1.655$~s, so T3 starts at $16.772$~s. Continue-slew is the continuation of the same pointing phase, not a new ``arrival--pointing'' process.
 
-\subsubsection{Rescheduling Model and Benchmark Strategy}
-
 The pending alert set $A_p$ is the union of alerts whose baseline start is $\ge t_p$, orphan alerts, and the new alert T4; the available vehicle set $V_p$ contains all non-failed vehicles. The decisions are $M_a$, $\pi_v$, and $p_{v,k}$; the objective is lexicographic: maximize $k$, then minimize $t_{\mathrm{last}}$; the constraints are two distinct available vehicles per pending alert, stations in the corresponding $\Omega_a$, timeline propagation from the snapshot state, and exclusion of locked alerts and vehicles. The solution reuses the structural enumeration, coordinate descent, Nelder--Mead, and deadlock detection of Problem~2(2), changing only the initial conditions.
 
 Three policies are compared. (i) \emph{Keep-original}: no new commands are issued; a pending alert whose pair contains the failed vehicle never starts, a new alert is never assigned, and nothing is redispatched---this is a no-reaction baseline. (ii) \emph{Simple repair}: keep every pending assignment and its original station; replace a failed vehicle by the nearest available spare for the same alert; insert a new alert at the end of the two earliest-available chains; choose a station only for a new or replacement task (the current position if feasible, otherwise the nearest feasible station); do not reorder existing tasks and do not run coordinate descent or Nelder--Mead. (iii) \emph{Re-optimization}: the model above. The simple-repair baseline separates the value of reacting at all from the incremental value of re-optimization. Because the lexicographic objective maximizes $k$ first, any pending alert that can be served will be served; the comparison with simple repair therefore separates this \emph{guaranteed} completion effect of the objective from the incremental timing effect of re-optimization.
-
-\subsubsection{Scenario Set and Results}
 
 The scenario set has 74 scenarios: A, new alert, $8$ azimuths $\times$ $3$ distances $=24$; B, single vehicle failure, 5; C, single outage, 3; D, failure $\times$ outage, 15; E, new alert $\times$ failure, 6; F, new alert $\times$ outage, 9; G, triple combination, 12. New alerts use 8 azimuths at $45^\circ$ and $\rho\in\{30,40,50\}$~m, covering the shadow directions of all buildings and both ends of the distance range; a subsequent $22.5^\circ$ refinement moves $t_{\mathrm{last}}$ smoothly within $14.57$--$16.45$~s, which confirms that $45^\circ$ sampling suffices. The failure class runs all 5 vehicles; the combination class uses V2 and V4 as representatives, because V1 and V4 are the two members of T2's pair and V2, V3 are the two members of T3's pair, so a failure within a pair leaves an isomorphic orphan structure (V3's only other task, T1, is locked at $t_p$), while V5's only task T1 is already locked and loses nothing. Failure $\times$ outage covers all three $t_{\mathrm{rec}}$, while the triple class uses only $t_{\mathrm{rec}}=10/30$~s: $t_{\mathrm{last}}$ responds in two stages (chain-limited, then unit slope), the middle value 20~s is already covered by D, and the secant slope ($\approx0.6$) makes the missing points predictable. The set covers azimuth, distance, failure role, outage length and combination, and its representativeness is supported by the $22.5^\circ$ refinement and the $0.5$~m margin/tolerance/robust-baseline checks.
 
@@ -170,6 +155,3 @@ Figure~\ref{fig:4-10}(a) shows that the new alert's azimuth has little effect on
 
 Figure~\ref{fig:4-11}(a) shows that after V4 fails, rescheduling still starts T2 and T3 on time with $\eta=1.00$; in (b), all green points lie at $\eta=1.00$, the red crosses spread between $0.50$ and $1.00$, and the arrows trace the keep-to-re-optimized change, showing that re-optimization shifts $t_{\mathrm{last}}$ left without changing $\eta$.
 
-\subsubsection{Algorithm and Efficiency}
-
-Algorithmic details are in Appendix~B.2; the three-way comparison is reported in Section~4.5.3.
