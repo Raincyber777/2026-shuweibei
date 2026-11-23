@@ -6,38 +6,30 @@
 
 \subsection{Symbols}
 
+Table~\ref{tab:3-1} lists the core symbols; the full symbol list is in Appendix~B.3.
+
 \begin{table}[htbp]
 \centering
-\caption{Main symbols}
+\caption{Core symbols}
 \label{tab:3-1}
 {\small
 \renewcommand{\arraystretch}{1.08}
-\begin{tabularnb}{@{}p{38mm}p{92mm}p{30mm}@{}}
+\begin{tabularnb}{@{}p{30mm}p{100mm}p{28mm}@{}}
   \toprule
   Symbol & Meaning & Unit / value \\
   \midrule
   $O$ & Dispatch center & $(50,50)$~m \\
-  $B_i$ & Building $i$ ($i=1,\dots,5$), planar range $[x_i^0,x_i^1]\times[y_i^0,y_i^1]$, height $h_i$ & m \\
-  $T_a$; $\theta_a,\rho_a,H_a$; $T'_a$ & Alert $a$ and its target; azimuth (counterclockwise from east), horizontal distance, height; horizontal projection & $^\circ$, m, m; m \\
-  $h_{\mathrm{cam}}$; $\Delta z_a$ & Camera height above ground; camera--target height difference $\Delta z_a=H_a-h_{\mathrm{cam}}$ & 2~m; m \\
-  $p=(x,y)$; $r(p)$; $\varepsilon(p)$ & Center of the observation station; horizontal distance from camera to target projection; LOS elevation $\arctan(\Delta z_a/r)$ & m; m; $^\circ$ \\
-  $[\varepsilon_{\min},\varepsilon_{\max}]$ & Feasible gimbal pitch range & $[-10^\circ,80^\circ]$ \\
-  C1, C2, C3; $\Omega_a$ & Vehicle geometry, gimbal pitch, and LOS occlusion constraints; observable region $\Omega_a=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$ & ---; m$^2$ \\
-  $Q(p)$; $p^*,r^*,\varepsilon^*,Q^*$ & Observation quality $1/r$; optimal station, horizontal distance, elevation, and quality in Problem~1 & m$^{-1}$; m, m, $^\circ$, m$^{-1}$ \\
-  $m(p)$; $\varphi$ & Geometric safety margin; polar angle parameter of the optimal arc & m; $^\circ$ \\
-  $V_j$; $V_j^0$ & Observation vehicle $j$ and its initial position ($j=1,\dots,5$) & m \\
-  $R_{\mathrm{veh}}$; $v$; $\omega$ & Equivalent vehicle disk radius; travel speed; maximum gimbal single-axis angular rate & 1.5~m; 3~m/s; $30^\circ$/s \\
-  $\alpha$ & Azimuth from station to target (pan command angle) & $^\circ$ \\
-  $t_{\mathrm{tr}},t_{\mathrm{sl}},t_{\mathrm{obs}},t_{\mathrm{rs}}$ & Travel, slew, synchronized observation, and reset times & s ($t_{\mathrm{obs}}=5$) \\
-  $d_i$; $d$ & Horizontal distance from station $i$ to target; single-station shorthand in Problem~3 (nominal 40~m) & m \\
-  $\sigma_\alpha$; $\gamma$; $\beta$ & Single-station azimuth standard deviation; intersection angle of the two LOS; two-station baseline length & $1^\circ$ (rad in computation); $^\circ$; m \\
-  $\Sigma$; $G$ & Covariance of the intersection-point position error; geometric dilution of precision $\sqrt{(d_1^2+d_2^2)/2}/|\sin\gamma|$ & m$^2$; m \\
-  DRMS; $R_{95}$ & Root-mean-square position error $\sigma_\alpha G$; 95\% error-circle radius $2.4477\,\mathrm{DRMS}$ & m; m \\
-  $\pi_j$; $p_{j,a}$; $M_a$ & Task order of vehicle $j$; station of vehicle $j$ for alert $a$; vehicle pair observing alert $a$ & ---; m; --- \\
-  $t^{\mathrm{rd}}_{v,k}$; $t_a^{\mathrm{start}}$ & Ready time of the $k$-th task of vehicle $v$; observation start time of alert $a$ & s \\
-  $P,\hat P,\delta$; $s$; $\sigma(s)=a+bs$ & True position, estimated position, and localization error; cumulative travel distance; single-axis localization standard deviation ($a,b\ge0$) & m; m; m, m/m \\
-  $\varepsilon_0,\varepsilon_c$; $\Delta\psi$; $\sigma_\psi$; $s_{\max}$ & Gimbal bias/control error; difference between commanded and true azimuth ($\wrap$); combined standard deviation of $\Delta\psi$; maximum travel distance satisfying $P(|\Delta\psi|\le5^\circ)\ge0.95$ & $0.8^\circ/0.6^\circ$; $^\circ$; $^\circ$; m \\
-  $t_p,t_{\mathrm{rec}}$; $N,k,\eta$; $t_{\mathrm{last}}$ & Rescheduling trigger/communication recovery time; total alerts, successful starts, $\eta=k/N$; latest observation start time (60~s if not started) & s; ---; s \\
+  $p=(x,y)$ & Observation station (vehicle center) & m \\
+  $r(p)$ & Horizontal camera--target distance & m \\
+  $\varepsilon(p)$ & LOS elevation angle (gimbal pitch) & $^\circ$ \\
+  C1, C2, C3 & Vehicle geometry, gimbal pitch, and LOS occlusion constraints & --- \\
+  $\Omega_a$ & Observable region $\Omega_a=\mathrm{C1}\cap\mathrm{C2}\cap\mathrm{C3}$ & m$^2$ \\
+  $Q(p)$ & Observation quality $1/r$ & m$^{-1}$ \\
+  $d_i$; $d$ & Station--target distance; Problem~3 nominal $40$~m & m \\
+  $\gamma$ & Intersection angle of the two LOS & $^\circ$ \\
+  $G$ & Geometric dilution of precision $\sqrt{(d_1^2+d_2^2)/2}/|\sin\gamma|$ & m \\
+  $\sigma(s)=a+bs$ & Single-axis localization standard deviation at travel distance $s$ & m \\
+  $s_{\max}$ & Maximum travel distance satisfying $P(|\Delta\psi|\le5^\circ)\ge0.95$ & m \\
   \bottomrule
 \end{tabularnb}
 }

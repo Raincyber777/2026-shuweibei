@@ -93,34 +93,24 @@ The algorithms for the four problems follow three criteria—provable, reproduci
 
 ## 3.1 Symbols
 
-Table 3-1 lists the main symbols used throughout the paper.
+Table 3-1 lists the core symbols; the full symbol list is in Appendix B.3.
 
-**Table 3-1 Main symbols**
+**Table 3-1 Core symbols**
 
 | Symbol | Meaning | Unit / value |
 |---|---|---|
 | O | Dispatch center | (50,50) m |
-| B<sub>i</sub> | Building i (i = 1,…,5), planar range [x<sub>i</sub><sup>0</sup>,x<sub>i</sub><sup>1</sup>]×[y<sub>i</sub><sup>0</sup>,y<sub>i</sub><sup>1</sup>], height h<sub>i</sub> | m |
-| T<sub>a</sub>; θ<sub>a</sub>,ρ<sub>a</sub>,H<sub>a</sub>; T′<sub>a</sub> | Alert a and its target; azimuth (counterclockwise from east), horizontal distance, height; horizontal projection | °, m, m; m |
-| h<sub>cam</sub>; Δz<sub>a</sub> | Camera height above ground; camera–target height difference Δz<sub>a</sub> = H<sub>a</sub> − h<sub>cam</sub> | 2 m; m |
-| p = (x,y); r(p); ε(p) | Center of the observation station; horizontal distance from camera to target projection; LOS elevation arctan(Δz<sub>a</sub>/r) | m; m; ° |
-| [ε<sub>min</sub>,ε<sub>max</sub>] | Feasible gimbal pitch range | [−10°,80°] |
-| C1,C2,C3; Ω<sub>a</sub> | Vehicle geometry, gimbal pitch, and LOS occlusion constraints; observable region Ω<sub>a</sub> = C1∩C2∩C3 | —; m² |
-| Q(p); p*,r*,ε*,Q* | Observation quality 1/r; optimal station, horizontal distance, elevation, and quality in Problem 1 | m<sup>−1</sup>; m,m,°,m<sup>−1</sup> |
-| m(p); φ | Geometric safety margin; polar angle parameter of the optimal arc | m; ° |
-| V<sub>j</sub>; V<sub>j</sub><sup>0</sup> | Observation vehicle j and its initial position (j = 1,…,5) | m |
-| R<sub>veh</sub>; v; ω | Equivalent vehicle disk radius; travel speed; maximum gimbal single-axis angular rate | 1.5 m; 3 m/s; 30°/s |
-| α | Azimuth from station to target (pan command angle) | ° |
-| t<sub>tr</sub>,t<sub>sl</sub>,t<sub>obs</sub>,t<sub>rs</sub> | Travel, slew, synchronized observation, and reset times | s (t<sub>obs</sub> = 5) |
-| d<sub>i</sub>; d | Horizontal distance from station i to target; single-station shorthand in Problem 3 (nominal 40 m) | m |
-| σ<sub>α</sub>; γ; β | Single-station azimuth standard deviation; intersection angle of the two LOS; two-station baseline length | 1° (rad in computation); °; m |
-| Σ; G | Covariance of the intersection-point position error; geometric dilution of precision √((d<sub>1</sub>²+d<sub>2</sub>²)/2)/\|sin γ\| | m²; m |
-| DRMS; R95 | Root-mean-square position error σ<sub>α</sub>G; 95% error-circle radius 2.4477DRMS | m; m |
-| π<sub>j</sub>; p<sub>j,a</sub>; M<sub>a</sub> | Task order of vehicle j; station of vehicle j for alert a; vehicle pair observing alert a | —; m; — |
-| t<sup>rd</sup><sub>v,k</sub>; t<sub>a</sub><sup>start</sup> | Ready time of the k-th task of vehicle v; observation start time of alert a | s |
-| P,P̂,δ; s; σ(s) = a + bs | True position, estimated position, and localization error; cumulative travel distance; single-axis localization standard deviation (a,b ≥ 0) | m; m; m,m/m |
-| ε<sub>0</sub>,ε<sub>c</sub>; Δψ; σ<sub>ψ</sub>; s<sub>max</sub> | Gimbal bias/control error; signed pointing offset ψ<sub>cmd</sub>−ψ<sub>true</sub> (wrap180); combined standard deviation of Δψ; maximum travel distance satisfying P(\|Δψ\| ≤ 5°) ≥ 0.95 | 0.8°/0.6°; °; °; m |
-| t<sub>p</sub>,t<sub>rec</sub>; N,k,η; t<sub>last</sub> | Rescheduling trigger/communication recovery time; total alerts, successful starts, η = k/N; latest observation start time (60 s if not started) | s; —; s |
+| p = (x,y) | Observation station (vehicle center) | m |
+| r(p) | Horizontal camera–target distance | m |
+| ε(p) | LOS elevation angle (gimbal pitch) | ° |
+| C1,C2,C3 | Vehicle geometry, gimbal pitch, and LOS occlusion constraints | — |
+| Ω<sub>a</sub> | Observable region Ω<sub>a</sub> = C1∩C2∩C3 | m² |
+| Q(p) | Observation quality 1/r | m<sup>−1</sup> |
+| d<sub>i</sub>; d | Station–target distance; Problem 3 nominal 40 m | m |
+| γ | Intersection angle of the two LOS | ° |
+| G | Geometric dilution of precision √((d<sub>1</sub>²+d<sub>2</sub>²)/2)/\|sin γ\| | m |
+| σ(s) = a + bs | Single-axis localization standard deviation at travel distance s | m |
+| s<sub>max</sub> | Maximum travel distance satisfying P(\|Δψ\| ≤ 5°) ≥ 0.95 | m |
 
 ## 3.2 Assumptions
 
@@ -748,6 +738,33 @@ The directory names `Q1/`–`Q4/` stand for the Chinese original directories in 
 
 The complete source programs, run scripts, and result JSON files are provided in the supporting materials.
 
+### B.3 Full symbol table
+
+| Symbol | Meaning | Unit / value |
+|---|---|---|
+| O | Dispatch center | (50,50) m |
+| B<sub>i</sub> | Building i (i = 1,…,5), planar range [x<sub>i</sub><sup>0</sup>,x<sub>i</sub><sup>1</sup>]×[y<sub>i</sub><sup>0</sup>,y<sub>i</sub><sup>1</sup>], height h<sub>i</sub> | m |
+| T<sub>a</sub>; θ<sub>a</sub>,ρ<sub>a</sub>,H<sub>a</sub>; T′<sub>a</sub> | Alert a and its target; azimuth (counterclockwise from east), horizontal distance, height; horizontal projection | °, m, m; m |
+| h<sub>cam</sub>; Δz<sub>a</sub> | Camera height above ground; camera–target height difference Δz<sub>a</sub> = H<sub>a</sub> − h<sub>cam</sub> | 2 m; m |
+| p = (x,y); r(p); ε(p) | Center of the observation station; horizontal distance from camera to target projection; LOS elevation arctan(Δz<sub>a</sub>/r) | m; m; ° |
+| [ε<sub>min</sub>,ε<sub>max</sub>] | Feasible gimbal pitch range | [−10°,80°] |
+| C1,C2,C3; Ω<sub>a</sub> | Vehicle geometry, gimbal pitch, and LOS occlusion constraints; observable region Ω<sub>a</sub> = C1∩C2∩C3 | —; m² |
+| Q(p); p*,r*,ε*,Q* | Observation quality 1/r; optimal station, horizontal distance, elevation, and quality in Problem 1 | m<sup>−1</sup>; m,m,°,m<sup>−1</sup> |
+| m(p); φ | Geometric safety margin; polar angle parameter of the optimal arc | m; ° |
+| V<sub>j</sub>; V<sub>j</sub><sup>0</sup> | Observation vehicle j and its initial position (j = 1,…,5) | m |
+| R<sub>veh</sub>; v; ω | Equivalent vehicle disk radius; travel speed; maximum gimbal single-axis angular rate | 1.5 m; 3 m/s; 30°/s |
+| α | Azimuth from station to target (pan command angle) | ° |
+| t<sub>tr</sub>,t<sub>sl</sub>,t<sub>obs</sub>,t<sub>rs</sub> | Travel, slew, synchronized observation, and reset times | s (t<sub>obs</sub> = 5) |
+| d<sub>i</sub>; d | Horizontal distance from station i to target; single-station shorthand in Problem 3 (nominal 40 m) | m |
+| σ<sub>α</sub>; γ; β | Single-station azimuth standard deviation; intersection angle of the two LOS; two-station baseline length | 1° (rad in computation); °; m |
+| Σ; G | Covariance of the intersection-point position error; geometric dilution of precision √((d<sub>1</sub>²+d<sub>2</sub>²)/2)/\|sin γ\| | m²; m |
+| DRMS; R95 | Root-mean-square position error σ<sub>α</sub>G; 95% error-circle radius 2.4477DRMS | m; m |
+| π<sub>j</sub>; p<sub>j,a</sub>; M<sub>a</sub> | Task order of vehicle j; station of vehicle j for alert a; vehicle pair observing alert a | —; m; — |
+| t<sup>rd</sup><sub>v,k</sub>; t<sub>a</sub><sup>start</sup> | Ready time of the k-th task of vehicle v; observation start time of alert a | s |
+| P,P̂,δ; s; σ(s) = a + bs | True position, estimated position, and localization error; cumulative travel distance; single-axis localization standard deviation (a,b ≥ 0) | m; m; m,m/m |
+| ε<sub>0</sub>,ε<sub>c</sub>; Δψ; σ<sub>ψ</sub>; s<sub>max</sub> | Gimbal bias/control error; signed pointing offset ψ<sub>cmd</sub>−ψ<sub>true</sub> (wrap180); combined standard deviation of Δψ; maximum travel distance satisfying P(\|Δψ\| ≤ 5°) ≥ 0.95 | 0.8°/0.6°; °; °; m |
+| t<sub>p</sub>,t<sub>rec</sub>; N,k,η; t<sub>last</sub> | Rescheduling trigger/communication recovery time; total alerts, successful starts, η = k/N; latest observation start time (60 s if not started) | s; —; s |
+
 ## Appendix C: Figure and Table Inventory
 
 The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 4 for Q2, 2 for Q3, and 2 for Q4), plus one framework figure in Chapter 2 (Figure 2-1); each is delivered as an SVG vector with a PNG fallback.
@@ -775,7 +792,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 |---|---|---|
 | Table 2-1 | Building geometry and initial vehicle positions | 2.1 |
 | Table 2-2 | Compact algorithm routes (full table in B-1) | 2.6 |
-| Table 3-1 | Main symbols | 3.1 |
+| Table 3-1 | Core symbols (full table in B-2) | 3.1 |
 | Table 4-1 | Main results of Problem 1 | 4.2.4 |
 | Table 4-2 | Two-station accuracy and station selection | 4.3.2 |
 | Table 4-3 | Scheduling plan versus the nearest-assignment baseline | 4.3.4 |
@@ -786,6 +803,7 @@ The four problem figure sets contain 11 multi-panel combined figures (3 for Q1, 
 | Table 5-1 | Summary of validation for the four problems | 5 |
 | Table 6-1 | Objective time under the v×ω full factorial | 6.2 |
 | Table B-1 | Full algorithm routes and selection rationale | Appendix B.1 |
+| Table B-2 | Full symbol list | Appendix B.3 |
 | Table D-1 | All ten vehicle pairs for T2 | Appendix D |
 | Table D-2 | Stations and per-task timeline of the 10.355 s plan | Appendix D |
 
